@@ -16,6 +16,34 @@ It also has a playlist and cue editor, beat grid detection, an ID tag editor, an
 
 Version 1.0.0. Boothbridge is free for personal and other noncommercial use. Companies and any commercial use: contact the author.
 
+## Download
+
+The Windows installer and the portable build are on the [releases page](https://github.com/bsm3d/Boothbridge/releases/latest), with a `SHA256SUMS.txt` file to check them. The program is not code signed, so Windows SmartScreen or an antivirus may warn about it.
+
+## Screenshots
+
+The main window: open a collection, tick the playlists, choose the output (here a CDJ USB key).
+
+<img src="images/screenshot_main.png" alt="The main window with a collection loaded and the list of export formats open" width="560">
+
+A playlist with the preview player, the waveform, the hot cue pads and the keys.
+
+<img src="images/screenshot_playlist.png" alt="A playlist with the preview player, the waveform and the cue pads" width="820">
+
+The cue editor: hot cues, memory cues and loops on the waveform, with the beat grid.
+
+<img src="images/screenshot_cues.png" alt="The cue editor of a track with hot cues and loops on the waveform" width="820">
+
+The ID tag editor, which can write the tags to the audio file and keeps the artwork.
+
+<img src="images/screenshot_tags.png" alt="The ID tag editor with the artwork of a track" width="640">
+
+The music browser and the settings that are written to a CDJ key for the player.
+
+<img src="images/screenshot_browser.png" alt="The music browser with a search box and the list of tracks of a folder" width="820">
+
+<img src="images/screenshot_player_settings.png" alt="The Player settings window with nine switches" width="300">
+
 ## Run it from source
 
 Python 3.11 or newer:
