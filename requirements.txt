@@ -1,0 +1,15 @@
+# Boothbridge
+
+# GUI and preview player
+PySide6>=6.6
+
+defusedxml>=0.7.1,<1
+
+# Waveforms and beat detection
+numpy>=1.26
+scipy>=1.11
+librosa>=0.10
+soundfile>=0.12
+
+# Artwork resizing
+Pillow>=10.0

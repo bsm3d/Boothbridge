@@ -1,0 +1,5 @@
+# the tests need these beyond the program requirements
+pytest
+psutil
+# optional: an independent library that reads back the tags our own code writes, the tag tests skip without it
+mutagen

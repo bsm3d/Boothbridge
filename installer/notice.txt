@@ -1,0 +1,18 @@
+Boothbridge
+
+Boothbridge is a hub that lets DJ programs exchange playlists. It works alongside them and does not
+replace any of them.
+
+Boothbridge is free, made by one person in his free time. The source code is public, under the PolyForm
+Noncommercial License 1.0.0 (see LICENSE.txt in the install folder): free for personal, educational and any
+other noncommercial use. A company or any commercial or paid use needs the author's authorisation:
+contact him through www.benoitsaintmoulin.com.
+
+The CDJ USB key is written by Boothbridge itself, rekordbox is not needed and takes no part in it.
+
+It is provided as is, without warranty of any kind. The author is not responsible for any loss
+of data (a collection, music files, cues, playlists, a USB key or its content) or for any other
+damage resulting from its use. Back up your collection before you use it.
+
+Not affiliated with AlphaTheta / Pioneer DJ, Native Instruments, VirtualDJ, inMusic / Denon DJ, Apple or Mixxx.
+All trademarks belong to their owners.

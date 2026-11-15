@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 280" width="1200" height="280" font-family="Segoe UI, Arial, sans-serif">
+  <!-- hero banner of the documentation: the mark, the name, one line -->
+  <rect width="1200" height="280" rx="18" fill="#14161a"/>
+  <rect x="1.5" y="1.5" width="1197" height="277" rx="17" fill="none" stroke="#2b2f36" stroke-width="3"/>
+  <path d="M120 190 Q250 40 380 190" fill="none" stroke="#ece6da" stroke-width="6" stroke-linecap="round"/>
+  <path d="M120 190 H380" fill="none" stroke="#ece6da" stroke-opacity=".3" stroke-width="3" stroke-linecap="round"/>
+  <circle cx="120" cy="190" r="12" fill="#e3a553"/>
+  <circle cx="380" cy="190" r="12" fill="#e3a553"/>
+  <text x="470" y="152" font-size="92" font-weight="300" fill="#ece6da" letter-spacing="-2">Booth<tspan fill="#e3a553">bridge</tspan></text>
+  <text x="474" y="206" font-size="27" fill="#9aa3b2">A hub that lets DJ programs exchange playlists.</text>
+  <text x="474" y="244" font-size="18" fill="#6c7482">Traktor, rekordbox, VirtualDJ, iTunes, Engine DJ, Mixxx, M3U, CDJ USB keys</text>
+</svg>

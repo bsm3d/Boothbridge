@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 860 256" width="860" height="256">
+  <!-- the mark and the name in a light weight -->
+  <rect x="6" y="6" width="244" height="244" rx="58" fill="#14161a" stroke="#2b2f36" stroke-width="3"/>
+  <path d="M48 176 Q128 36 208 176" fill="none" stroke="#ece6da" stroke-width="5" stroke-linecap="round"/><circle cx="48" cy="176" r="10" fill="#e3a553"/><circle cx="208" cy="176" r="10" fill="#e3a553"/>
+  <text x="290" y="168" font-family="'Segoe UI Light','Segoe UI',system-ui,sans-serif" font-size="130" font-weight="300" fill="#ece6da" letter-spacing="-2">Booth<tspan fill="#e3a553">bridge</tspan></text>
+</svg>

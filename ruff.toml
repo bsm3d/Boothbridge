@@ -1,0 +1,9 @@
+line-length = 88
+
+# the markers of the base source sit between the imports, isort cannot sort across them
+[lint.per-file-ignores]
+"djapp/app.py" = ["I001"]
+"djapp/ui/details.py" = ["I001"]
+"djapp/ui/dialogs.py" = ["I001"]
+"djapp/ui/main_window.py" = ["I001"]
+"djapp/lang/__init__.py" = ["I001"]
