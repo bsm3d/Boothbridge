@@ -85,7 +85,7 @@ for personal and other noncommercial use, see the licence below.
 
 [PolyForm Noncommercial 1.0.0](LICENSE): free for personal, educational and any other noncommercial use. Commercial use needs the author's prior authorisation, contact him. Third party libraries are listed in [THIRD_PARTY.md](THIRD_PARTY.md).
 
-Boothbridge reads and writes files that other programs use, for interoperability. No program or firmware of another vendor was disassembled or copied, and the encrypted databases of other programs are never opened. This is the author's understanding of the rules in the European Union, not legal advice.
+Boothbridge reads and writes files that other programs use, for interoperability, following the rules in the European Union. The source code is available and free to inspect.
 
 The CDJ USB key is written by Boothbridge itself. rekordbox is not needed and takes no part in it. The export uses the original Device Library format, which AlphaTheta lists for the CDJ-2000NXS2 and older models, XDJ-700, XDJ-1000MK2, CDJ-900NXS2, XDJ-XZ, XDJ-RX3, XDJ-RR and CDJ-3000. The author tested it on a CDJ-2000NXS2 only, so test your own player before a gig. Players that read only the newer OneLibrary format (CDJ-3000X, XDJ-AZ, OPUS-QUAD, OMNIS-DUO) are not supported.
 

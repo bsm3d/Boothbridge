@@ -3,7 +3,7 @@
 
 # Container format of export.pdb: 4096 byte pages, rows, string encoding. The layout
 # comes from a byte level study of rekordbox 6 USB exports and from the public notes
-# of Deep Symmetry crate-digger. No Pioneer program or firmware was disassembled.
+# of Deep Symmetry crate-digger.
 #
 # The players depend on three rules: each table owns an index page (flags 0x64) then
 # its data pages, the header sequence is higher than any page sequence, and the free

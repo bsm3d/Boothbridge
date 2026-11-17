@@ -47,7 +47,7 @@ It reads and writes ordinary files only. It has no network code: nothing is uplo
 
 The formats were worked out from public documentation and from files that the user exported with the program that owns them, then compared with what Boothbridge writes until the other program accepted it. Where a CDJ player is involved, the player and rekordbox were the judges: a key that rekordbox opens and a player reads is right.
 
-This is black box work. No program or firmware of another vendor was disassembled or decompiled, and no code or resource of another program is in the repository. The encrypted databases of other programs are never opened, `protected.py` refuses them (see [Safeguards](#safeguards)). Anyone who contributes follows the same rule.
+This is black box work. No code or resource of another program is in the repository. The encrypted databases of other programs are never opened, `protected.py` refuses them (see [Safeguards](#safeguards)). Anyone who contributes follows the same rule.
 
 ## Formats
 
@@ -115,7 +115,7 @@ main.py ---> djapp/app.py ---+--- command line (--export, --verify)
 | `export/cdj/` | The CDJ key writer, see the next sections: `usb.py` (conductor), `pdbwrite.py`, `devicesql.py`, `anlz.py`, `reference.py`, `keymerge.py`, `validate.py`, and the readers `pdbread.py`, `anlzread.py` |
 | `ui/` | Windows: `main_window.py`, `details.py` (playlist), `player.py`, `timeline.py`, `zoomwave.py`, `waveform.py`, `tageditor.py`, `musicbrowser.py`, `metronome.py`, `audiocheck.py`, `backup.py`, `formatter.py`, `dialogs.py`, `theme.py`, `worker.py` (background jobs) |
 
-Other folders: `tests/` (the test suite), `core/` (C++ source), `tools/` (`i18n_check.py`, `make_logo.py`, `rename.py`), `installer/` (Inno Setup script), `branding/` and `images/` (logos and diagrams).
+Other folders: `tests/` (the test suite), `core/` (C++ source), `tools/` (`i18n_check.py`, `make_logo.py`, `rename.py`, `checksums.py` for the sums of a release), `installer/` (Inno Setup script), `branding/` and `images/` (logos and diagrams).
 
 The name of the program is a value of `APP_NAME` in `brand.py`. `tools/rename.py` gives the program another name.
 
@@ -414,10 +414,10 @@ Read the existing code first and follow it, it is the style guide.
 Changes are welcome for personal and noncommercial use. There is no promise of support, of a reply or of a date: this is a one person project made in free time.
 
 - Open an issue or send a change that does one thing and says why.
-- Follow the method above: only public documentation and files exported by the user, no disassembly, no code or resource of another program, no file written by another vendor's program in the repository.
+- Follow the method above: only public documentation and files exported by the user, no code or resource of another program, no file written by another vendor's program in the repository.
 - A change is accepted only if its author writes this sentence in the issue or the pull request: "I wrote this change myself, and I grant Benoit Saint-Moulin a perpetual, worldwide, irrevocable licence to use, modify, distribute and sublicense it under any terms, including commercial ones." The author is the only holder of the rights on the code as a whole and has to stay able to license it, which a contribution without that sentence would prevent. A change without it is not merged.
 - The author may decline any change without giving a reason.
 
 ## Legal basis
 
-Boothbridge is an interoperability tool. File formats and the functionality of a program are not protected by copyright (Court of Justice of the EU, SAS Institute v World Programming, C-406/10), and the lawful user of a program may observe, study and test how it works (Directive 2009/24/EC, article 5.3), without the decompilation that article 6 would regulate, because none is done. The names of other programs and devices belong to their owners, Boothbridge is independent and not affiliated with any of them. This is the author's understanding of the position in the European Union and it is not legal advice. The code is under the PolyForm Noncommercial License 1.0.0 (`LICENSE`), third party libraries are listed in `THIRD_PARTY.md`.
+Boothbridge is an interoperability tool. File formats and the functionality of a program are not protected by copyright (Court of Justice of the EU, SAS Institute v World Programming, C-406/10), and the lawful user of a program may observe, study and test how it works (Directive 2009/24/EC, article 5.3). The names of other programs and devices belong to their owners, Boothbridge is independent and not affiliated with any of them. This is the author's understanding of the position in the European Union and it is not legal advice. The code is under the PolyForm Noncommercial License 1.0.0 (`LICENSE`), third party libraries are listed in `THIRD_PARTY.md`.

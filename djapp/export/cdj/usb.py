@@ -3,7 +3,7 @@
 
 # Drives the whole export: audio, export.pdb, analysis files, artwork, settings,
 # checksums. Layouts come from rekordbox keys compared byte by byte and the
-# crate-digger research, no Pioneer program was disassembled. Only ordinary data
+# crate-digger research. Only ordinary data
 # files are written.
 #
 # Order matters: audio first, analysis and pictures next, export.pdb last. A player only

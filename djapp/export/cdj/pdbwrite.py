@@ -3,7 +3,7 @@
 
 # Turns tracks and the playlist tree into export.pdb rows, devicesql.py lays them out
 # in pages. Row layouts come from a byte level study of rekordbox 6 exports and the
-# crate-digger notes, no Pioneer program was disassembled. Field names are
+# crate-digger notes. Field names are
 # crate-digger's when known, "constant" = same value in every export compared.
 
 from __future__ import annotations

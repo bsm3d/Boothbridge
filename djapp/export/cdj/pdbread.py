@@ -2,7 +2,6 @@
 # Boothbridge: read an export.pdb back into tables and rows.
 #
 # Layout worked out from rekordbox USB exports, matches the crate-digger write-up.
-# Nothing here comes from Pioneer software or firmware.
 #
 # The input is a drive anybody may have written to: every offset and length is checked
 # against its buffer, and only PdbError escapes.

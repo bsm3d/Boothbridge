@@ -3,7 +3,7 @@
 #
 # Two binary files per track (path, beat grid, waveforms, cues), built here as bytes.
 # Layout from rekordbox exports compared with the track content, plus the crate-digger
-# research. No Pioneer program was disassembled. Undocumented fields carry the value
+# research. Undocumented fields carry the value
 # seen in the exports and are named "unknown". All numbers big endian.
 #
 # Left out on purpose: PQT2, PSSI and .2EX (newest players only).
