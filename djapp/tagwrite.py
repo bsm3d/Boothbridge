@@ -1,4 +1,7 @@
-# explicit metadata writes: keep unrelated tags and audio, back up, then replace atomically
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Writes metadata to audio files: validates the values, keeps other tags and audio, then replaces the file atomically.
 
 from __future__ import annotations
 

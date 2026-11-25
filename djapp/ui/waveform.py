@@ -1,5 +1,7 @@
-# Benoit Saint-Moulin
-# Boothbridge : waveform overview for the player and the timeline, cached on disk
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Waveform overview for the player and the timeline: background computation, a disk cache and a memory cache.
 
 from __future__ import annotations
 
@@ -26,10 +28,8 @@ KEEP_HI = 4
 Wave = list[tuple[float, float, float]]
 log = logging.getLogger(__name__)
 
-
 # raised when the waveform of a same file comes out different: the cache is made again
 WAVE_VERSION = 2
-
 
 def key(path: str) -> str:
     st = os.stat(path)
@@ -39,12 +39,10 @@ def key(path: str) -> str:
     )
     return hashlib.sha1(raw.encode("utf-8")).hexdigest()
 
-
 def cache_file(path: str):
     d = cache_dir() / "wave"
     d.mkdir(exist_ok=True)
     return d / (key(path) + ".bin")
-
 
 # ------------------------------------------------------------
 def load(path: str) -> Wave | None:
@@ -58,7 +56,6 @@ def load(path: str) -> Wave | None:
         (raw[i] / 255, raw[i + 1] / 255, raw[i + 2] / 255)
         for i in range(0, len(raw), 3)
     ]
-
 
 # ------------------------------------------------------------
 def write_cache(path, raw: bytes):
@@ -78,7 +75,6 @@ def write_cache(path, raw: bytes):
         if os.path.exists(tmp):
             os.unlink(tmp)
 
-
 # ------------------------------------------------------------
 def compute(path: str) -> Wave:
     import numpy as np
@@ -97,12 +93,10 @@ def compute(path: str) -> Wave:
         )
     return wave
 
-
 def hi_file(path: str):
     d = cache_dir() / "wave"
     d.mkdir(exist_ok=True)
     return d / (key(path) + f".hi{HI_PER_SEC}")
-
 
 # ------------------------------------------------------------
 # (n, 3) float array 0..1, None when not computed yet
@@ -119,7 +113,6 @@ def load_hi(path: str):
     arr /= 255
     return arr
 
-
 # ------------------------------------------------------------
 def compute_hi(path: str):
     import numpy as np
@@ -133,7 +126,6 @@ def compute_hi(path: str):
         f = hi_file(path)
         write_cache(f, np.rint(arr * 255).astype(np.uint8).tobytes())
     return arr
-
 
 # ------------------------------------------------------------
 class _HiThread(QThread):
@@ -153,7 +145,6 @@ class _HiThread(QThread):
             )
             self.ready.emit(self.path, None)
 
-
 class _Thread(QThread):
     ready = Signal(str, object)
 
@@ -171,7 +162,6 @@ class _Thread(QThread):
             except Exception:
                 log.warning("cannot load waveform for %s", p, exc_info=True)
                 self.ready.emit(p, None)
-
 
 # ------------------------------------------------------------
 # one decoding thread at a time, requests queue up, the newest first

@@ -1,3 +1,8 @@
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Checks folder loading: enumeration of the files and sub folders when a folder is opened.
+
 import os
 import tempfile
 import unittest

@@ -1,5 +1,8 @@
-// Benoit Saint-Moulin
-// Boothbridge : native core, ANLZ0000.DAT and .EXT writer (what anlz.py builds)
+// Boothbridge
+// © Benoit Saint-Moulin - 2026
+// Version du fichier : 1.0.0
+// Fonction du fichier : C++ writer for the ANLZ analysis file sections in big endian, included by fastcore.cpp.
+
 // Included by fastcore.cpp. Big endian everywhere, section order from a rekordbox 6 export.
 
 namespace {

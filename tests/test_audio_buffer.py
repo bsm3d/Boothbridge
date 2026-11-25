@@ -1,3 +1,8 @@
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Checks the audio buffer used for playback and metronome clicks against reference signals and sample positions.
+
 import os
 import unittest
 from types import SimpleNamespace

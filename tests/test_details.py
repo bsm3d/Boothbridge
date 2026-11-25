@@ -1,3 +1,8 @@
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Checks the playlist details panel of the window, run offscreen against copied track data.
+
 import copy
 import os
 import unittest

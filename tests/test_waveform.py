@@ -1,3 +1,8 @@
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Checks the detailed waveform, computed from the audio rather than upsampled from CDJ columns.
+
 import os
 import tempfile
 import unittest

@@ -1,4 +1,9 @@
 @echo off
+REM Boothbridge
+REM © Benoit Saint-Moulin - 2026
+REM Version du fichier : 1.0.0
+REM Fonction du fichier : Windows batch wrapper that builds a clean venv, installs the build tools and runs build.py.
+
 rem Benoit Saint-Moulin
 rem Boothbridge : portable build in a clean venv
 setlocal

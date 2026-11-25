@@ -1,3 +1,8 @@
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Runs unittest modules or test ids and prints one machine-readable result line per test.
+
 # runs unittest modules or test ids like `python -m unittest -v`, and adds one machine readable
 # line per test after its result: @@BB {"id": ..., "status": ..., "ms": ..., "msg": ...}
 

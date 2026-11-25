@@ -1,5 +1,7 @@
-# Benoit Saint-Moulin
-# Boothbridge : one entry for every export format
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Registry of export formats mapped to their writer modules, and the entry point that runs an export.
 
 from __future__ import annotations
 
@@ -25,7 +27,6 @@ WRITERS = {
     "XSPF": ("lists", "export_xspf"),
 }
 
-
 # ----------------------------------------------------------------
 # what the CDJ database on the key at out holds (folders, playlists, tracks, playlist
 # names), None when there is none. With a cancel event it raises Cancelled once it is set.
@@ -35,7 +36,6 @@ def key_summary(out: str, cancel=None):
 
     return keymerge.key_summary(out, cancel)
 
-
 # --------------------------------------------
 # the database file of the key at out with its size and modification time, None when
 # there is none.
@@ -44,7 +44,6 @@ def key_stamp(out: str):
 
     return keymerge.key_stamp(out)
 
-
 # the playlists of an export merged into those already on a key: (merged tree, names of
 # the playlists that were replaced)
 def merge(new_nodes: list[Node], existing_nodes: list[Node], ident=None):
@@ -52,22 +51,16 @@ def merge(new_nodes: list[Node], existing_nodes: list[Node], ident=None):
 
     return keymerge.merge(new_nodes, existing_nodes, ident)
 
-
 # the playlists on the key that exporting nodes would replace, from key_summary alone
 def merge_names(nodes: list[Node], summary) -> list[str]:
     from .cdj import keymerge
 
     return keymerge.merge_names(nodes, summary)
 
-
 # ------------------------------------------
-# export, then the checksums of everything written. With verify_copy the whole
-# export is read back from the drive and compared to them.
-#
-# A CDJ/USB export keeps the playlists already on the key (cfg["key_mode"] is "keep", the
-# default of the settings) and merges the new ones into them, or replaces the whole database
-# ("replace", also what a config without key_mode does). A key whose database cannot be read is
-# refused in keep mode with a ValueError, before anything is written
+# Runs the export, then computes checksums of everything written. With verify_copy the export is read back from the drive and compared.
+# A CDJ/USB export keeps the playlists on the key (cfg["key_mode"] "keep", the default) and merges into them, or replaces the database ("replace").
+# A key whose database cannot be read is refused in keep mode with a ValueError, before anything is written.
 def run(
     fmt: str, nodes: list[Node], out: str, cfg: dict, progress=None, cancel=None
 ) -> Report:

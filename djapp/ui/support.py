@@ -1,5 +1,7 @@
-# Benoit Saint-Moulin
-# Boothbridge : the link that supports the project, shown once and always in the Help menu
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Opens the project support link from the Help menu and shows the one-time thank you message after a good export.
 
 from __future__ import annotations
 
@@ -10,12 +12,10 @@ from PySide6.QtWidgets import QMessageBox
 from ..brand import APP_NAME, SUPPORT_URL
 from ..i18n import tr
 
-
 # the browser opens only when the user clicks, the program never reaches the network by itself
 def open_link(*_):
     if SUPPORT_URL:
         QDesktopServices.openUrl(QUrl(SUPPORT_URL))
-
 
 # once, after the first export that went well: a thank you with a way to support, never again after an answer
 def ask_once(parent, cfg: dict) -> bool:

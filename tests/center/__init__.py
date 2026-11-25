@@ -1,4 +1,7 @@
-# tools behind the test center: random tests, monkey driver, memory runs, run records
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Helpers of the test center: timestamps, run folders, version information and saved run records.
 
 from __future__ import annotations
 

@@ -1,11 +1,10 @@
-# Benoit Saint-Moulin
-# Boothbridge : writer for the ANLZ0000.DAT and ANLZ0000.EXT analysis files
-#
-# Two binary files per track (path, beat grid, waveforms, cues), built here as bytes.
-# Layout from rekordbox exports compared with the track content, plus the crate-digger
-# research. Undocumented fields carry the value
-# seen in the exports and are named "unknown". All numbers big endian.
-#
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Writer for the ANLZ0000.DAT and .EXT analysis files (path, beat grid, waveforms, cues) as bytes.
+
+# Two binary files per track (path, beat grid, waveforms, cues), built as bytes, all numbers big endian.
+# Layout from rekordbox exports and crate-digger research. Undocumented fields carry the value seen in exports, named "unknown".
 # Left out on purpose: PQT2, PSSI and .2EX (newest players only).
 
 from __future__ import annotations
@@ -53,12 +52,10 @@ NO_LOOP_END = 0xFFFFFFFF
 ORDER_NONE = 0xFFFF
 MAX_HOT_CUES = 8
 
-
 # --------------------------------------------------------
 # Folder rekordbox picks: hash of the track path, one UTF-16 unit at a time, and the
 # players look there first. On a collision the next number is tried, hence `used`.
 FOLDER_COUNT = 200003
-
 
 def _folder_hash(usb_path: str) -> int:
     acc = 0
@@ -66,7 +63,6 @@ def _folder_hash(usb_path: str) -> int:
         unit = ord(ch) & 0xFFFF
         acc = ((acc * 0x5BC9 + unit) * 0x93B5 + unit) & 0xFFFFFFFF
     return acc
-
 
 # the P0xx parent folder is seven bits picked out of the folder number
 def _parent_number(num: int) -> int:
@@ -79,7 +75,6 @@ def _parent_number(num: int) -> int:
         | (num >> 8 & 0x20)
         | (num >> 10 & 0x40)
     )
-
 
 def anlz_dir(usb_path: str, used: set[str] | None = None) -> str:
     start = _folder_hash(usb_path)
@@ -95,27 +90,22 @@ def anlz_dir(usb_path: str, used: set[str] | None = None) -> str:
         "Too many tracks: Pioneer analysis directory allocation is exhausted"
     )
 
-
 # --------------------------------------------------------
 def _section(name: bytes, head: bytes, payload: bytes = b"") -> bytes:
     head_len = SECTION_PREFIX + len(head)
     return name + struct.pack(">II", head_len, head_len + len(payload)) + head + payload
-
 
 def pmai(sections: list[bytes]) -> bytes:
     body = b"".join(sections)
     fixed = struct.pack(">II", FILE_HEADER_LEN, FILE_HEADER_LEN + len(body))
     return b"PMAI" + fixed + struct.pack(">IIII", *FILE_HEADER_TAIL) + body
 
-
 def _slot_number(cue: Cue) -> int:
     # hot cue A = 1, memory cues = 0
     return cue.hotcue + 1 if cue.hotcue >= 0 else 0
 
-
 def _peak(bands: Bands):
     return np.maximum(np.maximum(bands.low, bands.mid), bands.high)
-
 
 def _detail_wave(track: Track, audio: Audio):
     if audio.ok:
@@ -124,12 +114,10 @@ def _detail_wave(track: Track, audio: Audio):
         columns = round(track.duration * DETAIL_PER_SECOND)
     return audio.at(columns)
 
-
 # --------------------------------------------------------
 def ppth(usb_path: str) -> bytes:
     raw = usb_path.encode("utf-16-be") + b"\0\0"
     return _section(b"PPTH", struct.pack(">I", len(raw)), raw)
-
 
 def _vbr_section(frames: int) -> bytes:
     # seek offsets stay zero (the player rebuilds them), only the trailing count matters
@@ -138,7 +126,6 @@ def _vbr_section(frames: int) -> bytes:
         struct.pack(">I", 0),
         bytes(VBR_INDEX_BYTES) + struct.pack(">I", frames),
     )
-
 
 # --------------------------------------------------------
 # (beat in bar 1 to 4, time in ms). The anchor can sit anywhere: beats before it are
@@ -159,7 +146,6 @@ def beats(t: Track) -> list[tuple[int, int]]:
         index += 1
     return grid
 
-
 def pqtz(t: Track) -> bytes:
     if t.grid is not None and t.bpm > MAX_BPM:
         raise ValueError("CDJ beat grids support at most 655.35 BPM")
@@ -172,7 +158,6 @@ def pqtz(t: Track) -> bytes:
         b"PQTZ", struct.pack(">III", 0, BEAT_GRID_UNKNOWN, len(grid)), entries
     )
 
-
 # --------------------------------------------------------
 # mono column byte: bits 0 to 4 height (0 to 31), bits 5 to 7 whiteness (0 to 7), whiter when highs dominate
 def _mono_columns(bands: Bands) -> bytes:
@@ -182,10 +167,8 @@ def _mono_columns(bands: Bands) -> bytes:
     whiteness = np.rint(7 * ratio).astype(np.uint8)
     return (whiteness << 5 | height).astype(np.uint8).tobytes()
 
-
 def pwav(b: Bands) -> bytes:
     return _section(b"PWAV", struct.pack(">II", len(b), WAVE_UNKNOWN), _mono_columns(b))
-
 
 # smallest preview, height 0 to 15
 def _tiny_wave(bands: Bands) -> bytes:
@@ -195,11 +178,9 @@ def _tiny_wave(bands: Bands) -> bytes:
         np.rint(15 * _peak(bands)).astype(np.uint8).tobytes(),
     )
 
-
 def _detail_mono(bands: Bands) -> bytes:
     head = struct.pack(">IIHH", 1, len(bands), DETAIL_PER_SECOND, 0)
     return _section(b"PWV3", head, _mono_columns(bands))
-
 
 # two bytes per column: 3 bits each of red (low), green (mid), blue (high), then 5 bits
 # of height. Bands are relative to the loudest one so quiet columns keep their hue,
@@ -217,7 +198,6 @@ def _detail_color(bands: Bands) -> bytes:
     head = struct.pack(">IIHH", 2, len(bands), DETAIL_PER_SECOND, COLOR_DETAIL_UNKNOWN)
     return _section(b"PWV5", head, word.astype(">u2").tobytes())
 
-
 # six bytes per column: the player draws from the last three (low, mid, high as r, g, b), the first three hold the level
 def _color_preview(bands: Bands) -> bytes:
     low, mid, high = (
@@ -226,7 +206,6 @@ def _color_preview(bands: Bands) -> bytes:
     level = np.maximum(np.maximum(low, mid), high)
     columns = np.stack([level, level, level, low, mid, high], axis=1)
     return _section(b"PWV4", struct.pack(">III", 6, len(bands), 0), columns.tobytes())
-
 
 # --------------------------------------------------------
 # The 62 hot cue colours of a CDJ, in palette grid order. The code in the file is
@@ -297,10 +276,8 @@ HOT_PALETTE = [
     0x6473FF,
 ]
 
-
 def _rgb_parts(value: int) -> tuple[int, int, int]:
     return value >> 16 & 255, value >> 8 & 255, value & 255
-
 
 # squared distance, first wins on a tie
 def nearest(rgb: tuple[int, int, int], palette) -> int:
@@ -310,11 +287,9 @@ def nearest(rgb: tuple[int, int, int], palette) -> int:
 
     return min(range(len(palette)), key=distance)
 
-
-# The RGB rekordbox writes after the code, by code (0 to 64): the device palette of the rbxport
-# notes (docs/reference/usb-export-db.md, Cue record tables), a hue ramp. The codes 1 to 62 are the
-# ones of HOT_PALETTE in the same order, HOT_PALETTE has the colours rekordbox shows for them.
-# attention -> bug = the colours of HOT_PALETTE went after the code, rekordbox writes these
+# attention -> bug = the colours of HOT_PALETTE went after the code, rekordbox writes these.
+# The RGB written after the code, by code (0 to 64), is a hue ramp from the device palette notes (docs/reference/usb-export-db.md).
+# Codes 1 to 62 follow HOT_PALETTE in the same order.
 DEVICE_PALETTE = [
     0x000000,
     0x0000FF,
@@ -383,7 +358,6 @@ DEVICE_PALETTE = [
     0xFFFFFF,
 ]
 
-
 # (palette code, 0xRRGGBB): the cue own #RRGGBB or the slot default, snapped to the palette
 def hot_color(c: Cue) -> tuple[int, int]:
     wanted = HOT_RGB[c.hotcue % 8]
@@ -398,7 +372,6 @@ def hot_color(c: Cue) -> tuple[int, int]:
     code = nearest(wanted, HOT_PALETTE + DEVICE_PALETTE[1:63]) % len(HOT_PALETTE) + 1
     return code, DEVICE_PALETTE[code]
 
-
 # (rekordbox colour id, word = palette code << 24 | 0xRRGGBB), memory cues (0, 0). The native core unpacks the word itself.
 def cue_color(c: Cue) -> tuple[int, int]:
     if c.hotcue < 0:
@@ -410,11 +383,9 @@ def cue_color(c: Cue) -> tuple[int, int]:
     color_id = nearest(_rgb_parts(shown), known) + 1
     return color_id, code << 24 | rgb
 
-
 # --------------------------------------------------------
 def _cue_start(cue: Cue) -> int:
     return round(max(0.0, cue.start))
-
 
 # PCOB entry: position and loop only
 def _plain_cue_entry(c: Cue) -> bytes:
@@ -436,7 +407,6 @@ def _plain_cue_entry(c: Cue) -> bytes:
         loop_end,
     )
     return b"PCPT" + fixed + bytes(16)
-
 
 # PCO2 entry: adds name and colour
 def _extended_cue_entry(c: Cue) -> bytes:
@@ -467,11 +437,9 @@ def _extended_cue_entry(c: Cue) -> bytes:
         + bytes((palette_code, *_rgb_parts(rgb)))
     )
 
-
 # the player has pads A to H only: a slot past H has nowhere to go, and the key reader drops it
 def hot_cues(t: Track) -> list[Cue]:
     return [c for c in t.hot_cues() if c.hotcue < MAX_HOT_CUES][:MAX_HOT_CUES]
-
 
 # hot cues (kind 1, 8 slots max) then memory cues (kind 0)
 def cue_lists(t: Track, ext: bool) -> list[bytes]:
@@ -486,7 +454,6 @@ def cue_lists(t: Track, ext: bool) -> list[bytes]:
             body = b"".join(map(_plain_cue_entry, cues))
             lists.append(_section(b"PCOB", head, body))
     return lists
-
 
 # --------------------------------------------------------
 # reference writer, the tests compare it with the compiled core
@@ -514,10 +481,8 @@ def build_py(t: Track, usb_path: str, audio: Audio) -> tuple[bytes, bytes]:
     )
     return dat, ext
 
-
 def _native_cue(c: Cue):
     return c.hotcue, c.start, c.length, c.name.strip(), *cue_color(c)
-
 
 # (DAT, EXT). Native core when it answers, else build_py.
 def build(t: Track, usb_path: str, audio: Audio) -> tuple[bytes, bytes]:

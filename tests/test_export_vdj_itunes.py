@@ -1,3 +1,8 @@
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Checks the VirtualDJ folder writer and the iTunes Library.xml writer by reading their output back.
+
 # the VirtualDJ writer (one .vdjfolder per playlist in a tree) and the iTunes XML writer
 # (one Library.xml), read back by the readers of the program
 
@@ -81,7 +86,6 @@ HOSTILE = [
 
 
 # ***************************************
-# VirtualDJ
 # ***************************************
 def test_vdj_layout_and_round_trip(tmp_path):
     out = tmp_path / "out"
@@ -214,7 +218,6 @@ def test_vdj_manifest_registers_every_file(tmp_path):
 
 
 # ***************************************
-# iTunes XML
 # ***************************************
 def test_itunes_plist_layout(tmp_path):
     out = tmp_path / "out"

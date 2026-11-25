@@ -1,3 +1,8 @@
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Checks keyboard shortcuts and key handling of the window and its widgets, run offscreen.
+
 import os
 import unittest
 from unittest.mock import patch

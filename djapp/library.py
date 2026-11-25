@@ -1,4 +1,7 @@
-# read-only music-library scans and exact-file duplicate detection
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Read-only music library scan and exact-file duplicate detection by size and SHA-256.
 
 from __future__ import annotations
 

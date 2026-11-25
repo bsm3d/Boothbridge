@@ -1,5 +1,7 @@
-# Benoit Saint-Moulin
-# Boothbridge : translations, texts shared by several windows
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : French, German, Spanish and Chinese translations of texts shared by several windows.
 
 CATALOG = {
     "fr": {

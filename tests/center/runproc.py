@@ -1,4 +1,7 @@
-# A child process driven by QProcess: live lines, a time limit, and a Stop that kills the whole tree
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : QProcess wrapper that runs a test child process with live output, a time limit and a Stop that kills its tree.
 
 from __future__ import annotations
 

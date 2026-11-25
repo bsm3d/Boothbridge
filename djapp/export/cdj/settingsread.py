@@ -1,5 +1,7 @@
-# Benoit Saint-Moulin
-# Boothbridge : reading the player settings files of a CDJ key, and changing single settings in them
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Reads the CDJ player settings files, checks their envelope and patches single settings without rebuilding them.
 
 # The four files in PIONEER (see reference.py) share one envelope. This module checks that
 # envelope and returns the bytes of the body, it never rebuilds a file it cannot read.
@@ -38,7 +40,6 @@ TOO_SHORT, HEADER, APP, SIZE, CHECKSUM, END, MAGIC, LAYOUT = (
     "layout",
 )
 
-
 @dataclass
 class Settings:
     name: str
@@ -57,10 +58,8 @@ class Settings:
             return self.body[position - 1]
         return None
 
-
 def _text(raw: bytes) -> str:
     return raw.split(b"\0", 1)[0].decode("ascii", "replace")
-
 
 # ----------------------------------------------------------------
 # name is the file name, it decides which body magic and which checksum are expected
@@ -93,7 +92,6 @@ def read(name: str, data: bytes) -> Settings:
         out.problems.append(MAGIC)
     return out
 
-
 # None when the file is not there. A file that cannot be read counts as too short.
 def read_file(path: str) -> Settings | None:
     if not os.path.isfile(path):
@@ -105,7 +103,6 @@ def read_file(path: str) -> Settings | None:
         data = b""
     return read(os.path.basename(path), data)
 
-
 # the problems of the files that are on the key, as (file name, reason)
 def check(pioneer_dir: str) -> list[tuple[str, str]]:
     found: list[tuple[str, str]] = []
@@ -114,7 +111,6 @@ def check(pioneer_dir: str) -> list[tuple[str, str]]:
         if got is not None:
             found += [(name, why) for why in got.problems]
     return found
-
 
 # ----------------------------------------------------------------
 # The player file of the key with some bytes changed: {position: value}, only inside the settings
@@ -129,7 +125,6 @@ def patched(got: Settings, data: bytes, changes: dict[int, int]) -> bytes | None
         body[position - 1] = value
     content = data[: HEAD.size] + bytes(body)
     return content + TAIL.pack(binascii.crc_hqx(bytes(body), 0), reference.CHECKSUM_FILLER)
-
 
 # Changes the chosen settings in MYSETTING.DAT when the key already has it. Other bytes stay as the
 # owner left them. Returns the problems that kept the file from being changed.

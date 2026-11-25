@@ -1,9 +1,10 @@
-# Benoit Saint-Moulin
-# Boothbridge: sanity checks on the export.pdb and ANLZ bytes before they are published.
-#
-# Layout as seen in rekordbox exports and in the crate-digger notes, no Pioneer
-# software used. Strict on purpose: made for the files this exporter generates, not
-# for everything rekordbox could write.
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Strict sanity checks on the export.pdb and ANLZ bytes, run before the files are published to the key.
+
+# Layout as seen in rekordbox exports and the crate-digger notes, no Pioneer software used.
+# Strict on purpose: made for the files this exporter generates, not for everything rekordbox could write.
 
 import contextlib
 import os
@@ -43,7 +44,6 @@ PDB_FIRST_OFFSET_AT = 6
 PDB_DIRECTORY_AT = 28
 PDB_DIRECTORY_ENTRY_SIZE = 16
 
-
 # ----------------------------------------------------------------
 # each checker gets the whole section, its header size and the expected track path
 def _check_path(section: bytes, header: int, expected_path: str | None):
@@ -58,7 +58,6 @@ def _check_path(section: bytes, header: int, expected_path: str | None):
     if expected_path is not None and path != expected_path:
         raise ValueError("ANLZ path does not match its exported track")
 
-
 def _check_beat_grid(section: bytes, header: int, expected_path: str | None):
     if (
         header != 24
@@ -66,7 +65,6 @@ def _check_beat_grid(section: bytes, header: int, expected_path: str | None):
         != struct.unpack_from(">I", section, 20)[0] * BEAT_ENTRY_SIZE
     ):
         raise ValueError("Invalid ANLZ beat-grid count")
-
 
 def _waveform_checker(tag: bytes):
     def check(section: bytes, header: int, expected_path: str | None):
@@ -82,11 +80,9 @@ def _waveform_checker(tag: bytes):
 
     return check
 
-
 def _check_vbr(section: bytes, header: int, expected_path: str | None):
     if header != 16 or len(section) != VBR_SECTION_SIZE:
         raise ValueError("Invalid ANLZ VBR payload")
-
 
 def _cue_list_checker(tag: bytes):
     list_header, count_at, entry_tag = CUE_LISTS[tag]
@@ -113,7 +109,6 @@ def _cue_list_checker(tag: bytes):
 
     return check
 
-
 SECTION_CHECKS = {
     b"PPTH": _check_path,
     b"PQTZ": _check_beat_grid,
@@ -123,7 +118,6 @@ for _tag in WAVEFORM_ENTRY_WIDTH:
     SECTION_CHECKS[_tag] = _waveform_checker(_tag)
 for _tag in CUE_LISTS:
     SECTION_CHECKS[_tag] = _cue_list_checker(_tag)
-
 
 def anlz(data: bytes, expected_path: str | None = None, extension: str | None = None):
     if (
@@ -159,7 +153,6 @@ def anlz(data: bytes, expected_path: str | None = None, extension: str | None = 
     if not needed <= found:
         raise ValueError(f"ANLZ {extension} is missing required sections")
 
-
 # ----------------------------------------------------------------
 # a page may belong to one table only
 def _check_data_page(data: bytes, offset: int):
@@ -178,7 +171,6 @@ def _check_data_page(data: bytes, offset: int):
             )[0]
             if row_start >= used:
                 raise ValueError("PDB row offset is outside its heap")
-
 
 def pdb(data: bytes):
     if len(data) < PAGE or len(data) % PAGE:
@@ -210,7 +202,6 @@ def pdb(data: bytes):
             if page == last:
                 break
             page = following
-
 
 # ----------------------------------------------------------------
 # validate first so a bad file never reaches the drive, write beside the target, read back, compare hash, swap

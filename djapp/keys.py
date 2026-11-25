@@ -1,5 +1,7 @@
-# Benoit Saint-Moulin
-# Boothbridge : musical keys, one table for every notation
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Musical key table shared by every parser and exporter, mapping Traktor indexes to rekordbox, Open Key and Camelot names.
 
 # Traktor MUSICAL_KEY indices: 0-11 major from C, 12-23 minor from Cm.
 # Parsers and exporters share this table for all key notations
@@ -44,7 +46,6 @@ for _i, (_name, _ok, _cam) in enumerate(_TABLE):
     for _s in (_name, _ok, _cam):
         _LOOKUP[_s.lower()] = _i
 
-
 # ------------------------------------------------------
 def name(idx: int | None, notation: str = "Classical") -> str:
     if idx is None or not 0 <= idx < 24:
@@ -55,7 +56,6 @@ def name(idx: int | None, notation: str = "Classical") -> str:
     if notation == "Camelot":
         return cam
     return rb
-
 
 # any notation back to the index: 'Am', 'A minor', 'F#m', '8A', '1m', 'Abmin'
 def parse(text: str) -> int | None:
@@ -79,7 +79,6 @@ def parse(text: str) -> int | None:
     root = root[0].upper() + root[1:]
     root = _SHARPS.get(root, root)
     return _LOOKUP.get((root + rest).lower())
-
 
 def from_traktor(value: str | int | None) -> int | None:
     try:

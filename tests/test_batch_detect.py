@@ -1,3 +1,8 @@
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Checks batch tempo detection over several tracks, including the threads it uses and its timing.
+
 import os
 import tempfile
 import threading

@@ -1,3 +1,8 @@
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Checks by reading the source that lambdas given to signals and menus accept the arguments Qt passes.
+
 import ast
 import unittest
 from pathlib import Path

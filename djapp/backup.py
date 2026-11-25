@@ -1,4 +1,7 @@
-# portable project backups, built and verified before replacing the destination
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Portable project backup that builds and verifies zip archives before replacing the destination.
 
 from __future__ import annotations
 

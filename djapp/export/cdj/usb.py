@@ -1,14 +1,11 @@
-# Benoit Saint-Moulin
-# Boothbridge : export of playlists to a USB key that Pioneer CDJ players can read
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Drives the whole CDJ USB export: audio copy, export.pdb, analysis files, artwork and settings, in a safe order.
 
-# Drives the whole export: audio, export.pdb, analysis files, artwork, settings,
-# checksums. Layouts come from rekordbox keys compared byte by byte and the
-# crate-digger research. Only ordinary data
-# files are written.
-#
-# Order matters: audio first, analysis and pictures next, export.pdb last. A player only
-# learns about a track from the database, so a cut in the middle never leaves a
-# database pointing to missing files.
+# Layouts come from rekordbox keys compared byte by byte, and crate-digger research. Only ordinary data files are written.
+# Order matters: audio first, analysis and pictures next, export.pdb last.
+# A player only learns of a track from the database, so a cut in the middle never leaves it pointing to missing files.
 
 from __future__ import annotations
 
@@ -59,7 +56,6 @@ PERCENT_ARTWORK = 92
 PERCENT_DATABASE = 96
 PERCENT_DONE = 100
 
-
 # ------------------------------------------------------------
 # Contents/<artist>/<album>/<file>. An existing file is reused only if it is the very
 # same recording: two untagged track01.wav get different names, so audio already on
@@ -77,7 +73,6 @@ def usb_path(t: Track, plan: Planner, root: str = "") -> str:
 
     return "/" + plan.claim("Contents/" + "/".join(parts), usable if root else None)
 
-
 # ------------------------------------------------------------
 # a file already inside Contents on this key stays where it is
 def place(root: str, t: Track, plan: Planner) -> str:
@@ -86,7 +81,6 @@ def place(root: str, t: Track, plan: Planner) -> str:
         plan.taken.add(current[1:].lower())
         return current
     return usb_path(t, plan, root)
-
 
 # ------------------------------------------------------------------
 # everything that changes the analysis goes into the hash: writer version, file size and mtime, key path, tempo, grid, length, cues
@@ -109,7 +103,6 @@ def cache_key(t: Track, usb: str) -> str:
     )
     return hashlib.sha1(fingerprint.encode("utf-8")).hexdigest()
 
-
 # ------------------------------------------------------------
 # May a key-only track keep its analysis? Both files must have been read completely and
 # the audio must be the one they were made from: size in the database, or when that is
@@ -130,7 +123,6 @@ def unchanged(root: str, t: Track, usb: str, old: key.KeyData) -> bool:
         return t.size == audio.st_size
     return audio.st_mtime <= newest_analysis + FAT_TIME_SLACK
 
-
 # ------------------------------------------------------------
 # left untouched (DAT, EXT, and the 2EX rekordbox may have written), only recorded in the checksums
 def keep_analysis(root: str, it: pdbwrite.Item, man: Manifest | None):
@@ -139,7 +131,6 @@ def keep_analysis(root: str, it: pdbwrite.Item, man: Manifest | None):
         if man and name.upper().startswith("ANLZ0000."):
             man.keep(os.path.join(folder, name))
 
-
 # ------------------------------------------------------------
 def whole(raw: bytes) -> bool:
     try:
@@ -147,7 +138,6 @@ def whole(raw: bytes) -> bool:
     except (ValueError, UnicodeDecodeError, struct.error):
         return False
     return True
-
 
 # ------------------------------------------------------------
 # an unreadable or invalid pair counts as a miss
@@ -167,20 +157,17 @@ def cached(
         return None
     return dat, ext
 
-
 # runs in a worker process
 def anlz_job(t: Track, usb: str) -> tuple[bytes, bytes]:
     from ...analysis import Audio
 
     return anlz.build(t, usb, Audio(t.path))
 
-
 # ------------------------------------------------------
 def put(path: str, data: bytes, man: Manifest | None):
     write_direct(path, data)
     if man:
         man.add(path, sha256_bytes(data))
-
 
 # --------------------------------------------------------------
 # both validated before anything touches the key, and again after writing
@@ -200,7 +187,6 @@ def put_anlz(
         if man:
             man.add(path, sha256_bytes(data))
 
-
 # refused before decoding its pixels
 MAX_PIXELS = 40_000_000
 # stored twice, small and medium square JPEG
@@ -212,10 +198,8 @@ ARTWORK_SET = "00001"
 # a<number>.jpg and a<number>_m.jpg
 ART_FILE = re.compile(r"a(\d{1,9})(_m)?\.jpg", re.IGNORECASE)
 
-
 def art_folder(root: str) -> str:
     return os.path.join(root, PIONEER_DIR, "Artwork", ARTWORK_SET)
-
 
 # --------------------------------------------
 def art_numbers(root: str) -> set[int]:
@@ -229,7 +213,6 @@ def art_numbers(root: str) -> set[int]:
         if match:
             numbers.add(int(match.group(1)))
     return numbers
-
 
 # ------------------------------------------------------------
 # kept maps item.id to the picture number in the key database. Files stay as they are so
@@ -256,7 +239,6 @@ def keep_artwork(
             for path in pair:
                 man.add(path)
 
-
 # ------------------------------------------------------------
 # after the new database is written. Only files named like rekordbox ones are touched.
 def prune_artwork(items: list[pdbwrite.Item], root: str):
@@ -275,7 +257,6 @@ def prune_artwork(items: list[pdbwrite.Item], root: str):
         except OSError as err:
             log.debug("artwork %s not removed: %s", name, err)
 
-
 def _square_jpeg(picture, side: int) -> bytes:
     from PIL import Image
 
@@ -284,7 +265,6 @@ def _square_jpeg(picture, side: int) -> bytes:
         buffer, "JPEG", quality=JPEG_QUALITY
     )
     return buffer.getvalue()
-
 
 def _decode_picture(raw: bytes, audio_path: str):
     from PIL import Image
@@ -303,7 +283,6 @@ def _decode_picture(raw: bytes, audio_path: str):
     except (OSError, ValueError, Image.DecompressionBombError) as err:
         log.debug("artwork of %s: %s", audio_path, err)
         return None
-
 
 # ------------------------------------------------------------
 # one pair per distinct image. Numbered after the highest in use when merging into a
@@ -345,7 +324,6 @@ def write_artwork(
         number_by_digest[digest] = it.art = number
     return len(number_by_digest)
 
-
 # ------------------------------------------------------------------
 # a playlist with no findable file would show up empty on the player, so it is left out.
 # Returns (nodes kept, names left out, files not found).
@@ -363,12 +341,10 @@ def playable(nodes: list[Node]) -> tuple[list[Node], list[str], list[str]]:
         return nodes, [], []
     return prune(nodes, staying), left_out, not_found
 
-
 @dataclass
 class _Analysis:
     item: pdbwrite.Item
     cache_id: str
-
 
 # state between the steps, which are methods in the order run() calls them
 @dataclass
@@ -650,7 +626,6 @@ class _Run:
         self.record_checksums(db_file, data)
         self.say(PERCENT_DONE, f"{len(self.items)} tracks exported")
         return self.rep
-
 
 # ------------------------------------------------------------------
 # old = the key as read before the export, its playlists stay and the new ones merge into them

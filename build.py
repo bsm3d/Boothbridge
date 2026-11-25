@@ -1,5 +1,7 @@
-# Benoit Saint-Moulin
-# Boothbridge : portable build (PyInstaller onedir) and its zip
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Packaging script that builds the portable Boothbridge folder with PyInstaller, its zip and the installer.
 
 # python build.py [--no-zip] [--installer]   the installer needs Inno Setup (BB_ISCC, or the usual folders)
 # dist/Boothbridge/ is copied as is (USB key, another PC, no admin rights). Settings and log land next to Boothbridge.exe.
@@ -45,7 +47,6 @@ KEEP_QT_TRANSLATIONS = {
 }
 SOURCE_SUFFIXES = {".py", ".pyw", ".pyi", ".pyx", ".pxd", ".c", ".cpp", ".h", ".hpp"}
 
-
 def clear(folder: Path):
     # rename first: Windows refuses while a Boothbridge.exe from there is running, a plain rmtree would delete half the folder under the running app
     if not folder.exists():
@@ -57,7 +58,6 @@ def clear(folder: Path):
     except OSError:
         sys.exit(f"{folder} is in use, close Boothbridge first (nothing was deleted)")
     shutil.rmtree(old, ignore_errors=True)
-
 
 def run_pyinstaller():
     clear(DIST)
@@ -80,7 +80,6 @@ def run_pyinstaller():
         check=True,
         env=env,
     )
-
 
 def prune():
     rt = DIST / "runtime"
@@ -105,7 +104,6 @@ def prune():
             gone += 1
     return gone
 
-
 def check_seal():
     # what PyInstaller copied is what the seal says, byte for byte
     from djapp import integrity
@@ -118,7 +116,6 @@ def check_seal():
     if found:
         sys.exit("the built folder does not match its seal:\n  " + "\n  ".join(found))
     print(f"seal checked: {len(hashes)} native modules match")
-
 
 # Inno Setup: the path in BB_ISCC, the PATH, then the places the installer of Inno Setup uses
 def find_iscc() -> str | None:
@@ -137,7 +134,6 @@ def find_iscc() -> str | None:
                     return str(path)
     return None
 
-
 # the setup of the folder that was just built, named like the zip so the two are never mixed up
 def make_installer() -> Path:
     iscc = find_iscc()
@@ -150,10 +146,8 @@ def make_installer() -> Path:
     subprocess.run(command, cwd=ROOT, check=True)
     return ROOT / "dist" / f"Boothbridge-{VERSION}-setup{SUFFIX}.exe"
 
-
 def size(p: Path) -> float:
     return sum(f.stat().st_size for f in p.rglob("*") if f.is_file()) / 1e6
-
 
 def make_zip() -> Path:
     z = ROOT / "dist" / f"Portable_Boothbridge-{VERSION}-win64{SUFFIX}.zip"
@@ -167,8 +161,6 @@ def make_zip() -> Path:
     return z
 
 
-
-
 def main() -> int:
     run_pyinstaller()
     n = prune()
@@ -176,6 +168,12 @@ def main() -> int:
     # the license travels with every copy, PolyForm asks for it, and so do the licences of the libraries
     shutil.copyfile(ROOT / "LICENSE", DIST / "LICENSE.txt")
     shutil.copyfile(ROOT / "THIRD_PARTY.md", DIST / "THIRD_PARTY.md")
+    # the complete manual (PDF), printed from the website generator (web/Boothbridge/manual), travels with every copy
+    manual = ROOT / "docs" / "Boothbridge-manual.pdf"
+    if manual.is_file():
+        shutil.copyfile(manual, DIST / manual.name)
+    else:
+        print("warning: docs/Boothbridge-manual.pdf is missing, the release has no manual")
     left = [
         p
         for p in DIST.rglob("*")
@@ -193,7 +191,6 @@ def main() -> int:
         s = make_installer()
         print(f"setup: {s} ({s.stat().st_size / 1e6:.0f} MB)")
     return 0
-
 
 if __name__ == "__main__":
     sys.exit(main())

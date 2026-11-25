@@ -1,9 +1,11 @@
-# repeats one scenario of the application for N cycles and watches what grows.
-#
-# After every cycle the process is measured: memory (resident and private), the Python heap
-# (tracemalloc), live widgets and QObjects, threads, open handles and child processes. The first
-# cycles are warm-up (caches, lazy imports, first windows) and do not count. A least-squares line
-# through the measured cycles says whether something keeps growing
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Repeats one application scenario for many cycles and fits a line through memory and object counts to spot leaks.
+
+# Repeats one scenario for N cycles and watches what grows. The first cycles are warm-up and do not count.
+# Measured per cycle: memory (resident and private), Python heap (tracemalloc), widgets, QObjects, threads, handles, child processes.
+# A least-squares line through the measured cycles says whether something keeps growing.
 
 from __future__ import annotations
 
@@ -30,14 +32,8 @@ KB = 1024.0
 
 
 # --------------------------------------------------------
-# what counts as growth. Memory is judged per cycle by the slope of the fitted line.
-#
-# Windows and the allocator move private memory by a few hundred KB from one cycle to the
-# next without any leak, so memory needs 256 KB per cycle and 4 MB of net growth before it
-# matters (the allocator grows in steps). The Python heap is far quieter (32 KB). A widget, a thread or a child process that is never freed is a
-# whole object, so counts are judged on the net growth over the measured cycles (1 for
-# widgets, threads and children, 10 handles) together with a slope that proves it keeps
-# going. A fit with an R squared under min_r2 is noise and is ignored
+# Memory needs 256 KB per cycle and 4 MB of net growth to count, since the allocator moves a few hundred KB without a leak. The Python heap threshold is 32 KB.
+# Widgets, threads and children need a net growth of 1, handles 10, with a slope that keeps going. A fit with R squared under min_r2 is noise and is ignored.
 @dataclass
 class Limits:
     memory_kb: float = 256.0

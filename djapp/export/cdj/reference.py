@@ -1,11 +1,11 @@
-# Benoit Saint-Moulin
-# Boothbridge : the fixed files a CDJ key holds besides tracks, produced by code
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Builds the fixed files of a CDJ key: player settings, browse columns, menu tables and play history.
 
-# Besides tracks, a key carries four player settings files and four small export.pdb
-# tables (browse columns, two menu tables, play history). All rebuilt from the values
-# below, no Pioneer file is embedded. Values were read off rekordbox 6 exports (black
-# box study). Settings layout (header, one byte per setting, CRC16) follows the notes
-# of pyrekordbox and rekordcrate, the rows follow devicesql.py.
+# Besides tracks, a key carries four player settings files and four small export.pdb tables (browse columns, two menu tables, play history).
+# All rebuilt from the values below, no Pioneer file is embedded: they were read off rekordbox 6 exports (black box study).
+# Settings layout (header, one byte per setting, CRC16) follows the notes of pyrekordbox and rekordcrate; the rows follow devicesql.py.
 
 from __future__ import annotations
 
@@ -22,10 +22,8 @@ SETTINGS = ("MYSETTING.DAT", "MYSETTING2.DAT", "DJMMYSETTING.DAT", "DEVSETTING.D
 
 PAGES = {16: "columns", 17: "t17", 18: "t18", 19: "history"}
 
-
 def names() -> list[str]:
     return list(SETTINGS) + [f"{n}.page" for n in PAGES.values()]
-
 
 # first bytes of the body, the players use them to tell the files apart
 PLAYER_BODY_MAGIC = bytes.fromhex("7856341202000000")
@@ -99,7 +97,6 @@ MIXER_BODY_SIZE = 52
 SWITCHES = (9, 11, 16, 17, 23, 26, 27, 35, 36)
 OFF, ON = 0x80, 0x81
 
-
 # The choices as kept in the settings file: "11:1,23:0" = position 11 on, position 23 off.
 # Anything that is not a known switch with 0 or 1 is dropped.
 def parse_choices(text: object) -> dict[int, int]:
@@ -117,7 +114,6 @@ def parse_choices(text: object) -> dict[int, int]:
             chosen[int(position)] = ON if state == "1" else OFF
     return chosen
 
-
 def format_choices(chosen: dict[int, int]) -> str:
     return ",".join(
         f"{position}:{1 if chosen[position] == ON else 0}"
@@ -125,14 +121,12 @@ def format_choices(chosen: dict[int, int]) -> str:
         if position in SWITCHES and chosen[position] in (OFF, ON)
     )
 
-
 def _settings_body(magic: bytes, settings: dict[int, int], size: int) -> bytes:
     body = bytearray(size)
     body[: len(magic)] = magic
     for position, value in settings.items():
         body[position - 1] = value
     return bytes(body)
-
 
 # CRC16 XMODEM (binascii.crc_hqx) over the body only, mixer file: header too
 def _settings_file(
@@ -150,7 +144,6 @@ def _settings_file(
     checked = content if checksum_includes_header else body
     crc = binascii.crc_hqx(checked, 0)
     return content + struct.pack("<HH", crc, CHECKSUM_FILLER)
-
 
 def _settings_files(chosen: dict[int, int]) -> dict[str, bytes]:
     device_body = DEVICE_BODY_MAGIC + b"\x01" * 9 + bytes(15)
@@ -175,7 +168,6 @@ def _settings_files(chosen: dict[int, int]) -> dict[str, bytes]:
         ),
         "DEVSETTING.DAT": _settings_file("PIONEER DJ", "7.2.11", device_body),
     }
-
 
 TABLE_COLUMNS, TABLE_MENU_A, TABLE_MENU_B, TABLE_HISTORY = 16, 17, 18, 19
 
@@ -267,7 +259,6 @@ HISTORY_DATE_AT = 12
 # bytes after the date, as found
 HISTORY_ROW_TAIL = bytes.fromhex("191e0b31303030") + b"\x03"
 
-
 def _column_rows() -> list[bytes]:
     rows = []
     for ident, code, name in BROWSE_COLUMNS:
@@ -276,10 +267,8 @@ def _column_rows() -> list[bytes]:
         rows.append(row.finish())
     return rows
 
-
 def _menu_rows(table: list[tuple]) -> list[bytes]:
     return [struct.pack("<4H", *entry) for entry in table]
-
 
 def _history_rows(day: str) -> list[bytes]:
     date_and_tail = ds.dstr(day) + HISTORY_ROW_TAIL
@@ -291,7 +280,6 @@ def _history_rows(day: str) -> list[bytes]:
         rows.append(bytes(row))
     return rows
 
-
 def _history_page(day: str) -> bytes:
     page = bytearray(
         ds.build_data_page(0, TABLE_HISTORY, 0, 0, _history_rows(day), True)
@@ -302,7 +290,6 @@ def _history_page(day: str) -> bytes:
     struct.pack_into("<HH", page, ds.OFF_ROW_COUNT_A, 2, 2)
     struct.pack_into("<HH", page, ds.PAGE - 4, 0x0008, 0x000C)
     return bytes(page)
-
 
 def _table_pages(day: str) -> dict[int, bytes]:
     return {
@@ -318,7 +305,6 @@ def _table_pages(day: str) -> dict[int, bytes]:
         TABLE_HISTORY: _history_page(day),
     }
 
-
 # ------------------------------------------------------------
 # built once per run, so the history date is the day the program started. chosen = the player
 # settings picked by the user as format_choices writes them, "" keeps the defaults.
@@ -330,12 +316,10 @@ def files(chosen: str = "") -> dict[str, bytes]:
         built[f"{PAGES[table]}.page"] = page
     return built
 
-
 # for devicesql.build_py
 def pages() -> dict[int, bytes]:
     built = files()
     return {table: built[f"{name}.page"] for table, name in PAGES.items()}
-
 
 # existing settings stay, the owner may have changed them. Only the settings the user chose
 # in the program are changed in the player file that is already there (settingsread.apply).

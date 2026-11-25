@@ -1,5 +1,7 @@
-# Benoit Saint-Moulin
-# Boothbridge : the choice of the language at the first start
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : First-start language choice dialog, listing every language in its own words.
 
 from __future__ import annotations
 
@@ -14,7 +16,6 @@ from PySide6.QtWidgets import (
 )
 
 from .. import i18n
-
 
 # ------------------------------------------------------------
 class LanguageDialog(QDialog):
@@ -44,7 +45,6 @@ class LanguageDialog(QDialog):
         if item is not None:
             self.choice = item.data(Qt.UserRole)
         super().accept()
-
 
 # the code of the language, asked once
 def choose(current: str = "") -> str:

@@ -1,5 +1,7 @@
-# Benoit Saint-Moulin
-# Boothbridge : translations, the library, the CDJ key and the menus of those functions
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Translations for the music library, duplicate scan and CDJ key menus.
 
 CATALOG = {
     "fr": {

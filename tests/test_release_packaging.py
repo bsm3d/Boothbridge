@@ -1,3 +1,8 @@
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Checks release packaging: pruning removes source files but keeps the runtime binaries.
+
 import tempfile
 import unittest
 import zipfile

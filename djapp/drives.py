@@ -1,14 +1,11 @@
-# Benoit Saint-Moulin
-# Boothbridge : the USB drives that can be formatted, and the formatting itself
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Lists removable USB and SD drives and formats them to FAT32 on Windows, Linux and macOS.
 
-# Windows: diskpart cleans the drive, fat32.py writes MBR + FAT32 on the raw drive (no 32 GB
-# limit), Windows then mounts the new volume. Linux and macOS use the same FAT32 writer on the raw
-# device, with their native tools only for unmounting, partition refresh and mounting.
-# Raw access needs administrator rights: the writing is done by this program started again
-# (--format-disk) through UAC, osascript or pkexec, and it checks the drive again before writing.
-#
-# Only USB / SD drives are listed, never the one Windows or the system runs from, never the one
-# this program runs from
+# Windows: diskpart cleans the drive, fat32.py writes MBR and FAT32 on the raw drive (no 32 GB limit), then Windows mounts the new volume.
+# Raw access needs administrator rights: this program starts again (--format-disk) through UAC, osascript or pkexec, and checks the drive again before writing.
+# Only USB and SD drives are listed, never the system drive or the one this program runs from.
 
 from __future__ import annotations
 
@@ -34,7 +31,6 @@ BUSES = {"USB", "SD", "MMC", "SDHC"}
 PROGRESS_PREFIX = "bb_format_"
 HELPER_FLAG = "--format-disk"
 
-
 # --------------------------------------------------------
 @dataclass
 class Drive:
@@ -52,15 +48,12 @@ class Drive:
         where = ", ".join(self.mounts)
         return f"{where + '  ' if where else ''}{self.name or tr('USB drive')}  ({gigabytes(self.size)})"
 
-
 def gigabytes(n: int) -> str:
     return f"{n / 1e9:.1f} GB" if n < 1e12 else f"{n / 1e12:.2f} TB"
-
 
 # serial numbers of cheap keys can be binary noise: keep ASCII letters and digits only
 def plain(s: str) -> str:
     return "".join(c for c in s if c.isascii() and c.isalnum())
-
 
 # ------------------------------------------------------
 # the full path of a Windows tool. CreateProcess looks in the folder of the program first, and
@@ -77,7 +70,6 @@ def tool(name: str) -> str:
     )
     return os.path.join(root, where, name + ".exe")
 
-
 def run(cmd: list[str], timeout: float = 60) -> subprocess.CompletedProcess:
     return subprocess.run(
         [tool(cmd[0]), *cmd[1:]],
@@ -90,7 +82,6 @@ def run(cmd: list[str], timeout: float = 60) -> subprocess.CompletedProcess:
         check=False,
     )
 
-
 def is_admin() -> bool:
     if sys.platform == "win32":
         import ctypes
@@ -98,10 +89,8 @@ def is_admin() -> bool:
         return bool(ctypes.windll.shell32.IsUserAnAdmin())
     return os.geteuid() == 0
 
-
 def running_from() -> str:
     return os.path.normcase(os.path.abspath(str(settings.app_dir())))
-
 
 # ---- listing
 
@@ -124,10 +113,8 @@ foreach ($d in Get-Disk) {
 ConvertTo-Json -InputObject @($out) -Depth 4 -Compress
 """
 
-
 def describe(fs: str, label: str, size: int) -> str:
     return f"{label or tr('no name')} ({fs or tr('unknown file system')}, {gigabytes(size)})"
-
 
 # --------------------------------------------------------
 def list_windows() -> list[Drive]:
@@ -166,7 +153,6 @@ def list_windows() -> list[Drive]:
             )
         )
     return found
-
 
 def list_linux() -> list[Drive]:
     cols = "NAME,PATH,SIZE,TYPE,TRAN,RM,HOTPLUG,MODEL,VENDOR,SERIAL,FSTYPE,LABEL,MOUNTPOINT,PTTYPE,LOG-SEC"
@@ -210,7 +196,6 @@ def list_linux() -> list[Drive]:
             )
         )
     return found
-
 
 # ------------------------------------------------------
 def list_mac() -> list[Drive]:
@@ -265,7 +250,6 @@ def list_mac() -> list[Drive]:
         )
     return found
 
-
 # ------------------------------------------------------------
 # the drives that can be formatted. Also the Job entry point of the dialog
 def list_drives(progress=None, cancel=None) -> list[Drive]:
@@ -276,7 +260,6 @@ def list_drives(progress=None, cancel=None) -> list[Drive]:
         for d in found
         if not any(here.startswith(os.path.normcase(m)) for m in d.mounts if m)
     ]
-
 
 # --------------------------------------------------------
 # the listed drive that holds path, None for a folder on an internal disk or a network share
@@ -291,14 +274,11 @@ def drive_for(path: str, progress=None, cancel=None) -> Drive | None:
                 return d
     return None
 
-
 # ---- ejecting
-
 
 # the volume is held open by another program: expected, not a fault of ours
 class VolumeBusy(OSError):
     expected = True
-
 
 # flush, lock and dismount the volume, then ask the drive to eject: what Safely Remove does
 def eject_windows(mount: str) -> None:
@@ -356,7 +336,6 @@ def eject_windows(mount: str) -> None:
     finally:
         k.CloseHandle(h)
 
-
 # --------------------------------------------------------
 def eject(d: Drive, progress=None, cancel=None) -> str:
     if progress:
@@ -386,9 +365,7 @@ def eject(d: Drive, progress=None, cancel=None) -> str:
     log.info("ejected %s (%s)", d.id, d.name)
     return d.title
 
-
 # ---- formatting
-
 
 # --------------------------------------------------------
 # tells Windows the partition table changed, it mounts the new volume by itself
@@ -401,7 +378,6 @@ def rescan_windows(dev, n: str):
     ctypes.windll.kernel32.DeviceIoControl(
         ctypes.c_void_p(handle), 0x70140, None, 0, None, 0, ctypes.byref(got), None
     )
-
 
 # the letter of the new volume, assigned when Windows did not
 def drive_letter(n: str) -> str:
@@ -420,7 +396,6 @@ def drive_letter(n: str) -> str:
             return letter.upper() + ":\\"
         threading.Event().wait(1)
     return ""
-
 
 # ------------------------------------------------------------------
 def format_windows(d: Drive, label: str, progress) -> str:
@@ -456,10 +431,8 @@ def format_windows(d: Drive, label: str, progress) -> str:
     progress(92, tr("Mounting the new volume"))
     return drive_letter(d.id)
 
-
 def partition_node(dev: str) -> str:
     return dev + ("p1" if dev[-1].isdigit() else "1")
-
 
 # ----------------------------------------
 def format_linux(d: Drive, label: str, progress) -> str:
@@ -491,18 +464,15 @@ def format_linux(d: Drive, label: str, progress) -> str:
     run(["udevadm", "settle"], timeout=30)
     return partition_node(d.id)
 
-
 def mac_raw_device(d: Drive) -> str:
     if not re.fullmatch(r"/dev/disk\d+", d.id):
         raise OSError(f"Not a whole macOS disk: {d.id}")
     return d.id.replace("/dev/disk", "/dev/rdisk", 1)
 
-
 # --------------------------------------------------------------
 def mac_mountpoint(d: Drive) -> str:
     refreshed = next((disk for disk in list_mac() if disk.id == d.id), None)
     return refreshed.mounts[0] if refreshed and refreshed.mounts else ""
-
 
 # --------------------------------------------------------
 # use the shared FAT32 writer; diskutil only handles macOS volume lifecycle
@@ -538,7 +508,6 @@ def format_mac(d: Drive, label: str, progress) -> str:
         )
     return mac_mountpoint(d)
 
-
 # --------------------------------------------------------
 def do_format(d: Drive, label: str, progress) -> str:
     if sys.platform == "win32":
@@ -546,7 +515,6 @@ def do_format(d: Drive, label: str, progress) -> str:
     if sys.platform == "darwin":
         return format_mac(d, label, progress)
     return format_linux(d, label, progress)
-
 
 # --------------------------------------------------------
 # the drive as it is now: it must still be listed, with the same size and serial
@@ -562,9 +530,7 @@ def check(d: Drive) -> Drive:
         tr("The drive is no longer there, or it is not one that can be formatted")
     )
 
-
 # ---- the privileged helper
-
 
 # --------------------------------------------------------
 # the file the caller made for the progress lines: it must exist, be a plain file, be named
@@ -579,7 +545,6 @@ def open_progress(path: str, owner: str = ""):
         os.close(fd)
         raise OSError("Bad progress file")
     return os.fdopen(fd, "w", encoding="utf-8")
-
 
 # ------------------------------------------------------
 # Boothbridge --format-disk ID --size N --serial S --label L --progress FILE [--owner UID]
@@ -614,7 +579,6 @@ def helper_main(argv: list[str]) -> int:
         say("done", res)
         return 0
 
-
 # --------------------------------------------------------
 # new lines of the helper's file: returns the position, the result kind and its text
 def relay(path: str, pos: int, progress) -> tuple[int, str, str]:
@@ -630,7 +594,6 @@ def relay(path: str, pos: int, progress) -> tuple[int, str, str]:
         else:
             kind, text = k, msg
     return pos, kind, text
-
 
 def helper_args(d: Drive, label: str, path: str) -> list[str]:
     owner = str(os.getuid()) if hasattr(os, "getuid") else ""
@@ -651,10 +614,8 @@ def helper_args(d: Drive, label: str, path: str) -> list[str]:
         i18n.language(),
     ]
 
-
 def applescript_string(value: str) -> str:
     return '"' + value.replace("\\", "\\\\").replace('"', '\\"') + '"'
-
 
 # --------------------------------------------------------
 # starts this program again with administrator rights, returns what waits for its end
@@ -714,7 +675,6 @@ def launch_elevated(args: list[str]):
     )
     return subprocess.Popen(cmd)
 
-
 # --------------------------------------------------------
 def wait_elevated(handle, step) -> int:
     if sys.platform == "win32":
@@ -743,7 +703,6 @@ def wait_elevated(handle, step) -> int:
         handle.wait()
         raise
     return handle.returncode
-
 
 # --------------------------------------------------------------
 # formats the drive FAT32 / MBR and returns where it is mounted ('' when that is not known).
@@ -780,7 +739,6 @@ def format_drive(d: Drive, label: str, progress=None, cancel=None) -> str:
         res = mount_linux(res) or res
     cb(100, tr("Done"))
     return res
-
 
 # --------------------------------------------------
 # mounts the new partition for the user (udisks), '' when that is not possible

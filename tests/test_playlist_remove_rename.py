@@ -1,4 +1,7 @@
-# renaming and removing a playlist of the main window: the tree, the open windows, the project
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Checks renaming and removing a playlist in the main window: the tree, open windows and the project.
 
 import os
 import tempfile

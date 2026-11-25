@@ -1,5 +1,7 @@
-# Benoit Saint-Moulin
-# Boothbridge : the encrypted databases of other programs are never opened
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Refuses to open the encrypted databases of other programs such as rekordbox, by name and file header.
 
 import os
 
@@ -10,7 +12,6 @@ EXTENSIONS = (".db", ".sqlite", ".sqlite3")
 # the private libraries of Apple, only the exported XML is read
 BINARY_LIBRARIES = (".itl", ".musiclibrary")
 MAGIC = b"SQLite format 3\x00"
-
 
 # A plain SQLite file starts with its magic text. A database file that does not is encrypted (or damaged), and by
 # the name alone the databases of rekordbox are refused
@@ -26,7 +27,6 @@ def encrypted(path: str) -> bool:
     except OSError:
         return False
     return len(head) == len(MAGIC) and head != MAGIC
-
 
 def refuse(path: str):
     if encrypted(path):

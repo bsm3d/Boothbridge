@@ -1,5 +1,7 @@
-# Benoit Saint-Moulin
-# Mixxx export: a new standalone mixxxdb.sqlite, read back with the program's own reader
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Checks the Mixxx export, which writes a new mixxxdb.sqlite and reads it back with the program's own reader.
 
 import os
 import sqlite3
@@ -13,13 +15,11 @@ from djapp.export.manifest import Cancelled
 from djapp.model import CUE, LOAD, LOOP, Cue, Node, Track
 from djapp.sources import mixxx as reader
 
-
 def audio(folder, name, size=64) -> str:
     p = os.path.join(str(folder), name)
     with open(p, "wb") as f:
         f.write(b"x" * size)
     return p
-
 
 def track(folder, name, **fields) -> Track:
     t = Track(title=name, artist="Artist", path=audio(folder, name + ".mp3"))
@@ -28,18 +28,14 @@ def track(folder, name, **fields) -> Track:
         setattr(t, k, v)
     return t
 
-
 def pl(name, *tracks) -> Node:
     return Node("playlist", name, tracks=list(tracks))
-
 
 def db(out) -> str:
     return os.path.join(str(out), "mixxxdb.sqlite")
 
-
 def view(t: Track):
     return (t.title, t.artist, t.album, t.genre, t.comment, t.year, t.rating, t.key)
-
 
 # ----------------------------------------------------------------
 def test_round_trip_tracks_playlists_cues(tmp_path):
@@ -92,7 +88,6 @@ def test_round_trip_tracks_playlists_cues(tmp_path):
     with sqlite3.connect(db(out)) as con:
         assert con.execute("select count(*) from library").fetchone()[0] == 2
 
-
 def test_schema_is_version_39_and_opens_cleanly(tmp_path):
     out = tmp_path / "out"
     mixxx.export([pl("p", track(tmp_path, "a"))], str(out))
@@ -135,7 +130,6 @@ def test_schema_is_version_39_and_opens_cleanly(tmp_path):
     finally:
         con.close()
 
-
 def test_key_numbering_and_text(tmp_path):
     ts = [track(tmp_path, f"k{i}", key=i) for i in (0, 11, 12, 23)]
     out = tmp_path / "out"
@@ -143,7 +137,6 @@ def test_key_numbering_and_text(tmp_path):
     with sqlite3.connect(db(out)) as con:
         rows = con.execute("select key, key_id from library order by id").fetchall()
     assert rows == [("C", 1), ("B", 12), ("Cm", 13), ("Bm", 24)]
-
 
 def test_a_second_export_into_the_same_folder_is_refused_and_changes_nothing(tmp_path):
     out = tmp_path / "out"
@@ -153,7 +146,6 @@ def test_a_second_export_into_the_same_folder_is_refused_and_changes_nothing(tmp
         mixxx.export([pl("q", track(tmp_path, "b"))], str(out))
     assert open(db(out), "rb").read() == before
     assert sorted(os.listdir(out)) == ["mixxxdb.sqlite"]
-
 
 def test_an_existing_mixxx_database_is_never_touched(tmp_path):
     out = tmp_path / "profile"
@@ -165,7 +157,6 @@ def test_an_existing_mixxx_database_is_never_touched(tmp_path):
     assert real.read_bytes() == b"the library of a user"
     assert os.listdir(out) == ["mixxxdb.sqlite"]
 
-
 def test_same_named_playlists_do_not_collide(tmp_path):
     a, b = track(tmp_path, "a"), track(tmp_path, "b")
     nodes = [pl("Mix", a), pl("mix", b), Node("folder", "F", children=[pl("Mix", a)])]
@@ -174,7 +165,6 @@ def test_same_named_playlists_do_not_collide(tmp_path):
     got = reader.load(db(out))
     assert len({n.name.casefold() for n in got}) == 3
     assert [n.tracks[0].title for n in got] == ["a", "b", "a"]
-
 
 def test_empty_playlists_and_tracks_without_path_are_skipped(tmp_path):
     ghost = Track(title="ghost")
@@ -188,7 +178,6 @@ def test_empty_playlists_and_tracks_without_path_are_skipped(tmp_path):
     got = reader.load(db(out))
     assert [n.name for n in got] == ["real"]
     assert [t.title for t in got[0].tracks] == ["a"]
-
 
 def test_hostile_content_survives(tmp_path):
     nasty = "A<b>&\"' \x00\x07\ud800 \U0001f600 ; DROP TABLE library;--"
@@ -228,7 +217,6 @@ def test_hostile_content_survives(tmp_path):
         assert con.execute("select count(*) from library").fetchone()[0] == 1
         assert con.execute("pragma integrity_check").fetchall() == [("ok",)]
 
-
 def test_tracks_without_cues_or_a_grid_and_empty_fields(tmp_path):
     t = Track(title="", path=audio(tmp_path, "z.flac"))
     out = tmp_path / "out"
@@ -240,7 +228,6 @@ def test_tracks_without_cues_or_a_grid_and_empty_fields(tmp_path):
             "flac",
             None,
         )
-
 
 def test_cue_positions_follow_the_sample_rate(tmp_path):
     t = track(tmp_path, "a", samplerate=48000)
@@ -256,7 +243,6 @@ def test_cue_positions_follow_the_sample_rate(tmp_path):
     assert rows[1][:4] == (4, 192000.0, 48000.0, -1)
     assert all(r[4] != 0 for r in rows)
 
-
 def test_cancel_stops_cleanly_and_leaves_nothing(tmp_path):
     ev = threading.Event()
     ev.set()
@@ -264,7 +250,6 @@ def test_cancel_stops_cleanly_and_leaves_nothing(tmp_path):
     with pytest.raises(Cancelled):
         mixxx.export([pl("p", track(tmp_path, "a"))], str(out), cancel=ev)
     assert os.listdir(out) == []
-
 
 def test_a_failure_leaves_no_temporary_file(tmp_path, monkeypatch):
     def boom(con):
@@ -275,7 +260,6 @@ def test_a_failure_leaves_no_temporary_file(tmp_path, monkeypatch):
     with pytest.raises(ValueError):
         mixxx.export([pl("p", track(tmp_path, "a"))], str(out))
     assert os.listdir(out) == []
-
 
 def test_copy_puts_the_audio_in_the_export_and_paths_point_to_it(tmp_path):
     t = track(tmp_path, "a")
@@ -288,7 +272,6 @@ def test_copy_puts_the_audio_in_the_export_and_paths_point_to_it(tmp_path):
     )
     assert os.path.getsize(r.path) == 64 and r.size == 64
 
-
 def test_manifest_registers_the_database_and_the_copies(tmp_path):
     t = track(tmp_path, "a")
     out = tmp_path / "out"
@@ -298,7 +281,6 @@ def test_manifest_registers_the_database_and_the_copies(tmp_path):
     assert "mixxxdb.sqlite" in man.files
     assert any(k.startswith("Contents/") for k in man.files)
     assert manifest.verify(str(out)).good
-
 
 def test_registered_through_run(tmp_path):
     out = tmp_path / "out"

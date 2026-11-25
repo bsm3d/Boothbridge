@@ -1,4 +1,7 @@
-# the key reader gives back what the CDJ export wrote
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Checks that the CDJ key reader gives back what the export wrote, in a round trip.
 
 import os
 import unittest

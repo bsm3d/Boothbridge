@@ -1,10 +1,10 @@
-// Benoit Saint-Moulin
-// Boothbridge : native core, DeviceSQL page layout (export.pdb) and waveform bands
-//
-// Same results as export/cdj/devicesql.py (build), pdbwrite.py (rows), anlz.py and analysis.py,
-// which stay as the reference and the fallback when this library is absent. The tests
-// compare the two byte for byte. Plain C interface for ctypes, no exception crosses it,
-// the caller owns every buffer.
+// Boothbridge
+// © Benoit Saint-Moulin - 2026
+// Version du fichier : 1.0.0
+// Fonction du fichier : Native C++ core that builds the export.pdb page layout and waveform bands behind a plain C interface.
+
+// Same results as the Python reference (devicesql.py build, pdbwrite.py rows, anlz.py, analysis.py), which stays the fallback when this library is absent.
+// The tests compare the two byte for byte. Plain C interface for ctypes: no exception crosses it, the caller owns every buffer.
 
 #include <algorithm>
 #include <cmath>
@@ -262,10 +262,9 @@ int64_t build_file(const std::vector<Source>& src, uint8_t* out, int64_t cap) {
 
 }  // namespace
 
-// Per table t (0..19): rows[t] / lens[t] / counts[t] the row blobs back to back and their
-// lengths, stat[t] a finished 4096 byte data page or null, shifted[t] non zero for the
-// tables whose rows carry the 0x20 stride. Writes the file to out when cap is big enough.
-// Returns its size, 0 when a row does not fit in a page.
+// Per table t (0..19): rows[t], lens[t] and counts[t] are the row blobs back to back, their lengths and their count.
+// stat[t] is a finished 4096 byte data page or null, shifted[t] is non zero for the tables with the 0x20 stride.
+// Writes the file to out when cap is big enough. Returns its size, 0 when a row does not fit in a page.
 BB_API int64_t bb_pdb_build(const uint8_t* const* rows, const uint32_t* const* lens,
                             const uint32_t* counts, const uint8_t* const* stat,
                             const uint8_t* shifted, uint8_t* out, int64_t cap) {
@@ -322,10 +321,8 @@ struct Biquad {
 
 }  // namespace
 
-// Peak |value| of the low, mid and high band for every column, normalised on the loudest
-// of the three. y: mono signal, lo / hi: one section each (6 doubles, b0 b1 b2 a0 a1 a2).
-// Column c covers samples [c*len/cols, (c+1)*len/cols): the whole signal at an even pace (with
-// len / cols samples for each and the tail dropped, a 44.1 kHz waveform ran 0.68 percent slow).
+// Peak |value| of the low, mid and high band per column, normalised on the loudest of the three. y is the mono signal, lo and hi one section each (b0 b1 b2 a0 a1 a2).
+// Column c covers samples from c*len/cols to (c+1)*len/cols, an even pace: len // cols dropped the tail, and a 44.1 kHz waveform ran 0.68 percent slow.
 // Returns 0 when the arguments cannot work.
 BB_API int32_t bb_bands(const float* y, int64_t len, const double* lo, const double* hi,
                         int64_t cols, float* out_lo, float* out_mid, float* out_high) {

@@ -1,5 +1,7 @@
-# Benoit Saint-Moulin
-# Boothbridge : background jobs (loading a collection, exporting)
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Background job thread for collection loading and exports, kept alive until it ends and stopped at exit.
 
 from __future__ import annotations
 
@@ -14,15 +16,12 @@ from ..export.files import Cancelled
 
 log = logging.getLogger(__name__)
 
-
 # Keep running threads alive even if their owning dialog closes.
 # Qt aborts if a QThread is collected before it finishes.
 _alive: set[Job] = set()
 
-
 def has_active_jobs() -> bool:
     return bool(_alive)
-
 
 # ------------------------------------------------------------
 # asks every running job to stop and waits for them, at exit
@@ -39,7 +38,6 @@ def stop_all(ms: int = 5000) -> bool:
         else:
             stopped = False
     return stopped
-
 
 # --------------------------------------------------------------
 # runs fn(progress=..., cancel=...) away from the GUI, reports through signals

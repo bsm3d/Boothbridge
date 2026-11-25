@@ -1,4 +1,7 @@
-# the hot cue colours of a CDJ key: the code, then the RGB of rekordbox's device palette
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Checks that hot cue colours match the RGB palette rekordbox writes for a CDJ key.
 
 import unittest
 

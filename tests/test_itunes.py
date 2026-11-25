@@ -1,3 +1,8 @@
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Checks the iTunes library reader on synthetic XML, including playlists, folders and rejected unsafe input.
+
 import tempfile
 import unittest
 from pathlib import Path

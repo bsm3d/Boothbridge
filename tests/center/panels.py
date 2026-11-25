@@ -1,3 +1,8 @@
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Tabs of the test center window (random, monkey, memory, reports) that build commands and show their logs.
+
 # the tabs of the test center: Aléatoire, Monkey, Mémoire and Rapports. Every long run is a child
 # process (see runproc.py); a tab only builds the command, shows the log and reads the record back
 

@@ -1,5 +1,7 @@
-# Benoit Saint-Moulin
-# Boothbridge : launcher
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Launcher for the program: checks the compiled core for changes, then starts the application through djapp.app.
 
 import sys
 from multiprocessing import freeze_support

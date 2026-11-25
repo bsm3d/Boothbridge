@@ -1,3 +1,8 @@
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Regression tests for tag reading and writing defects found in review, using hand built tag atoms.
+
 import sqlite3
 import struct
 import tempfile

@@ -1,5 +1,7 @@
-# the sandbox the monkey plays in: a process level setup, one World per run, and the
-# patches that answer dialogs and block the dangerous parts of the application
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Sandbox for the monkey driver: one world per run, with patches that answer dialogs and block dangerous actions.
 
 from __future__ import annotations
 

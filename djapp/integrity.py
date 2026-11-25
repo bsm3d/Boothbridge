@@ -1,14 +1,11 @@
-# Benoit Saint-Moulin
-# Boothbridge : startup check of the compiled core
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Startup check that compares the compiled core files with their sealed SHA-256 values and stops on changes.
 
-# A release carries the core as .pyd files and fastcore.dll. compile_core.py writes their
-# SHA-256 into djapp/_seal.py, packed in the executable, and the program compares
-# them with the files on disk before it loads any of them. A file that changed, vanished or
-# was added beside them stops the program.
-# The checker stays in the executable's Python archive, not an unverified extension DLL.
-#
-# It keeps out a casual swap of a file in the unzipped folder, nothing more: whoever rebuilds
-# the executable can rebuild the seal
+# compile_core.py writes the SHA-256 of the compiled core into djapp/_seal.py, packed in the executable; the program checks the files on disk against it.
+# A file that changed, vanished or was added beside them stops the program. The checker stays in the executable's Python archive, not in an extension DLL.
+# A casual swap is all it keeps out: whoever rebuilds the executable can rebuild the seal.
 
 from __future__ import annotations
 
@@ -37,7 +34,6 @@ STALE = (
     "To avoid this, unzip a new version into a new folder, or use the installer."
 )
 
-
 # ----------------------------------------------------------
 def sha256(path: Path) -> str:
     h = hashlib.sha256()
@@ -46,7 +42,6 @@ def sha256(path: Path) -> str:
             h.update(block)
     return h.hexdigest()
 
-
 # ----------------------------------------------------------
 def scan(root: Path) -> dict[str, str]:
     return {
@@ -54,7 +49,6 @@ def scan(root: Path) -> dict[str, str]:
         for p in sorted(root.rglob("*"))
         if p.is_file() and p.suffix.lower() in EXTENSIONS
     }
-
 
 # ----------------------------------------------------------
 # what differs between the files on disk and the seal, one line each
@@ -68,7 +62,6 @@ def problems(root: Path, expected: dict[str, str]) -> list[str]:
     ]
     out += [f"unexpected: {rel}" for rel in found if rel not in expected]
     return out
-
 
 # ----------------------------------------------------------
 # empty when everything is as sealed, or when this is not a sealed build (a run from
@@ -95,13 +88,11 @@ def check() -> list[str]:
     root = Path(getattr(sys, "_MEIPASS", Path(sys.executable).parent)) / "djapp"
     return problems(root, _seal.HASHES)
 
-
 def details(found: list[str], limit: int = 6) -> str:
     lines = found[:limit]
     if len(found) > limit:
         lines.append(f"... and {len(found) - limit} more")
     return "\n".join(lines)
-
 
 # ----------------------------------------------------------
 # logs what was found and tells the user, without Qt (nothing has been loaded yet).

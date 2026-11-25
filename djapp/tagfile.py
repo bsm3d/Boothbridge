@@ -1,6 +1,7 @@
-# Benoit Saint-Moulin
-# Boothbridge : reading and writing the tags of audio files, written from the public format
-# specifications (ID3v2.3 and 2.4, FLAC, Ogg Vorbis, MP4 atoms, RIFF and AIFF chunks). No tag library.
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Reads and writes audio tags (ID3v2, FLAC, Ogg, MP4, RIFF, AIFF) from the public format specifications, with no tag library.
 
 from __future__ import annotations
 
@@ -14,16 +15,13 @@ from pathlib import Path
 BLOCK = 4 << 20
 PADDING = 1024
 
-
 class TagError(ValueError):
     pass
-
 
 @dataclass(frozen=True)
 class Info:
     format: str
     length: float
-
 
 # ------------------------------------------------------------
 # the fields the editor knows, and the name each format gives them
@@ -73,12 +71,10 @@ MP4_NUMBERS = {"track_no": b"trkn", "disc_no": b"disk"}
 MP4_MEAN = "com.apple.iTunes"
 NUMBER_FIELDS = ("track_no", "disc_no")
 
-
 # A new track or disc number keeps the "/12" the file had after the old one
 def with_total(value: str, old: str) -> str:
     total = old.partition("/")[2].strip()
     return f"{value}/{total}" if total.isdecimal() and "/" not in value else value
-
 
 # ------------------------------------------------------------
 def rewrite(path: str, produce):
@@ -96,7 +92,6 @@ def rewrite(path: str, produce):
             os.unlink(name)
         raise
 
-
 def copy_range(src, out, start: int, end: int):
     src.seek(start)
     left = end - start
@@ -107,20 +102,16 @@ def copy_range(src, out, start: int, end: int):
         out.write(block)
         left -= len(block)
 
-
 def syncsafe(b: bytes) -> int:
     return (b[0] & 127) << 21 | (b[1] & 127) << 14 | (b[2] & 127) << 7 | (b[3] & 127)
 
-
 def to_syncsafe(n: int) -> bytes:
     return bytes([(n >> 21) & 127, (n >> 14) & 127, (n >> 7) & 127, n & 127])
-
 
 # ------------------------------------------------------------
 # ID3v2
 ENCODINGS = {0: "latin-1", 1: "utf-16", 2: "utf-16-be", 3: "utf-8"}
 FRAME_ID = re.compile(rb"^[A-Z0-9]{4}$")
-
 
 def terminated(raw: bytes, enc: int) -> tuple[bytes, bytes]:
     if enc in (1, 2):
@@ -133,17 +124,14 @@ def terminated(raw: bytes, enc: int) -> tuple[bytes, bytes]:
     i = raw.find(b"\0")
     return (raw, b"") if i < 0 else (raw[:i], raw[i + 1 :])
 
-
 def decode_string(raw: bytes, enc: int) -> str:
     codec = ENCODINGS.get(enc, "latin-1")
     return raw.decode(codec, "replace").lstrip("﻿")
-
 
 def text_of(body: bytes) -> str:
     if not body:
         return ""
     return decode_string(body[1:], body[0]).split("\0")[0]
-
 
 def encode_text(value: str, version: int) -> tuple[int, bytes]:
     if version >= 4:
@@ -153,11 +141,9 @@ def encode_text(value: str, version: int) -> tuple[int, bytes]:
     except UnicodeEncodeError:
         return 1, b"\xff\xfe" + value.encode("utf-16-le")
 
-
 class Frame:
     def __init__(self, fid: str, flags: int, data: bytes):
         self.id, self.flags, self.data = fid, flags, data
-
 
 class Id3Tag:
     def __init__(self, version: int = 4):
@@ -303,7 +289,6 @@ class Id3Tag:
         else:
             self.set_text(ID3_NAMES[field], value)
 
-
 # ------------------------------------------------------------
 class Tagged:
     def __init__(self, path: str):
@@ -323,7 +308,6 @@ class Tagged:
     def save(self):
         raise NotImplementedError
 
-
 # ------------------------------------------------------------
 # MPEG audio with an ID3v2 tag in front
 MPEG_RATES = {
@@ -340,7 +324,6 @@ SAMPLE_RATES = {
     3: [11025, 12000, 8000],
 }
 
-
 def mpeg_header(h: bytes):
     if len(h) < 4 or h[0] != 0xFF or h[1] & 0xE0 != 0xE0:
         return None
@@ -354,7 +337,6 @@ def mpeg_header(h: bytes):
     rate = SAMPLE_RATES[version][sr_index]
     samples = 384 if layer == 1 else 1152 if layer == 2 or version == 1 else 576
     return version, layer, bitrate, rate, samples, h[3] >> 6 == 3
-
 
 def find_mpeg(f, start: int, limit: int = 65536):
     f.seek(start)
@@ -376,7 +358,6 @@ def find_mpeg(f, start: int, limit: int = 65536):
                 return start + i
     return None
 
-
 def mpeg_length(f, first: int, size: int) -> float:
     f.seek(first)
     head = f.read(4)
@@ -395,7 +376,6 @@ def mpeg_length(f, first: int, size: int) -> float:
     if f.read(3) == b"TAG":
         end -= 128
     return max(0, end - first) * 8 / bitrate if bitrate else 0.0
-
 
 class Mp3File(Tagged):
     def __init__(self, path: str):
@@ -436,7 +416,6 @@ class Mp3File(Tagged):
 
         rewrite(self.path, produce)
         self.start = len(blob)
-
 
 # ------------------------------------------------------------
 # RIFF (WAV) and IFF (AIFF) chunks, with the tag in an ID3 chunk
@@ -523,7 +502,6 @@ class ChunkFile(Tagged):
 
         rewrite(self.path, produce)
 
-
 # ------------------------------------------------------------
 # Vorbis comments, the same layout in FLAC and in Ogg Vorbis
 class Comments:
@@ -580,7 +558,6 @@ class Comments:
         if value:
             self.items.append((name.upper(), value))
 
-
 class FlacFile(Tagged):
     def __init__(self, path: str):
         super().__init__(path)
@@ -635,7 +612,6 @@ class FlacFile(Tagged):
 
         rewrite(self.path, produce)
 
-
 # ------------------------------------------------------------
 # Ogg pages, for Vorbis: the comment header is the second packet of the stream
 OGG_TABLE = []
@@ -649,14 +625,12 @@ for _i in range(256):
         )
     OGG_TABLE.append(_c)
 
-
 def ogg_crc(data: bytes) -> int:
     crc = 0
     table = OGG_TABLE
     for b in data:
         crc = ((crc << 8) & 0xFFFFFFFF) ^ table[(crc >> 24) ^ b]
     return crc
-
 
 def ogg_page(f):
     head = f.read(27)
@@ -678,7 +652,6 @@ def ogg_page(f):
     )
     return flags, granule, serial, seq, list(table), data
 
-
 def build_page(
     flags: int, granule: int, serial: int, seq: int, table: list[int], data: bytes
 ) -> bytes:
@@ -693,7 +666,6 @@ def build_page(
     page = bytearray(head + data)
     page[22:26] = struct.pack("<I", ogg_crc(bytes(page)))
     return bytes(page)
-
 
 def ogg_packets(f, count: int):
     # the first count packets, the number of pages they take, the serial number and where the next page starts
@@ -715,7 +687,6 @@ def ogg_packets(f, count: int):
     if current or len(packets) > count:
         raise TagError("The Ogg headers do not end on a page boundary")
     return packets, pages, serial, f.tell()
-
 
 class OggFile(Tagged):
     def __init__(self, path: str):
@@ -786,7 +757,6 @@ class OggFile(Tagged):
     def lace(packet: bytes) -> list[int]:
         return [255] * (len(packet) // 255) + [len(packet) % 255]
 
-
 # ------------------------------------------------------------
 # MP4 and M4A: atoms, the tags are the items of moov/udta/meta/ilst
 def mp4_atoms(data: bytes, start: int = 0, end: int | None = None):
@@ -805,12 +775,10 @@ def mp4_atoms(data: bytes, start: int = 0, end: int | None = None):
         yield kind, data[pos + header : pos + size]
         pos += size
 
-
 def mp4_pack(kind: bytes, payload: bytes) -> bytes:
     if len(payload) + 8 >= 1 << 32:
         return struct.pack(">I4sQ", 1, kind, len(payload) + 16) + payload
     return struct.pack(">I4s", len(payload) + 8, kind) + payload
-
 
 def mp4_shift(moov: bytes, delta: int, floor: int) -> bytes:
     # the chunk offsets that point behind the old end of moov move with it
@@ -847,11 +815,9 @@ def mp4_shift(moov: bytes, delta: int, floor: int) -> bytes:
     walk(0, len(out))
     return bytes(out)
 
-
 # a meta atom is a full box (4 bytes of version and flags first), but some files leave them out
 def meta_header(meta: bytes) -> int:
     return 0 if meta[4:8] in (b"hdlr", b"ilst", b"keys", b"free") else 4
-
 
 def mp4_item_value(payload: bytes):
     for kind, body in mp4_atoms(payload):
@@ -859,10 +825,8 @@ def mp4_item_value(payload: bytes):
             return int.from_bytes(body[:4], "big") & 0xFFFFFF, body[8:]
     return None
 
-
 def mp4_data_atom(kind: int, value: bytes) -> bytes:
     return mp4_pack(b"data", kind.to_bytes(4, "big") + bytes(4) + value)
-
 
 class Mp4File(Tagged):
     def __init__(self, path: str):
@@ -1072,7 +1036,6 @@ class Mp4File(Tagged):
 
         rewrite(self.path, produce)
 
-
 # ------------------------------------------------------------
 EXTENSIONS = {
     ".mp3": Mp3File,
@@ -1086,7 +1049,6 @@ EXTENSIONS = {
     ".ogg": OggFile,
 }
 
-
 def open_tagged(path: str) -> Tagged:
     kind = EXTENSIONS.get(Path(path).suffix.lower())
     if kind is None:
@@ -1094,7 +1056,6 @@ def open_tagged(path: str) -> Tagged:
             "Unsupported or damaged audio container; tags were not written"
         )
     return kind(str(path))
-
 
 # the comments of an Ogg Vorbis file, for the readers that do not write
 def ogg_comments(path: str) -> dict[str, list[str]]:
@@ -1104,7 +1065,6 @@ def ogg_comments(path: str) -> dict[str, list[str]]:
             clean = value.encode("utf-8", "surrogateescape").decode("utf-8", "replace")
             out.setdefault(key.upper(), []).append(clean)
     return out
-
 
 # ------------------------------------------------------------
 # what the audio check needs from a header: the container, and the length it declares.
@@ -1142,7 +1102,6 @@ def identify(path: str) -> Info | None:
             return Info("MP3", mpeg_length(f, first, size))
     return None
 
-
 def wave_length(f, size: int) -> float:
     pos, byte_rate, data = 12, 0, None
     while pos + 8 <= size:
@@ -1160,7 +1119,6 @@ def wave_length(f, size: int) -> float:
             data = min(n, size - pos - 8)
         pos += 8 + n + (n & 1)
     return data / byte_rate if data is not None and byte_rate else 0.0
-
 
 def aiff_length(f, size: int) -> float:
     pos = 12
@@ -1185,7 +1143,6 @@ def aiff_length(f, size: int) -> float:
         pos += 8 + n + (n & 1)
     return 0.0
 
-
 def ogg_info(f, size: int) -> Info | None:
     f.seek(0)
     page = ogg_page(f)
@@ -1207,7 +1164,6 @@ def ogg_info(f, size: int) -> Info | None:
         return Info(name, 0.0)
     granule = struct.unpack("<q", block[i + 6 : i + 14])[0]
     return Info(name, max(0, granule - skip) / rate if rate and granule > 0 else 0.0)
-
 
 def mp4_info(path: str) -> Info | None:
     tagged = Mp4File(path)

@@ -1,3 +1,8 @@
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Checks that each supported audio format decodes correctly, with the native decoders run in a child process.
+
 import os
 import subprocess
 import sys

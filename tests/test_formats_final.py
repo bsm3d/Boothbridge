@@ -1,3 +1,8 @@
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Regression tests for file format defects found before release: odd Mixxx values, self-linking folders and bad names.
+
 # defects found by the last pass on the file formats, before a release build: odd values in a Mixxx library,
 # a folder that links back to itself, a name that Windows cannot hold, half a surrogate pair in a project
 

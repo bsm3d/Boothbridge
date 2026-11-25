@@ -1,3 +1,8 @@
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Checks where the program looks for its data folder, including the home folder and overrides.
+
 import importlib.util
 import os
 import sys
@@ -15,8 +20,12 @@ if not (ROOT / "build.py").is_file():
     ROOT = Path(__file__).resolve().parents[1]
 
 
+DATAS = tempfile.mkdtemp(prefix="bb_datas_")      # D:\Datas (the analyses): a temporary folder here, the real D: is never touched
+
+
 def without_home(**extra):
     env = {k: v for k, v in os.environ.items() if k != HOME_ENV}
+    env["BSM_DATAS"] = DATAS
     env.update(extra)
     return patch.dict(os.environ, env, clear=True)
 
@@ -41,13 +50,13 @@ class LocationTests(unittest.TestCase):
                 self.assertEqual(settings.data_dir(), Path(tmp) / "BSM" / APP_NAME)
                 self.assertTrue((Path(tmp) / "BSM" / APP_NAME).is_dir())
 
-    def test_a_portable_copy_keeps_them_beside_the_program_but_its_cache_goes_to_the_home_folder(self):
+    def test_a_portable_copy_keeps_them_beside_the_program_but_its_cache_goes_to_the_datas_folder(self):
         with tempfile.TemporaryDirectory() as tmp, tempfile.TemporaryDirectory() as program, without_home(APPDATA=tmp):
             (Path(program) / PORTABLE_FLAG).write_text("x")
             with patch.object(settings, "app_dir", return_value=Path(program)):
                 self.assertTrue(settings.portable())
                 self.assertEqual(settings.data_dir(), Path(program))
-                self.assertEqual(settings.cache_dir(), Path(tmp) / "BSM" / APP_NAME / "cache")
+                self.assertEqual(settings.cache_dir(), Path(DATAS) / APP_NAME / "cache")
 
 
 class MigrationTests(unittest.TestCase):
@@ -58,11 +67,12 @@ class MigrationTests(unittest.TestCase):
         self.program, self.roaming, self.local = base / "program", base / "roaming", base / "local"
         for d in (self.program, self.roaming, self.local):
             d.mkdir()
+        self.datas = base / "datas"
         self.new_config = self.roaming / "BSM" / APP_NAME / SETTINGS_FILE
         (self.roaming / "BSM" / APP_NAME).mkdir(parents=True)
 
     def run_migration(self):
-        with without_home(APPDATA=str(self.roaming), LOCALAPPDATA=str(self.local)), \
+        with without_home(APPDATA=str(self.roaming), LOCALAPPDATA=str(self.local), BSM_DATAS=str(self.datas)), \
                 patch.object(settings, "app_dir", return_value=self.program), patch.object(settings, "CONFIG", self.new_config):
             settings.migrate()
 
@@ -85,7 +95,7 @@ class MigrationTests(unittest.TestCase):
         (older / "wave").mkdir()
         (older / "wave" / "w.hi1000").write_bytes(b"2")
         self.run_migration()
-        cache = self.roaming / "BSM" / APP_NAME / "cache"
+        cache = self.datas / APP_NAME / "cache"
         self.assertEqual((cache / "anlz" / "a.dat").read_bytes(), b"1")
         self.assertEqual((cache / "wave" / "w.hi1000").read_bytes(), b"2")
         self.assertFalse((older / "anlz").exists())
@@ -94,7 +104,7 @@ class MigrationTests(unittest.TestCase):
         older = self.local / APP_NAME
         (older / "wave").mkdir(parents=True)
         (older / "wave" / "old.bin").write_bytes(b"old")
-        new = self.roaming / "BSM" / APP_NAME / "cache" / "wave"
+        new = self.datas / APP_NAME / "cache" / "wave"
         new.mkdir(parents=True)
         (new / "new.bin").write_bytes(b"new")
         self.run_migration()
@@ -115,6 +125,50 @@ class MigrationTests(unittest.TestCase):
         with patch.object(settings, "CONFIG", self.new_config):
             cfg = settings.load()
         self.assertEqual((cfg["language"], cfg["volume"]), ("fr", 40))
+
+
+class DatasTests(unittest.TestCase):
+    """The analyses are on D:\\Datas\\Boothbridge\\cache, the settings and the log stay in the home folder."""
+
+    def test_the_root_is_the_variable_then_the_pointer_then_d_datas(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            roaming = Path(tmp) / "roaming"
+            (roaming / "BSM").mkdir(parents=True)
+            with without_home(APPDATA=str(roaming)):
+                os.environ.pop("BSM_DATAS")
+                self.assertEqual(settings.datas_root(), Path("D:/Datas"))
+                (roaming / "BSM" / "datas.json").write_text('{"root": "%s"}' % str(Path(tmp) / "pointed").replace("\\", "\\\\"), encoding="utf-8")
+                self.assertEqual(settings.datas_root(), Path(tmp) / "pointed")
+                os.environ["BSM_DATAS"] = str(Path(tmp) / "variable")
+                self.assertEqual(settings.datas_root(), Path(tmp) / "variable")
+
+    def test_the_cache_is_copied_once_never_over_what_is_there_and_the_old_one_stays(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            roaming, datas = Path(tmp) / "roaming", Path(tmp) / "datas"
+            old = roaming / "BSM" / APP_NAME / "cache"
+            (old / "anlz").mkdir(parents=True)
+            (old / "anlz" / "a.dat").write_bytes(b"analysis")
+            (old / "wave").mkdir()
+            (old / "wave" / "w.bin").write_bytes(b"wave")
+            (datas / APP_NAME / "cache" / "wave").mkdir(parents=True)
+            (datas / APP_NAME / "cache" / "wave" / "kept.bin").write_bytes(b"already there")
+            with without_home(APPDATA=str(roaming), BSM_DATAS=str(datas)), patch.object(settings, "_ADOPTED", []):
+                d = settings.cache_dir()
+            self.assertEqual(d, datas / APP_NAME / "cache")
+            self.assertEqual((d / "anlz" / "a.dat").read_bytes(), b"analysis")
+            self.assertTrue((d / "wave" / "kept.bin").is_file() and not (d / "wave" / "w.bin").exists(), "an entry already on D: is left alone")
+            self.assertTrue((old / "anlz" / "a.dat").is_file(), "the old copy is kept")
+            self.assertEqual([p.name for p in d.iterdir() if p.name.endswith(".part")], [])
+
+    def test_a_missing_disk_is_said_and_nothing_is_made(self):
+        missing = "Q:\\Datas" if not os.path.exists("Q:\\") else "Z:\\Datas"
+        if os.path.exists(missing[:3]):
+            self.skipTest("the test disk exists on this machine")
+        with without_home(BSM_DATAS=missing):
+            with self.assertRaises(settings.DatasUnavailable) as caught:
+                settings.cache_dir()
+        self.assertIn("Datas", str(caught.exception))
+        self.assertIsInstance(caught.exception, OSError)
 
 
 class ZipTests(unittest.TestCase):

@@ -1,4 +1,7 @@
-# the memory curve: one metric per cycle, the warm-up shaded, the fitted line over the measured cycles
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Qt widget that draws the memory curve per cycle, with the warm-up shaded and the fitted line on top.
 
 from __future__ import annotations
 

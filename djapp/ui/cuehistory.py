@@ -1,5 +1,7 @@
-# Benoit Saint-Moulin
-# Boothbridge : undo and redo of the cue edits, shared by the player and the cue timeline
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Undo and redo of cue edits, kept per track and shared by the player and the cue timeline.
 
 from __future__ import annotations
 
@@ -11,16 +13,13 @@ TRACKS = 32  # tracks whose history is kept
 _hist: dict[int, tuple[Track, list, list]] = {}  # id(track) -> (track, undo, redo)
 _edits: dict[int, int] = {}  # id(track) -> edits recorded so far
 
-
 # Edit counter, unchanged by undo/redo so windows can distinguish new edits
 def edits(t: Track) -> int:
     return _edits.get(id(t), 0)
 
-
 def snap(t: Track) -> tuple:
     cues = tuple((c.name, c.kind, c.start, c.length, c.hotcue, c.color) for c in t.cues)
     return cues, t.bpm, t.grid
-
 
 # ----------------------------------------
 def _entry(t: Track):
@@ -29,7 +28,6 @@ def _entry(t: Track):
     while len(_hist) > TRACKS:
         _edits.pop(id(_hist.pop(next(iter(_hist)))[0]), None)
     return e
-
 
 # ----------------------------------------------------------
 # call with snap(t) taken before an edit; unchanged timing states are ignored
@@ -42,7 +40,6 @@ def record(t: Track, before: tuple):
     redo.clear()
     _edits[id(t)] = edits(t) + 1
 
-
 # call right before an edit, when the whole edit happens after it
 def mark(t: Track):
     _, undo, redo = _entry(t)
@@ -53,7 +50,6 @@ def mark(t: Track):
         _edits[id(t)] = edits(t) + 1
     redo.clear()
 
-
 # ----------------------------------------------------------
 def _restore(t: Track, state: tuple):
     cues, t.bpm, t.grid = state
@@ -63,7 +59,6 @@ def _restore(t: Track, state: tuple):
             for n, k, s, ln, h, c in cues
         ]
 
-
 # --------------------------------------------------------
 def undo(t: Track) -> bool:
     _, u, r = _entry(t)
@@ -72,7 +67,6 @@ def undo(t: Track) -> bool:
     r.append(snap(t))
     _restore(t, u.pop())
     return True
-
 
 # ------------------------------------------------------------------
 def redo(t: Track) -> bool:

@@ -1,5 +1,7 @@
-# Benoit Saint-Moulin
-# Boothbridge : user settings, stored as JSON in the data folder of the program
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : User settings stored as JSON in the data folder, with the data folder lookup, cache location and migration.
 
 from __future__ import annotations
 
@@ -33,14 +35,11 @@ EXPORTS = (
     "XSPF",
 )
 
-
 # the formats written from the documentation and never opened in the program they are meant for
 BETA_EXPORTS = ("VirtualDJ", "Mixxx", "iTunes XML", "PLS", "XSPF")
 
-
 def export_label(fmt: str) -> str:
     return f"{fmt} {tr('(beta)')}" if fmt in BETA_EXPORTS else fmt
-
 
 # the name of a format typed in any case, with or without its beta label, "" when unknown
 def export_name(text) -> str:
@@ -52,10 +51,8 @@ def export_name(text) -> str:
             return fmt
     return ""
 
-
 def exports() -> tuple[str, ...]:
     return EXPORTS
-
 
 DEFAULTS = {
     "source_path": "",
@@ -83,19 +80,16 @@ DEFAULTS = {
     "log_level": "INFO",
 }
 
-
 def app_dir() -> Path:
     # frozen build: next to the exe, source run: the project folder
     if getattr(sys, "frozen", False):
         return Path(sys.executable).parent
     return Path(__file__).resolve().parent.parent
 
-
 # --------------------------------------------------------
 # a flag file next to the program: the portable zip carries it, the installer does not
 def portable() -> bool:
     return (app_dir() / PORTABLE_FLAG).is_file()
-
 
 # the folder of the program among the user's data, %APPDATA%\BSM\Boothbridge (~/.config/BSM/Boothbridge elsewhere);
 # the variable BOOTHBRIDGE_HOME replaces it
@@ -106,7 +100,6 @@ def home_dir() -> Path:
     base = os.environ.get("APPDATA") or os.path.expanduser("~/.config")
     return Path(base) / ORG_FOLDER / APP_NAME
 
-
 # the settings and the log: beside the program in a portable copy, else in the home folder
 def data_dir() -> Path:
     d = app_dir() if portable() and not os.environ.get(HOME_ENV) else home_dir()
@@ -116,16 +109,88 @@ def data_dir() -> Path:
         log.warning("cannot create %s: %s", d, e)
     return d
 
+# The analyses (beat grids, BPM, waveforms) are hours of work, not a preference: they live on D:\Datas\Boothbridge\cache so that a format of C: does not take them.
+# Settings and log stay in %APPDATA%\BSM\Boothbridge. D:\Datas is found through BSM_DATAS, else the root of %APPDATA%\BSM\datas.json, else D:\Datas.
+# BOOTHBRIDGE_HOME (the tests) keeps everything in one folder. A portable copy leaves no cache on its key: the cache is the machine's, on D:.
+class DatasUnavailable(OSError):
+    pass
 
-# the analyses and the waveforms: always in the home folder, a portable copy leaves no cache on its key
+def datas_root() -> Path:
+    given = os.environ.get("BSM_DATAS", "").strip().strip('"')
+    if not given:
+        base = os.environ.get("APPDATA") or os.path.expanduser("~/.config")
+        try:
+            with open(Path(base) / ORG_FOLDER / "datas.json", encoding="utf-8-sig") as f:
+                given = str(json.load(f).get("root") or "").strip()
+        except (OSError, ValueError, AttributeError):
+            given = ""
+    return Path(given) if given else Path("D:/Datas")
+
+def _tree(root: Path) -> dict:
+    out = {}
+    for p in root.rglob("*"):
+        if p.is_file():
+            out[p.relative_to(root).as_posix()] = p.stat().st_size
+    return out
+
+# the one-time copy of the cache from the home folder to D:\Datas: a copy, never a move (the old files stay until the user removes them), never over an entry already
+# there, each entry checked file by file before it takes its name. Returns the entries copied
+def adopt_cache(src: Path, dst: Path) -> list:
+    done = []
+    if not src.is_dir() or os.path.normcase(os.path.abspath(src)) == os.path.normcase(os.path.abspath(dst)):
+        return done
+    for a in sorted(src.iterdir()):
+        b = dst / a.name
+        if b.exists():
+            continue
+        part = dst / (a.name + ".part")
+        try:
+            if part.is_dir():
+                shutil.rmtree(part, ignore_errors=True)
+            elif part.exists():
+                part.unlink()
+            if a.is_dir():
+                shutil.copytree(a, part)
+                if _tree(a) != _tree(part):
+                    raise DatasUnavailable(f"the copy of {a} is incomplete, nothing was kept")
+            else:
+                shutil.copy2(a, part)
+                if a.stat().st_size != part.stat().st_size:
+                    raise DatasUnavailable(f"the copy of {a} is incomplete, nothing was kept")
+            os.replace(part, b)
+        except DatasUnavailable:
+            shutil.rmtree(part, ignore_errors=True) if part.is_dir() else part.unlink(missing_ok=True)
+            raise
+        except OSError as e:
+            shutil.rmtree(part, ignore_errors=True) if part.is_dir() else part.unlink(missing_ok=True)
+            raise DatasUnavailable(f"{a} could not be copied to {b}: {e}") from e
+        done.append(a.name)
+    return done
+
+_ADOPTED: list = []
+
 def cache_dir() -> Path:
-    d = home_dir() / "cache"
-    d.mkdir(parents=True, exist_ok=True)
+    if os.environ.get(HOME_ENV):
+        d = home_dir() / "cache"
+        d.mkdir(parents=True, exist_ok=True)
+        return d
+    root = datas_root()
+    if root.anchor and not Path(root.anchor).exists():
+        raise DatasUnavailable(
+            f"The data folder {root} is on a disk that is not there ({root.anchor}). "
+            f"{APP_NAME} does not analyse your library again on C:. Connect the disk, or set BSM_DATAS to another folder."
+        )
+    d = root / APP_NAME / "cache"
+    try:
+        d.mkdir(parents=True, exist_ok=True)
+    except OSError as e:
+        raise DatasUnavailable(f"The data folder {d} cannot be made: {e}") from e
+    if not _ADOPTED:
+        adopt_cache(home_dir() / "cache", d)
+        _ADOPTED.append(True)
     return d
 
-
 CONFIG = data_dir() / SETTINGS_FILE
-
 
 # what older versions kept elsewhere: the settings beside the program, the caches in %LOCALAPPDATA%\Boothbridge.
 # Copied or moved once, never over what is already there, and never when the data folder is replaced by hand
@@ -146,7 +211,6 @@ def migrate() -> None:
                     log.info("%s moved to %s", src, dst)
     except OSError as e:
         log.warning("the data of an older version could not be moved: %s", e)
-
 
 def load() -> dict:
     cfg = dict(DEFAULTS)
@@ -182,7 +246,6 @@ def load() -> dict:
     cfg["export_format"] = name if name in exports() else "Rekordbox XML"
     return cfg
 
-
 # --------------------------------------------------------
 def save(cfg: dict):
     tmp = CONFIG.with_suffix(".tmp")
@@ -192,7 +255,6 @@ def save(cfg: dict):
         os.replace(tmp, CONFIG)
     except (OSError, UnicodeError) as e:
         log.error("cannot save settings: %s", e)
-
 
 # --------------------------------------------------------
 def default_collection() -> str:

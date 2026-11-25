@@ -1,3 +1,8 @@
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Checks the memory use of the NML and XML readers on large generated collections, measured with tracemalloc.
+
 import os
 import tempfile
 import tracemalloc

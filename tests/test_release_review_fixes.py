@@ -1,3 +1,8 @@
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Regression tests for fixes from the release review: colliding track names, threads and writes.
+
 import os
 import tempfile
 import threading

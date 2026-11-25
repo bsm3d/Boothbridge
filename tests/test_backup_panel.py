@@ -1,3 +1,8 @@
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Checks the backup panel of the window: its buttons, status text and the jobs it starts.
+
 import os
 import tempfile
 import time

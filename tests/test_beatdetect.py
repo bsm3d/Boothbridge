@@ -1,3 +1,8 @@
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Checks tempo detection on synthetic click tracks at known BPM, with noise, hi-hats and seeded randomness.
+
 import os
 import tempfile
 import threading

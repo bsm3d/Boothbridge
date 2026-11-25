@@ -1,3 +1,8 @@
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Headless command line of the test center for monkey, memory and random runs, with exit codes for pass, fail and broken.
+
 """Headless command line of the test center (the GUI starts these same commands in a child process).
 
   python tests/test_center.py --monkey --seed 7 --steps 300

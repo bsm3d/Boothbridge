@@ -1,5 +1,7 @@
-# Benoit Saint-Moulin
-# Boothbridge : cue timeline of one track, cues can be edited, moved, deleted
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Qt cue timeline dialog for one track, where cues can be edited, moved and deleted, and the beat grid detected or set.
 
 from __future__ import annotations
 
@@ -46,7 +48,6 @@ from .zoomwave import (
     swatch,
 )
 
-
 # one literal tr() per kind, so the catalog can give each its own case and gender
 def kind_name(kind: int) -> str:
     if kind == FADE_IN:
@@ -59,7 +60,6 @@ def kind_name(kind: int) -> str:
         return tr("loop")
     return tr("cue")
 
-
 def label(c: Cue) -> str:
     base = kind_name(c.kind)
     return (
@@ -67,7 +67,6 @@ def label(c: Cue) -> str:
         if 0 <= c.hotcue < 8
         else tr("Memory {kind}", kind=base)
     )
-
 
 # ------------------------------------------------------------
 # 'mm:ss.mmm' or plain seconds, in ms
@@ -84,9 +83,7 @@ def parse_clock(s: str) -> float | None:
     # "inf" and "1e999" are floats too, the clock cannot show them
     return ms if math.isfinite(ms) else None
 
-
 COMPACT_BUTTON = "QPushButton { padding: 2px 10px; }"
-
 
 # ------------------------------------------------------------------
 # the zoomable wave of the track: the needle is the position cues are added at
@@ -96,7 +93,6 @@ class Canvas(ZoomWave):
         self.setMinimumHeight(120)
         self.show_track(t, None)
         self.needle = -1.0
-
 
 # ------------------------------------------------------------
 class CueEdit(QDialog):
@@ -133,7 +129,6 @@ class CueEdit(QDialog):
             c.kind = LOOP
         elif c.kind == LOOP:
             c.kind = CUE
-
 
 class Timeline(QDialog):
     changed = Signal()

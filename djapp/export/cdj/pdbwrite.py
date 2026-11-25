@@ -1,10 +1,10 @@
-# Benoit Saint-Moulin
-# Boothbridge : writer for the tables of export.pdb (tracks, lookups, playlists)
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Turns tracks, lookups and the playlist tree into export.pdb rows for the CDJ key.
 
-# Turns tracks and the playlist tree into export.pdb rows, devicesql.py lays them out
-# in pages. Row layouts come from a byte level study of rekordbox 6 exports and the
-# crate-digger notes. Field names are
-# crate-digger's when known, "constant" = same value in every export compared.
+# Turns tracks and the playlist tree into export.pdb rows; devicesql.py lays them out in pages. Layouts from a study of rekordbox 6 exports.
+# Field names are crate-digger's when known, "constant" = same value in every export compared.
 
 from __future__ import annotations
 
@@ -57,7 +57,6 @@ TRACK_STRING_OFFSETS = 0x5E
 PLAYLIST_NAME_LIMIT = 255
 ARTWORK_PATH = "/PIONEER/Artwork/00001/a{}.jpg"
 
-
 # ------------------------------------------------------------
 # a track as it lands on the key
 @dataclass(slots=True)
@@ -68,7 +67,6 @@ class Item:
     anlz: str  # /PIONEER/USBANLZ/P.../ANLZ0000.DAT
     size: int
     art: int = 0
-
 
 # ------------------------------------------------------------
 # C++ core first, Python path as reference and fallback. Returns the bytes, the manifest keeps them.
@@ -95,7 +93,6 @@ def write(
 
     write_verified(str(path), data, pdb)
     return data
-
 
 # ----------------------------------------------------------------
 def build_py_file(
@@ -124,7 +121,6 @@ def build_py_file(
 
     return build_py(tables, static, SHIFTED_TABLES)
 
-
 # --------------------------------------------------------
 # numbered from 1 in order of first use, like rekordbox. Empty name = id 0.
 class _IdsByFirstUse:
@@ -138,7 +134,6 @@ class _IdsByFirstUse:
             self.ids[key] = len(self.ids) + 1
         return self.ids[key]
 
-
 class _TrackLinks(NamedTuple):
     artist: int
     album: int
@@ -147,7 +142,6 @@ class _TrackLinks(NamedTuple):
     remixer: int
     composer: int
     key: int
-
 
 class _Lookups:
     def __init__(self):
@@ -171,7 +165,6 @@ class _Lookups:
             self.artists.get(track.composer),
             self.keys.get(keys.name(track.key)),
         )
-
 
 # ------------------------------------------------------------
 def _track_row(item: Item, today: str, link: _TrackLinks) -> bytes:
@@ -244,7 +237,6 @@ def _track_row(item: Item, today: str, link: _TrackLinks) -> bytes:
         row.set_u16(TRACK_STRING_OFFSETS + 2 * slot, row.add_string(string))
     return row.finish()
 
-
 # 21 strings in offset slot order, names from crate-digger
 def _track_strings(item: Item, today: str) -> list[str]:
     track = item.track
@@ -272,13 +264,11 @@ def _track_strings(item: Item, today: str) -> list[str]:
         item.path,  # file_path
     ]
 
-
 # genre, label, artwork: u32 id then name
 def _id_name_row(ident: int, name: str) -> bytes:
     row = RowBuffer(struct.pack("<I", ident))
     row.add_string(name)
     return row.finish()
-
 
 def _artist_row(ident: int, name: str) -> bytes:
     # subtype 0x60: artist row, name offset is one byte at 9
@@ -286,12 +276,10 @@ def _artist_row(ident: int, name: str) -> bytes:
     row.set_u8(9, row.add_string(name))
     return row.finish()
 
-
 def _album_row(ident: int, name: str, artist: int) -> bytes:
     row = RowBuffer(struct.pack("<HHIIIIBB", 0x80, 0, 0, artist, ident, 0, 3, 0))
     row.set_u8(21, row.add_string(name))
     return row.finish()
-
 
 def _key_row(ident: int, name: str) -> bytes:
     # id repeated, as in the exports
@@ -299,19 +287,16 @@ def _key_row(ident: int, name: str) -> bytes:
     row.add_string(name)
     return row.finish()
 
-
 def _color_row(ident: int, name: str) -> bytes:
     row = RowBuffer(struct.pack("<IBHB", 0, ident, ident, 0))
     row.add_string(name)
     return row.finish()
-
 
 # public, the tests build damaged files with it
 def tree_row(parent: int, sort: int, ident: int, is_folder: bool, name: str) -> bytes:
     row = RowBuffer(struct.pack("<IIIII", parent, 0, sort, ident, int(is_folder)))
     row.add_string(name)
     return row.finish()
-
 
 # ------------------------------------------------------------
 # depth first, nodes numbered 1, 2, 3... as met. Returns tree_row arguments per node and
@@ -341,7 +326,6 @@ def _flatten_playlists(
 
     visit(nodes, 0)
     return folders, entries
-
 
 # ------------------------------------------------------------
 # same data as build_py_file, as plain values for the native core

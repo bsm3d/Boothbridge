@@ -1,4 +1,7 @@
-# bounded subprocess probes; never run a native crash in the test runner
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Bounded subprocess probes that decode audio and simulate native crashes, kept away from the test runner process.
 
 import ctypes
 import os

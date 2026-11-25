@@ -1,5 +1,7 @@
-# Benoit Saint-Moulin
-# Boothbridge : a project is the work in the playlist editors saved as JSON
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Reads and writes the Boothbridge project file (JSON) that keeps playlists, track metadata, cues and export settings.
 
 # ordered playlist trees, track metadata, cues, grids and export settings.
 # Tracks are stored once and referenced by number to preserve shared edits on reload
@@ -36,14 +38,12 @@ TRACK_FIELDS = [f.name for f in fields(Track) if f.name != "cues"]
 CUE_FIELDS = [f.name for f in fields(Cue)]
 OPTIONAL = {"key": int, "grid": float, "energy": float}
 
-
 def sniff(path: str) -> bool:
     try:
         with open(path, "rb") as f:
             return FORMAT.encode() in f.read(2048)
     except OSError:
         return False
-
 
 # ------------------------------------------------------------------------
 def dump(nodes: list[Node], cfg: dict) -> dict:
@@ -79,7 +79,6 @@ def dump(nodes: list[Node], cfg: dict) -> dict:
         "tree": tree,
     }
 
-
 def save(path: str, nodes: list[Node], cfg: dict):
     from ..export.manifest import write_atomic
 
@@ -91,8 +90,6 @@ def save(path: str, nodes: list[Node], cfg: dict):
         data = json.dumps(doc, indent=1, ensure_ascii=True).encode("ascii")
     write_atomic(path, data)
 
-
-# load
 # --------------------------------------------------------------
 def _coerce(value, default):
     if isinstance(default, bool):
@@ -109,7 +106,6 @@ def _coerce(value, default):
         return value if isinstance(value, str) else default
     return default
 
-
 # A list from the file, empty when missing. Anything else is a damaged project
 def _list(value, what: str) -> list:
     if isinstance(value, list):
@@ -117,7 +113,6 @@ def _list(value, what: str) -> list:
     if value is not None:
         raise ValueError(f"{what} must be a list")
     return []
-
 
 # ------------------------------------------------------------
 def _track(d: dict) -> Track:
@@ -151,7 +146,6 @@ def _track(d: dict) -> Track:
                 setattr(cue, n, _coerce(c[n], getattr(cue, n)))
         t.cues.append(cue)
     return t
-
 
 # ------------------------------------------------------------------
 # the tree and the saved settings. Files that moved are looked up in music_root, or in
@@ -240,7 +234,6 @@ def read(
     if progress:
         progress(100, "Project read")
     return nodes, cfg
-
 
 def load(
     path: str, music_root: str = "", progress: Progress | None = None

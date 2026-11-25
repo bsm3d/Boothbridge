@@ -1,10 +1,10 @@
-# Benoit Saint-Moulin
-# Boothbridge : what the translations of the interface still lack
-#
-#   python tools/i18n_check.py [--lang fr] [--files]
-#
-# Reads every tr("...") and trn(n, "...", "...") of the package with the syntax tree, then compares with the catalogs of
-# djapp/lang. A text that is not a plain string (a variable, an f-string) cannot be translated and is reported.
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Reports the interface texts that have no translation in the catalogs of djapp/lang, by reading the code.
+
+# Only plain strings are checked: a variable or an f-string cannot be translated and is reported as such.
+# python tools/i18n_check.py [--lang fr] [--files]
 
 from __future__ import annotations
 
@@ -20,7 +20,6 @@ sys.path.insert(0, str(ROOT))
 from djapp import i18n, lang
 
 FIELD = re.compile(r"\{(\w*)\}")
-
 
 # ------------------------------------------------------------
 def texts(path: Path):
@@ -51,7 +50,6 @@ def texts(path: Path):
                 loose.append((node.lineno, ast.unparse(a)[:60]))
     return keys, loose
 
-
 def used() -> tuple[dict[str, set[str]], list[tuple[str, int, str]]]:
     where: dict[str, set[str]] = {}
     loose = []
@@ -65,13 +63,11 @@ def used() -> tuple[dict[str, set[str]], list[tuple[str, int, str]]]:
         loose += [(rel, n, s) for n, s in bad]
     return where, loose
 
-
 def catalog(code: str) -> dict[str, str]:
     words: dict[str, str] = {}
     for part in lang.PARTS:
         words.update(part.CATALOG.get(code, {}))
     return words
-
 
 def check(codes=None):
     where, loose = used()
@@ -87,7 +83,6 @@ def check(codes=None):
         )
         report["unused"][code] = sorted(k for k in words if k not in where)
     return report, where
-
 
 # ------------------------------------------------------------
 def main() -> int:
@@ -120,7 +115,6 @@ def main() -> int:
             for rel, n in sorted(count.items(), key=lambda x: -x[1])[:15]:
                 print(f"    {n:4d} {rel}")
     return 1 if bad else 0
-
 
 if __name__ == "__main__":
     raise SystemExit(main())

@@ -1,5 +1,7 @@
-# Benoit Saint-Moulin
-# Boothbridge : source detection and loading
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Source detection and loading shared by every reader: size limits, folder walks and relocation of moved music.
 
 from __future__ import annotations
 
@@ -26,7 +28,6 @@ MAX_NODES = 100_000
 MAX_REFS = 10_000_000
 TICK = 20_000
 
-
 # ------------------------------------------------------------
 # refuses a file too big to be what its name says, before it is read into memory
 def check_size(path: str, limit: int = 0):
@@ -37,11 +38,9 @@ def check_size(path: str, limit: int = 0):
             f"({size / 1e6:.0f} MB, the limit is {(limit or MAX_FILE) / 1e6:.0f} MB)"
         )
 
-
 # An encoding declaration Python does not know is a bad file
 class BadEncoding(ValueError):
     pass
-
 
 # ------------------------------------------------------------
 # One pass over an XML file with defusedxml (entities, external data refused as in a plain parse).
@@ -127,7 +126,6 @@ class Stream:
                 f"{self.name} declares an encoding that is not supported: {e}"
             ) from e
 
-
 # what can be added to a playlist: no video container (.mp4), no .m4a, one list on purpose
 AUDIO_EXT = {
     ".mp3",
@@ -143,12 +141,10 @@ COLLECTION_AUDIO_EXT = AUDIO_EXT | {".m4a", ".mp4", ".alac"}
 # the copy that tag writing works on, left behind when the program is killed
 TEMP_PREFIX = ".bb-tags-"
 
-
 def is_audio(name: str) -> bool:
     return os.path.splitext(name)[1].lower() in AUDIO_EXT and not name.startswith(
         TEMP_PREFIX
     )
-
 
 KINDS = (
     "traktor",
@@ -163,15 +159,12 @@ KINDS = (
     "key",
 )
 
-
 # attention -> bug = "inf", "nan" and "1e999" parse as floats and break int() and every sum after them
 LIMIT = 1e15
-
 
 # ------------------------------------------------------------
 def sane(x: float) -> bool:
     return abs(x) <= LIMIT
-
 
 def num(s, default: float = 0.0) -> float:
     try:
@@ -180,13 +173,11 @@ def num(s, default: float = 0.0) -> float:
         return default
     return v if sane(v) else default
 
-
 # ------------------------------------------------------------
 # A cue or grid position as written in a file. 0 when the attribute is missing, None when
 # it is there but is not a usable number
 def position(s) -> float | None:
     return 0.0 if s is None else num(s, None)
-
 
 def unix_date(s) -> str:
     try:
@@ -194,20 +185,17 @@ def unix_date(s) -> str:
     except (TypeError, ValueError, OverflowError, OSError):
         return ""
 
-
 # a symlink or a Windows junction. islink() is False for a junction and os.walk goes into it, a junction back up
 # to a parent is a tree without an end, and two of them are one with too many paths to ever finish
 def is_link(path: str) -> bool:
     isjunction = getattr(os.path, "isjunction", None)
     return os.path.islink(path) or bool(isjunction and isjunction(path))
 
-
 # os.walk that does not enter symlinks or junctions
 def walk(root: str):
     for d, dirs, files in os.walk(root):
         dirs[:] = [x for x in dirs if not is_link(os.path.join(d, x))]
         yield d, dirs, files
-
 
 # every audio file under root, by lowercase filename
 def index_folder(root: str) -> dict[str, list[str]]:
@@ -218,12 +206,10 @@ def index_folder(root: str) -> dict[str, list[str]]:
                 out.setdefault(f.lower(), []).append(os.path.join(d, f))
     return out
 
-
 # a database on a share is file://nas/share/m.db, an authority SQLite refuses: with four slashes it stays a path
 def sqlite_uri(path) -> str:
     uri = Path(path).resolve().as_uri()
     return uri if uri.startswith("file:///") else "file:////" + uri[len("file://") :]
-
 
 def detect(path: str) -> str:
     from . import key
@@ -274,7 +260,6 @@ def detect(path: str) -> str:
             return "traktor"
     return ""
 
-
 # ------------------------------------------------------------------
 # notes is filled by the readers that have something to say besides the playlists
 def load(
@@ -303,7 +288,6 @@ def load(
         ) from None
     except sqlite3.Error as e:
         raise ValueError(f"{name} cannot be read as a library database ({e})") from e
-
 
 def read_collection(
     path: str, music_root: str, progress: Progress | None, notes: dict | None
@@ -351,14 +335,12 @@ def read_collection(
         return folder.load(path, music_root, progress)
     raise ValueError(f"Unknown collection format: {os.path.basename(path)}")
 
-
 # ------------------------------------------------------------
 def relocate(path: str, found: dict[str, list[str]]) -> str:
     if not found or os.path.exists(path):
         return path
     alt = found.get(os.path.basename(path).lower())
     return os.path.normpath(alt[0]) if alt else path
-
 
 # one lazy folder index and one existence lookup per distinct playlist path
 def relocator(music_root: str):

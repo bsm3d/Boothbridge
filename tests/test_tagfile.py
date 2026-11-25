@@ -1,3 +1,8 @@
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Checks the tag reader on hand built audio files for each format, including atoms and frames.
+
 import ast
 import struct
 import tempfile

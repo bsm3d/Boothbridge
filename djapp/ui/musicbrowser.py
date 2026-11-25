@@ -1,3 +1,8 @@
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Floating read-only library window: track model with filtering and duplicate marking, drag to playlists.
+
 # floating, read-only library: preview a track, copy file URLs to a playlist
 
 from __future__ import annotations

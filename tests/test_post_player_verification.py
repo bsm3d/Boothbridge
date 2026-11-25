@@ -1,3 +1,8 @@
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Checks the verification of files a player changed, using temporary files modified after the fact.
+
 import os
 import tempfile
 import threading

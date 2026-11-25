@@ -1,3 +1,8 @@
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Checks native library loading on Windows: dependency search limits and ABI checks.
+
 import importlib
 import runpy
 import sys

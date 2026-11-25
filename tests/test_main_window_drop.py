@@ -1,5 +1,7 @@
-# dropping a file or a folder on the main window, the tooltips that say how the tree works, and
-# the checkbox indicators of the theme
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Checks dropping files or folders on the main window, the tree tooltips and the theme checkbox indicators.
 
 import os
 import time

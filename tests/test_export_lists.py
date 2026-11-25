@@ -1,3 +1,8 @@
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Checks CSV, JSON, PLS and XSPF exports: they parse back, hostile text survives and copied audio matches.
+
 # CSV, JSON, PLS and XSPF exports: every file parses back, hostile text survives, a
 # spreadsheet cannot be made to run a formula, copied audio is what the paths point to
 

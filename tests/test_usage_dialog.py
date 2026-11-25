@@ -1,4 +1,7 @@
-# the built-in help: its contents list, the search box, and that it says what the program does now
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Checks the built-in help: its contents list, anchors, search box, and that it matches the program.
 
 import os
 import re

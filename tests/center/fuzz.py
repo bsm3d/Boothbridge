@@ -1,8 +1,10 @@
-# seeded random tests on the application's own modules.
-#
-# A scenario is a function (seed, iterations, deadline) -> list of Failure. Every case uses its
-# own seed (seed + case number), so a failure replays alone with --iterations 1 on that seed.
-# To add a scenario, write the function and add one line to SCENARIOS
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Seeded random scenarios run on the application's own modules, each failure replayable from its seed.
+
+# A scenario is a function (seed, iterations, deadline) -> list of Failure. Case n uses seed + n, so a failure replays alone with --iterations 1 on that seed.
+# To add a scenario, write the function and add one line to SCENARIOS.
 
 from __future__ import annotations
 

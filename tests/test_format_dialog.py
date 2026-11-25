@@ -1,5 +1,7 @@
-# the last thing a user sees before a drive is erased, and that only the drive that was picked is
-# formatted
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Checks the format confirmation dialog, which must name the chosen drive and format only that drive.
 
 import os
 import time

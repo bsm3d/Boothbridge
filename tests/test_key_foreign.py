@@ -1,3 +1,8 @@
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Checks that files rekordbox writes next to export.pdb are named in the key summary and left alone.
+
 # files rekordbox writes next to export.pdb (exportExt.pdb, exportLibrary.db): the summary of a
 # key names them so the window can warn, and an export leaves them as they are
 

@@ -1,5 +1,7 @@
-# A player rewrites the analysis files of the tracks it plays. An export that keeps those files must not
-# call that damage, and a playlist none of whose files can be found is not written empty on the key
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Checks that exports keep analysis files a player rewrote and skip playlists whose files cannot be found.
 
 import os
 import unittest

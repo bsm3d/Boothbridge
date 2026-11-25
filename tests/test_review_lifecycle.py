@@ -1,3 +1,8 @@
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Lifecycle regression tests from review: event disposal and jobs starting and finishing, with mocks.
+
 import os
 import tempfile
 import threading

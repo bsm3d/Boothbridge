@@ -1,7 +1,10 @@
-# self tests of the test center tools: monkey driver, random scenarios, memory runs, window and command line.
-#
-# The long runs happen in child processes, as they do for the user, and the independent ones run side by
-# side so that the whole file stays well under half a minute
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Self tests of the test center tools: monkey driver, random scenarios, memory runs and command line.
+
+# The long runs happen in child processes, as they do for the user, and the independent ones run side by side.
+# The whole file stays well under half a minute.
 
 import contextlib
 import json

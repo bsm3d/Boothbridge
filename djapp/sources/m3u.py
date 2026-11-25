@@ -1,5 +1,7 @@
-# Benoit Saint-Moulin
-# Boothbridge : M3U / M3U8 playlist reader
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : M3U and M3U8 playlist reader that resolves track paths, with BOM-aware text decoding.
 
 from __future__ import annotations
 
@@ -8,7 +10,6 @@ import os
 from ..model import Node, Track
 from . import MAX_TRACKS, Progress, check_size, num, relocator
 from .rbxml import url_to_path
-
 
 # ------------------------------------------------------------
 def read_text(path: str) -> str:
@@ -23,7 +24,6 @@ def read_text(path: str) -> str:
     except UnicodeDecodeError:
         # plain .m3u from older players is usually the Windows codepage
         return raw.decode("cp1252", errors="replace")
-
 
 def load(
     path: str, music_root: str = "", progress: Progress | None = None

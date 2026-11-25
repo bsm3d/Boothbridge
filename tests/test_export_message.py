@@ -1,3 +1,8 @@
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Checks the message the export shows the user after a run, for each target format.
+
 import os
 import unittest
 from unittest.mock import patch

@@ -1,5 +1,7 @@
-# Benoit Saint-Moulin
-# Boothbridge : Mixxx library (mixxxdb.sqlite) reader
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Reader for the Mixxx library database, with its tracks, hot cues, loops and playlists.
 
 from __future__ import annotations
 
@@ -20,12 +22,10 @@ FROM library l JOIN track_locations tl ON l.location = tl.id
 WHERE l.mixxx_deleted = 0 AND tl.fs_deleted = 0
 """
 
-
 # ----------------------------------------------------------------
 # SQLite keeps whatever type it is given in any column, a BLOB or a number can sit in a TEXT one
 def text(value) -> str:
     return value if isinstance(value, str) else ""
-
 
 # ----------------------------------------------------------------
 def read_track(r: sqlite3.Row) -> Track:
@@ -60,7 +60,6 @@ def read_track(r: sqlite3.Row) -> Track:
         pass
     return t
 
-
 # ----------------------------------------------------------------
 def read_cues(con: sqlite3.Connection, tracks: dict[int, Track]):
     for r in con.execute(
@@ -84,10 +83,8 @@ def read_cues(con: sqlite3.Connection, tracks: dict[int, Track]):
             )
         )
 
-
 def read_list(con, sql: str, lid: int, tracks: dict[int, Track]) -> list[Track]:
     return [tracks[r[0]] for r in con.execute(sql, (lid,)) if r[0] in tracks]
-
 
 def load(
     path: str, music_root: str = "", progress: Progress | None = None

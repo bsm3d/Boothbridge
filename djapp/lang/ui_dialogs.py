@@ -1,5 +1,7 @@
-# Benoit Saint-Moulin
-# Boothbridge : translations, ui_dialogs
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Translations for the program dialogs, such as player settings and the options window.
 
 CATALOG = {
     "fr": {

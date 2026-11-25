@@ -1,5 +1,7 @@
-# Benoit Saint-Moulin
-# Boothbridge : ANLZ files against the ones rekordbox wrote for the same tracks
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Compares the ANLZ analysis files Boothbridge writes with those rekordbox wrote for the same tracks, when an export is present.
 
 """The comparisons with a real export need the Test_B export of rekordbox 6 with its audio, which
 stays out of the repo. Point BB_ORACLE to its root, they are skipped when it is missing. Other exports
@@ -18,8 +20,6 @@ from djapp.model import Cue, LOOP, Track
 
 ROOT = Path(os.environ.get("BB_ORACLE", "no-reference-export"))
 
-
-
 def sections(data: bytes) -> list[tuple[bytes, bytes]]:
     out, o = [], struct.unpack_from(">I", data, 4)[0]
     assert struct.unpack_from(">I", data, 8)[0] == len(data)
@@ -30,13 +30,11 @@ def sections(data: bytes) -> list[tuple[bytes, bytes]]:
     assert o == len(data)
     return out
 
-
 def refs():
     for dat in sorted((ROOT / "PIONEER" / "USBANLZ").glob("*/*/ANLZ0000.DAT")):
         secs = dict(sections(dat.read_bytes()))
         path = secs[b"PPTH"][16:-2].decode("utf-16-be")
         yield dat, path
-
 
 @pytest.fixture(scope="module", params=list(refs()) if (ROOT / "PIONEER" / "USBANLZ").is_dir() else [None], ids=lambda p: Path(p[1]).name if p else "none")
 def pair(request):
@@ -53,11 +51,9 @@ def pair(request):
     ours_dat, ours_ext = anlz.build(t, path, audio)
     return path, dat, ref_dat, ref_ext, dict(sections(ours_dat)), sections(ours_ext)
 
-
 def test_folder(pair):
     path, dat = pair[0], pair[1]
     assert anlz.anlz_dir(path) == "/" + dat.parent.relative_to(ROOT).as_posix()
-
 
 def test_dat_layout(pair):
     _, _, ref, _, ours, _ = pair
@@ -68,11 +64,9 @@ def test_dat_layout(pair):
     assert ours[b"PPTH"] == ref[b"PPTH"]
     assert ours[b"PCOB"][:24] == ref[b"PCOB"][:24]
 
-
 def test_ext_layout(pair):
     ref = [n for n, _ in pair[3] if n not in (b"PQT2", b"PSSI")]
     assert [n for n, _ in pair[5]] == ref
-
 
 def test_frames_and_detail(pair):
     _, _, ref, ref_ext, ours, ours_ext = pair
@@ -84,7 +78,6 @@ def test_frames_and_detail(pair):
     o5 = dict(ours_ext)[b"PWV5"]
     assert o5[12:16] == r5[12:16]
     assert abs(struct.unpack_from(">I", o5, 16)[0] - struct.unpack_from(">I", r5, 16)[0]) <= 15
-
 
 def test_beats(pair):
     _, _, ref, _, ours, _ = pair
@@ -98,7 +91,6 @@ def test_beats(pair):
         # the stored tempo is rounded to 0.01 bpm, rekordbox places beats with the exact one
         assert abs(a[2] - b[2]) <= 5, i
 
-
 def test_cues_roundtrip():
     t = Track(bpm=120, duration=60, cues=[Cue("A", start=1000, hotcue=0),
                                           Cue("drop", LOOP, 5000, 2000, hotcue=3),
@@ -111,7 +103,6 @@ def test_cues_roundtrip():
     assert hot[24 + 56 + 0x1c] == 2
     assert struct.unpack_from(">II", hot, 24 + 56 + 0x20) == (5000, 7000)
     assert struct.unpack_from(">I", mem, 24 + 12)[0] == 0
-
 
 def test_hot_cue_colours():
     t = Track(bpm=120, duration=60, cues=[Cue("A", start=1000, hotcue=0),
@@ -133,7 +124,6 @@ def test_hot_cue_colours():
     assert anlz.hot_color(t.cues[2]) == (42, 0xFF0000)
     assert rows[2] == (2, bytes.fromhex("FF0000"))
     assert mem[20 + 28] == 0                          # memory cue: none
-
 
 # a source (NML, Mixxx) can hand over a slot past H: the player has eight pads and the key
 # reader drops anything above slot 8, so the writer leaves those cues out of the hot list

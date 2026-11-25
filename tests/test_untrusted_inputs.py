@@ -1,3 +1,8 @@
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Checks that archives and inputs from outside are rejected or sealed safely, including hostile entries.
+
 import hashlib
 import json
 import os

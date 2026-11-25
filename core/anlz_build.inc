@@ -1,6 +1,7 @@
-// Benoit Saint-Moulin
-// Boothbridge : native core, ANLZ cue sections and the two files
-// Included by fastcore.cpp after anlz.inc.
+// Boothbridge
+// © Benoit Saint-Moulin - 2026
+// Version du fichier : 1.0.0
+// Fonction du fichier : C++ code that assembles the ANLZ cue sections and the two analysis files, included after anlz.inc.
 
 extern "C" {
 

@@ -1,5 +1,7 @@
-# Benoit Saint-Moulin
-# Boothbridge : rekordbox XML (DJ_PLAYLISTS) reader
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : rekordbox XML (DJ_PLAYLISTS) reader, with its tracks, cues, playlists and colour mapping.
 
 from __future__ import annotations
 
@@ -39,7 +41,6 @@ RB_COLORS = [
     "660099",
 ]
 
-
 # ------------------------------------------------------------
 # without its host file://nas/music/a.mp3 is a folder of this disk instead of the share \\nas\music,
 # and file://C:/a.mp3 (one slash too few) loses its drive
@@ -47,7 +48,6 @@ def host_path(host: str, p: str) -> str:
     if host.lower() in ("", "localhost"):
         return p
     return "/" + host + p if len(host) == 2 and host[1] == ":" else "//" + host + p
-
 
 def url_to_path(loc: str) -> str:
     if not loc.startswith("file:"):
@@ -62,10 +62,8 @@ def url_to_path(loc: str) -> str:
         p = os.path.normpath(p[1:])
     return p
 
-
 def rb_date(s: str) -> str:
     return s[:10] if len(s) >= 10 and s[4] == "-" else ""
-
 
 def read_track(el: ET.Element) -> Track:
     g = el.get
@@ -121,7 +119,6 @@ def read_track(el: ET.Element) -> Track:
         t.cues.append(c)
     return t
 
-
 # ------------------------------------------------------------------
 def read_nodes(
     parent: ET.Element, by_id: dict[str, Track], by_loc: dict[str, Track], keyed: dict
@@ -145,12 +142,9 @@ def read_nodes(
             out.append(node)
     return out
 
-
 # --------------------------------------------------------------
-# One pass over the file. A track of the collection becomes a Track as soon as it is read and a
-# track of a playlist becomes a reference to it, nothing of the XML is kept but the folders and
-# playlists (keyed holds what each playlist lists). A playlist read before the collection keeps
-# the keys instead and they are resolved at the end
+# One pass over the file. A collection track becomes a Track as soon as it is read; a playlist track becomes a reference to it.
+# Only folders and playlists are kept (keyed: what each playlist lists). A playlist read before the collection keeps keys, resolved at the end.
 def load(
     path: str, music_root: str = "", progress: Progress | None = None
 ) -> list[Node]:

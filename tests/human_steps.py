@@ -1,7 +1,9 @@
-# parcours de vérification manuelle de Boothbridge.
-#
-# Chaque étape suit le format (zone, titre, action, résultat attendu). Le test de
-# formatage ne lance jamais l'effacement d'un disque : il s'arrête avant confirmation
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Manual check list of the application, one step per entry with its zone, title, action and expected result.
+
+# Le test de formatage ne lance jamais l'effacement d'un disque : il s'arrête avant confirmation.
 
 STEPS = [
     (

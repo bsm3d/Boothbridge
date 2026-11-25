@@ -1,8 +1,9 @@
-# values in collection files that are not what they should be: numbers that are not numbers ("inf",
-# "nan", "1e999") and an encoding label that is not an encoding.
-#
-# Each case is the smallest file that failed in a seeded run of the Test center (the seed is in the
-# test name), frozen here so that it does not depend on the generator
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Frozen regression cases for collection files holding non-numbers such as inf, nan or 1e999, and bad encoding labels.
+
+# Frozen regression cases: each is the smallest file that failed in a seeded run of the Test center (seed in the test name), so it does not depend on the generator.
 
 import math
 import sqlite3

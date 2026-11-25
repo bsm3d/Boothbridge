@@ -1,3 +1,8 @@
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Checks the audio check panel in the window, from starting a job to showing its result.
+
 import os
 import tempfile
 import time

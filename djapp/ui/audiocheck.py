@@ -1,3 +1,8 @@
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Qt dialog that runs the audio verification over the collection and shows a status for each file.
+
 # audio verification panel, independent of collection relocation
 
 from collections import Counter

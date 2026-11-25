@@ -1,5 +1,7 @@
-# Benoit Saint-Moulin
-# Boothbridge : rekordbox XML export (File > Import in rekordbox)
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : rekordbox XML export, written to be imported through File then Import in rekordbox.
 
 from __future__ import annotations
 
@@ -43,14 +45,12 @@ KINDS = {
     ".aiff": "AIFF File",
 }
 
-
 # ------------------------------------------------------------------
 def location(path: str) -> str:
     p = Path(text(path, 32767)).as_posix()
     if not p.startswith("/"):
         p = "/" + p
     return "file://localhost" + quote(p, safe="/:")
-
 
 # --------------------------------------------------------------
 def hex_rgb(s: str):
@@ -62,7 +62,6 @@ def hex_rgb(s: str):
     except ValueError:
         return None
     return v >> 16 & 255, v >> 8 & 255, v & 255
-
 
 def track_el(t: Track, tid: int, path: str) -> ET.Element:
     t = fit(t)
@@ -127,7 +126,6 @@ def track_el(t: Track, tid: int, path: str) -> ET.Element:
         ET.SubElement(el, "POSITION_MARK", m)
     return el
 
-
 def node_el(n: Node, ids: dict[str, int]) -> ET.Element:
     if n.is_folder:
         el = ET.Element(
@@ -143,7 +141,6 @@ def node_el(n: Node, ids: dict[str, int]) -> ET.Element:
     for k in keys_:
         ET.SubElement(el, "TRACK", Key=str(k))
     return el
-
 
 # ------------------------------------------------------------------------
 def export(

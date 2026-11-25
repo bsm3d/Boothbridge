@@ -1,7 +1,10 @@
-# the pictures of a key when an export is merged into it. A track that stays keeps its picture
-# and its number, the new ones are numbered after the highest, the pictures nobody uses any more
-# go once the new database is written. Until then the old database must still show the right
-# picture on every track it lists
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Checks the pictures of a key when an export is merged: kept tracks keep their picture, unused pictures go.
+
+# A track that stays on the key keeps its picture and number; new ones are numbered after the highest.
+# Pictures nobody uses go only once the new database is written: until then the old one must still show the right picture on every track it lists.
 
 import io
 import unittest

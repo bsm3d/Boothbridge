@@ -1,3 +1,8 @@
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Checks that the support page points to the author's donation page.
+
 import os
 import unittest
 from unittest.mock import patch

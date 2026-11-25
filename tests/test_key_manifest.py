@@ -1,4 +1,7 @@
-# the manifest of a key export holds the hash of the bytes written, never one carried over
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Checks that the key export manifest holds the hash of the bytes written, never one carried over.
 
 import json
 import unittest

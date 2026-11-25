@@ -1,5 +1,7 @@
-# Benoit Saint-Moulin
-# Boothbridge : a track the writers can take, whatever the collection it came from held
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Clamps a track's values (text lengths, ratings, colours) into ranges the export writers can store, without changing the original.
 
 # A damaged collection can hand the model a rating of -1, a colour of 99, a 70 000
 # character comment or a title with half a surrogate pair. fit() gives the writers a copy
@@ -49,7 +51,6 @@ BPM = 655.35  # and the beat grid keeps the tempo times 100 in 16 bits
 # a cue position or a loop end is a count of milliseconds in 32 bits in the analysis files
 CUE_MS = 2**32 - 1
 
-
 # ------------------------------------------------------------
 # text a file can hold: no lone surrogate, no NUL, not longer than limit
 def text(value, limit: int = NAME) -> str:
@@ -57,7 +58,6 @@ def text(value, limit: int = NAME) -> str:
     if s.isascii() and len(s) <= limit and "\x00" not in s:
         return s
     return _SURROGATES.sub("�", s).replace("\x00", "")[:limit]
-
 
 # ------------------------------------------------------------
 def whole(value, low: int, high: int) -> int:
@@ -67,14 +67,12 @@ def whole(value, low: int, high: int) -> int:
         return low
     return min(high, max(low, n))
 
-
 def real(value, low: float, high: float) -> float:
     try:
         x = float(value)
     except (TypeError, ValueError, OverflowError):
         return low
     return min(high, max(low, x)) if math.isfinite(x) else low
-
 
 # ------------------------------------------------------------
 def fit(t: Track) -> Track:

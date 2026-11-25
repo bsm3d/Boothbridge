@@ -1,3 +1,8 @@
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Checks tag writing on temporary audio files: atoms and frames written, file modes and threads.
+
 import stat
 import struct
 import tempfile

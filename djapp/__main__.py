@@ -1,3 +1,8 @@
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Entry point for python -m djapp that checks program integrity and then starts the application.
+
 import sys
 from multiprocessing import freeze_support
 

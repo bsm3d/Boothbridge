@@ -1,3 +1,8 @@
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Builds a small synthetic music collection in a temp folder: WAV files, playlists and a few missing tracks.
+
 # A small synthetic collection in a temp folder: short WAV files, a Traktor NML, an M3U,
 # a rekordbox XML and a project JSON, with a few tracks whose file is missing
 

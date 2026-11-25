@@ -1,3 +1,8 @@
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Checks that hostile or malformed project JSON is read safely and does not break the project load.
+
 import os
 import tempfile
 import unittest

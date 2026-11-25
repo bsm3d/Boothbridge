@@ -1,6 +1,10 @@
-# what the exporters do with values a damaged collection can hold (a rating of -1, a colour of 99,
-# a 100 000 character title, half a surrogate pair), device names in file names, and two songs with one
-# name in a file export. Found by pushing extreme tracks through every writer
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Checks that the exporters handle extreme track values such as bad ratings, long titles and odd device names.
+
+# Extreme values a damaged collection can hold: rating -1, colour 99, a 100 000 character title, half a surrogate pair.
+# Also device names in file names and two songs with one name. Found by pushing extreme tracks through every writer.
 
 import unittest
 import xml.etree.ElementTree as ET

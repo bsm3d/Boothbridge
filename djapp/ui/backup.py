@@ -1,4 +1,7 @@
-# one panel for creating, restoring and verifying ZIP backups
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Qt panel for creating, restoring and verifying ZIP backups, with a disk-transfer animation.
 
 from PySide6.QtCore import Qt, QTimer
 from PySide6.QtGui import QColor, QPainter

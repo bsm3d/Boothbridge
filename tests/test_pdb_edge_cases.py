@@ -1,3 +1,8 @@
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Checks export.pdb writing and reading on edge cases, with consistency checks between tracks, nodes and cues.
+
 import unittest
 
 from djapp.export.cdj import anlz, pdbread, pdbwrite, reference, validate

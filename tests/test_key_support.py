@@ -1,6 +1,7 @@
-# shared helpers of the test_key_* files: synthetic WAV libraries, seeded random models, an
-# export that runs the analysis in threads, and the comparison of a model with what a key gives
-# back. No test in here
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Shared helpers for the key tests: synthetic WAV libraries, seeded models and comparison with key output.
 
 import contextlib
 import random

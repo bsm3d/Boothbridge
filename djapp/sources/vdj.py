@@ -1,10 +1,11 @@
-# Benoit Saint-Moulin
-# Boothbridge : VirtualDJ reader (database.xml, playlists and .vdjfolder)
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : VirtualDJ reader for database.xml, playlists and vdjfolder files, with cues and analysis values.
 
-# database.xml holds every track, its cues (Poi) and its analysis (Scan).
-# Playlists live next to it: Playlists/*.m3u and Folders/**/*.vdjfolder, the folder
-# tree on disk becomes the playlist tree. Scan Bpm is the time between two beats in
-# seconds, not beats per minute
+# database.xml holds every track with its cues (Poi) and its analysis (Scan).
+# Playlists live beside it: Playlists/*.m3u and Folders/**/*.vdjfolder, the folder tree on disk becomes the playlist tree.
+# Scan Bpm is the time between two beats in seconds, not beats per minute.
 
 from __future__ import annotations
 
@@ -44,7 +45,6 @@ def color(s: str) -> str:
         return "#%06X" % (int(s) & 0xFFFFFF)
     except ValueError:
         return ""
-
 
 # ------------------------------------------------------------
 def read_song(el: ET.Element) -> Track:
@@ -113,7 +113,6 @@ def read_song(el: ET.Element) -> Track:
         t.cues.append(c)
     return t
 
-
 # ------------------------------------------------------------
 def read_vdjfolder(path: str, by_path: dict[str, Track], found) -> list[Track]:
     songs = []
@@ -160,7 +159,6 @@ def read_vdjfolder(path: str, by_path: dict[str, Track], found) -> list[Track]:
         out.append(t)
     return out
 
-
 # ------------------------------------------------------------
 # the tracks of every playlist file end up in one dictionary, so it is bounded as well
 def check_known(by_path: dict[str, Track], path: str):
@@ -168,7 +166,6 @@ def check_known(by_path: dict[str, Track], path: str):
         raise ValueError(
             f"{os.path.basename(path)} adds to more tracks than a collection can hold"
         )
-
 
 def read_m3u(path: str, by_path: dict[str, Track], found) -> list[Track]:
     out = []
@@ -188,7 +185,6 @@ def read_m3u(path: str, by_path: dict[str, Track], found) -> list[Track]:
             by_path[os.path.normcase(p)] = t
         out.append(t)
     return out
-
 
 def read_dir(folder: str, by_path, found) -> list[Node]:
     out = []
@@ -216,7 +212,6 @@ def read_dir(folder: str, by_path, found) -> list[Node]:
                 out.append(Node("playlist", stem, tracks=tl))
     return out
 
-
 # ------------------------------------------------------------------------
 # the VirtualDJ folder whether the user picked database.xml or a playlist in it
 def home_of(path: str) -> str:
@@ -227,7 +222,6 @@ def home_of(path: str) -> str:
             return os.path.dirname(os.path.abspath(path))
         d = up
     return d
-
 
 # ----------------------------------------
 def load(

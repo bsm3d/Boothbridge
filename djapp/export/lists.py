@@ -1,5 +1,7 @@
-# Benoit Saint-Moulin
-# Boothbridge : list exports, CSV and JSON (one file) and PLS and XSPF (one file per playlist)
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Writes playlists as CSV, JSON, PLS and XSPF files, with one file per playlist for the list formats.
 
 from __future__ import annotations
 
@@ -53,11 +55,9 @@ FORMULA = ("=", "+", "-", "@", "\t", "\r")
 # some spreadsheets skip these in front of the first real character before they decide
 SKIPPED = " \t\r\n\x0b\x0c\xa0\"'"
 
-
 # ----------------------------------------------------------------
 def one_line(s, limit: int = 32767) -> str:
     return text(s, limit).replace("\r", " ").replace("\n", " ")
-
 
 def num(x, digits: int):
     if not x:
@@ -65,12 +65,10 @@ def num(x, digits: int):
     r = round(x, digits)
     return int(r) if r == int(r) else r
 
-
 def energy_of(t: Track):
     e = t.energy
     ok = isinstance(e, (int, float)) and not isinstance(e, bool) and 1 <= e <= 10
     return num(e, 2) if ok else None
-
 
 # the one place a track becomes the values every list shows, None when it has nothing
 def info(t: Track, p: str) -> dict:
@@ -88,12 +86,10 @@ def info(t: Track, p: str) -> dict:
         "path": text(p, 32767),
     }
 
-
 def label(t: Track, p: str) -> str:
     if t.artist and t.title:
         return f"{t.artist} - {t.title}"
     return t.artist or t.title or os.path.splitext(os.path.basename(p))[0]
-
 
 # ----------------------------------------------------------------
 # every playlist with something in it, with the names of the folders above it
@@ -106,7 +102,6 @@ def walk(
         elif n.tracks:
             yield parents, n
 
-
 # tracks a player can be given: the ones that have a file
 def usable(n: Node, moved: dict[str, str]) -> list[tuple[Track, str]]:
     out = []
@@ -116,17 +111,14 @@ def usable(n: Node, moved: dict[str, str]) -> list[tuple[Track, str]]:
             out.append((fit(original), text(p, 32767)))
     return out
 
-
 def put(path: str, data: bytes, man: Manifest | None):
     write_atomic(path, data)
     if man:
         man.add(path, sha256_bytes(data))
 
-
 def check(cancel: threading.Event | None):
     if cancel is not None and cancel.is_set():
         raise Cancelled()
-
 
 def begin(nodes, out, copy, verify, cb, cancel, man) -> tuple[Report, dict]:
     os.makedirs(out, exist_ok=True)
@@ -143,7 +135,6 @@ def begin(nodes, out, copy, verify, cb, cancel, man) -> tuple[Report, dict]:
             man,
         )
     return rep, moved
-
 
 # ----------------------------------------------------------------
 def csv_bytes(nodes: list[Node], moved: dict[str, str]) -> bytes:
@@ -171,7 +162,6 @@ def csv_bytes(nodes: list[Node], moved: dict[str, str]) -> bytes:
     # the BOM is what makes a spreadsheet read the accents as UTF-8
     return ("\ufeff" + buf.getvalue()).encode("utf-8")
 
-
 # ------------------------------------------------------------
 def cue_dict(c) -> dict:
     d = {
@@ -185,14 +175,12 @@ def cue_dict(c) -> dict:
     d["color"] = text(c.color, 32)
     return d
 
-
 def track_dict(t: Track, p: str, position: int) -> dict:
     d = {"position": position, **info(t, p)}
     d["cues"] = [cue_dict(c) for c in t.cues if c.kind != GRID]
     if t.grid is not None:
         d["grid"] = {"anchor": round(t.grid, 3), "bpm": num(t.bpm, 2)}
     return d
-
 
 def tree(nodes: list[Node], moved: dict[str, str]) -> list[dict]:
     out = []
@@ -214,7 +202,6 @@ def tree(nodes: list[Node], moved: dict[str, str]) -> list[dict]:
             out.append(d)
     return out
 
-
 def json_bytes(nodes: list[Node], moved: dict[str, str]) -> bytes:
     doc = {"format": FORMAT, "version": VERSION, "tree": tree(nodes, moved)}
     try:
@@ -226,7 +213,6 @@ def json_bytes(nodes: list[Node], moved: dict[str, str]) -> bytes:
             "ascii"
         )
 
-
 # ----------------------------------------------------------------
 def rel(p: str, base: str) -> str:
     try:
@@ -234,7 +220,6 @@ def rel(p: str, base: str) -> str:
     except ValueError:  # other drive
         pass
     return p.replace("\\", "/")
-
 
 def pls_bytes(n: Node, path: str, moved: dict[str, str], relative: bool) -> bytes:
     base = os.path.dirname(path)
@@ -246,7 +231,6 @@ def pls_bytes(n: Node, path: str, moved: dict[str, str], relative: bool) -> byte
         out.append(f"Length{i}={round(t.duration) or -1}")
     out += [f"NumberOfEntries={len(found)}", "Version=2"]
     return ("\n".join(out) + "\n").encode("utf-8")
-
 
 # ------------------------------------------------------------
 # file:///C:/Music/a%20b.mp3, file://server/share/a.mp3, file:///home/me/a.mp3 (RFC 8089),
@@ -262,10 +246,8 @@ def file_url(p: str) -> str:
         return file_url(os.path.abspath(p))
     return "file://" + quote(s, safe="/:")
 
-
 def xml_text(s, limit: int = NAME) -> str:
     return clean(one_line(s, limit))
-
 
 def xspf_bytes(n: Node, path: str, moved: dict[str, str], relative: bool) -> bytes:
     root = ET.Element("playlist", {"version": "1", "xmlns": XSPF_NS})
@@ -288,7 +270,6 @@ def xspf_bytes(n: Node, path: str, moved: dict[str, str], relative: bool) -> byt
     body = ET.tostring(root, encoding="unicode")
     return ('<?xml version="1.0" encoding="UTF-8"?>\n' + body + "\n").encode("utf-8")
 
-
 # ----------------------------------------------------------------
 def single(nodes, out, name, build, copy, verify, progress, cancel, man) -> Report:
     cb = progress or (lambda pct, msg: None)
@@ -297,7 +278,6 @@ def single(nodes, out, name, build, copy, verify, progress, cancel, man) -> Repo
     put(os.path.join(out, name), build(nodes, moved), man)
     cb(100, f"{name} written")
     return rep
-
 
 def each(nodes, out, ext, build, copy, verify, progress, cancel, man) -> Report:
     cb = progress or (lambda pct, msg: None)
@@ -322,13 +302,11 @@ def each(nodes, out, ext, build, copy, verify, progress, cancel, man) -> Report:
     cb(100, f"{done} playlists written")
     return rep
 
-
 # ----------------------------
 def export_csv(
     nodes, out, copy=False, verify=False, progress=None, cancel=None, man=None
 ) -> Report:
     return single(nodes, out, CSV_NAME, csv_bytes, copy, verify, progress, cancel, man)
-
 
 def export_json(
     nodes, out, copy=False, verify=False, progress=None, cancel=None, man=None
@@ -337,12 +315,10 @@ def export_json(
         nodes, out, JSON_NAME, json_bytes, copy, verify, progress, cancel, man
     )
 
-
 def export_pls(
     nodes, out, copy=False, verify=False, progress=None, cancel=None, man=None
 ) -> Report:
     return each(nodes, out, ".pls", pls_bytes, copy, verify, progress, cancel, man)
-
 
 def export_xspf(
     nodes, out, copy=False, verify=False, progress=None, cancel=None, man=None

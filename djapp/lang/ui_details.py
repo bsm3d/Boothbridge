@@ -1,5 +1,7 @@
-# Benoit Saint-Moulin
-# Boothbridge : translations, ui_details (playlist window, ID tag editor)
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Translations for the playlist details window and the ID tag editor.
 
 CATALOG = {
     "fr": {

@@ -1,12 +1,11 @@
-# Benoit Saint-Moulin
-# Boothbridge : gives the program another name
-#
-#   python tools/rename.py NEWNAME            shows what would change
-#   python tools/rename.py NEWNAME --apply    does it
-#
-# The name is a value, djapp/brand.py holds it. What cannot read it at run time (texts, the spec, the installer
-# script, the names of a few files) is rewritten here, in the three spellings the tree uses: Name, name and NAME.
-# The tests live outside the tree: pass their folder with --also to rewrite them too.
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Renames the program everywhere its name cannot be read at run time, showing the changes unless --apply is given.
+
+# Dry run unless --apply is given. Texts, the spec, the installer script and a few file names are rewritten here, in the spellings Name, name and NAME.
+# The name itself is a value in djapp/brand.py.
+# python tools/rename.py NEWNAME
 
 from __future__ import annotations
 
@@ -42,7 +41,6 @@ SKIP_DIRS = {
 }
 VALID = re.compile(r"^[A-Za-z][A-Za-z0-9]{1,30}$")
 
-
 def current_name() -> str:
     m = re.search(
         r'^APP_NAME = "([^"]+)"', BRAND.read_text(encoding="utf-8"), re.MULTILINE
@@ -51,10 +49,8 @@ def current_name() -> str:
         sys.exit("APP_NAME not found in djapp/brand.py")
     return m.group(1)
 
-
 def spellings(old: str, new: str) -> list[tuple[str, str]]:
     return [(old, new), (old.lower(), new.lower()), (old.upper(), new.upper())]
-
 
 def files(base: Path):
     for path in sorted(base.rglob("*")):
@@ -65,7 +61,6 @@ def files(base: Path):
             and not any(part in SKIP_DIRS for part in rel.parts)
         ):
             yield path
-
 
 def plan(base: Path, pairs: list[tuple[str, str]]):
     edits, renames = [], []
@@ -87,7 +82,6 @@ def plan(base: Path, pairs: list[tuple[str, str]]):
         if name != path.name:
             renames.append((path, path.with_name(name)))
     return edits, renames
-
 
 # ------------------------------------------------------------
 def main() -> int:
@@ -131,7 +125,6 @@ def main() -> int:
         + ("" if apply else " (nothing written, add --apply)")
     )
     return 0
-
 
 if __name__ == "__main__":
     sys.exit(main())

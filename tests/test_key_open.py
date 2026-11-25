@@ -1,5 +1,7 @@
-# File > Open a CDJ USB key... on keys written by the program itself: the folders a user may
-# pick inside the key, what the window says when the key was read with trouble, and Cancel
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Checks File > Open a CDJ USB key on keys the program wrote: allowed folders, read warnings and Cancel.
 
 import contextlib
 import os

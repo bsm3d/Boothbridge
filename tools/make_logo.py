@@ -1,9 +1,10 @@
-# Benoit Saint-Moulin
-# Boothbridge : draws the logo files from branding/*.svg
-#
-#   python tools/make_logo.py [OUTDIR]
-#
-# The icon of the program (djapp/ui/res) is rewritten, and the other sizes go to OUTDIR (default ../Boothbridge-site/src/images)
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Draws the program logo files from the branding SVGs into the icon and web image sizes.
+
+# The program icon (djapp/ui/res) is rewritten; the other sizes go to OUTDIR (default Coding/web/Boothbridge/src/images).
+# python tools/make_logo.py [OUTDIR]
 
 from __future__ import annotations
 
@@ -24,7 +25,6 @@ from PySide6.QtSvg import QSvgRenderer
 
 app = QGuiApplication([])
 
-
 def render(svg: Path, width: int, height: int) -> Image.Image:
     renderer = QSvgRenderer(str(svg))
     image = QImage(width, height, QImage.Format_ARGB32)
@@ -36,7 +36,6 @@ def render(svg: Path, width: int, height: int) -> Image.Image:
     painter.end()
     buffer = image.bits().tobytes()
     return Image.frombuffer("RGBA", (width, height), buffer, "raw", "BGRA", 0, 1)
-
 
 # the name next to the mark, drawn with the fonts of the system (the svg renderer has no font of its own here)
 def wordmark(mark: Image.Image) -> Image.Image:
@@ -55,12 +54,11 @@ def wordmark(mark: Image.Image) -> Image.Image:
     draw.text((x + light.getlength(first), y), second, font=bold, fill="#e3a553")
     return image
 
-
 def main():
     out = (
         Path(sys.argv[1])
         if len(sys.argv) > 1
-        else ROOT.parent / "Boothbridge-site" / "src" / "images"
+        else ROOT.parents[2] / "web" / "Boothbridge" / "src" / "images"
     )
     out.mkdir(parents=True, exist_ok=True)
     mark = ROOT / "branding" / "mark.svg"
@@ -90,7 +88,6 @@ def main():
         sorted(p.name for p in out.glob("logo*")),
         out / "favicon.png",
     )
-
 
 if __name__ == "__main__":
     main()

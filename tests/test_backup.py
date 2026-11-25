@@ -1,3 +1,8 @@
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Checks backup and restore, including that a portable restore keeps every playlist and shared setting.
+
 import copy
 import hashlib
 import json

@@ -1,3 +1,8 @@
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Pytest setup that points the offscreen Qt platform at the Windows system fonts so layout tests match a real screen.
+
 # the offscreen Qt platform has no font database on Windows, so every text measures about
 # 2.4 times too wide and the layout tests see windows that do not exist for a real user.
 # Pointing it at the system fonts gives the widths Segoe UI really has

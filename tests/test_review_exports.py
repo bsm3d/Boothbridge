@@ -1,3 +1,8 @@
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Regression tests for the export review: refused Mixxx keeps its checksums, relative folders, formula safety.
+
 # fixes of the review of the seven writers added with the formats of the second round: a
 # refused Mixxx export keeps the checksums, relative output folders, spreadsheet formulas
 # behind a space, the format names of the command line and of the settings, the Options dialog

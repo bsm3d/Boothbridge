@@ -1,3 +1,8 @@
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Regression tests from the last review: hostile covers, exports after failed writes, damaged iTunes and Engine files.
+
 # regressions found by the review before the release build: a hostile cover that aborted a whole export, an
 # export that waited for every queued analysis after a failed write, readers that raised the wrong error on
 # a damaged iTunes or Engine file, and the help page whose markup was broken

@@ -1,3 +1,8 @@
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Checks that the format helper process receives the program's language from the environment.
+
 import importlib.util
 import os
 import tempfile

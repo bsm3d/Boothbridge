@@ -1,9 +1,10 @@
-# A seeded random driver on the real windows of the application.
-#
-# Each step picks a window, a real widget in it and an action (click, type, key, shortcut, drag,
-# sort, open a window, close it...). Every step is written down, so a run can be played again
-# from its list and shrunk to a shorter list that still fails. Dialogs answer by themselves, files
-# stay in a temp folder and the dangerous parts of the application are stubbed (see world.py)
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Seeded random driver that clicks, types and opens windows in the real application, recording each step for replay.
+
+# A seeded random driver on the real windows: each step picks a window, a widget and an action, and is recorded so the run can be replayed and shrunk.
+# Dialogs answer by themselves, files stay in a temp folder, dangerous parts are stubbed (see world.py).
 
 from __future__ import annotations
 

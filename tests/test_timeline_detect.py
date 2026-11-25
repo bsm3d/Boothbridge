@@ -1,3 +1,8 @@
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Checks beat and bar detection on the timeline, with time and patch mocks in place.
+
 import os
 import tempfile
 import time

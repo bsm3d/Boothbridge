@@ -1,5 +1,7 @@
-# Benoit Saint-Moulin
-# Boothbridge : Traktor collection export (NML 19, read by Traktor Pro 3 and 4)
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Traktor collection export to NML 19 XML, with paths split into volume, folder and file.
 
 from __future__ import annotations
 
@@ -19,7 +21,6 @@ from .manifest import Manifest
 
 RB_TO_COLOR = {v: k for k, v in COLOR_TO_RB.items()}
 
-
 # VOLUME, DIR, FILE the way Traktor stores them: 'C:', '/:Music/:House/:', 'x.mp3'
 def split_path(path: str) -> tuple[str, str, str]:
     if (len(path) > 1 and path[1] == ":") or path.startswith("\\\\"):
@@ -34,7 +35,6 @@ def split_path(path: str) -> tuple[str, str, str]:
             vol = "Macintosh HD"
     return vol, "".join(f"/:{d}" for d in parts) + "/:", p.name
 
-
 # ------------------------------------------------------------
 def nml_date(iso: str) -> str:
     try:
@@ -42,7 +42,6 @@ def nml_date(iso: str) -> str:
     except ValueError:
         return ""
     return f"{d.year}/{d.month}/{d.day}"
-
 
 def entry(t: Track, path: str) -> ET.Element:
     t = fit(t)
@@ -128,11 +127,9 @@ def entry(t: Track, path: str) -> ET.Element:
             c.set("COLOR", col)
     return e
 
-
 def key_of(path: str) -> str:
     vol, d, f = split_path(path)
     return vol + d + f
-
 
 # ------------------------------------------------------------
 def node(n: Node, paths: dict[str, str]) -> ET.Element:
@@ -156,7 +153,6 @@ def node(n: Node, paths: dict[str, str]) -> ET.Element:
         ent = ET.SubElement(pl, "ENTRY")
         ET.SubElement(ent, "PRIMARYKEY", TYPE="TRACK", KEY=clean(key_of(p)))
     return el
-
 
 def export(
     nodes: list[Node],

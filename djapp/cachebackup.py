@@ -1,5 +1,7 @@
-# Benoit Saint-Moulin
-# Boothbridge : back up and restore the analysis cache (ANLZ files and waveforms)
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Backup and restore of the analysis cache (ANLZ files and waveforms) as a verified zip archive.
 
 from __future__ import annotations
 
@@ -48,13 +50,11 @@ CHUNK = 1 << 20
 DAMAGED = (zipfile.BadZipFile, zlib.error, EOFError, NotImplementedError)
 UNREADABLE = DAMAGED + (OSError,)
 
-
 # ----------------------------------------------------------------
 # whether an error means the archive is damaged. zipfile seeks to the offset a header gives, a
 # wrong one comes out as OSError EINVAL, any other OSError is the drive and is not ours to name
 def is_damage(error: BaseException) -> bool:
     return not isinstance(error, OSError) or error.errno == errno.EINVAL
-
 
 # ----------------------------------------------------------------
 @dataclass
@@ -70,11 +70,9 @@ class Result:
     sha256: str = ""
     sidecar: bool = False
 
-
 # ----------------------------------------------------------------
 def shown(text: str) -> str:
     return re.sub(r"[\x00-\x1f\x7f]", "?", text)[:80]
-
 
 # ----------------------------------------------------------------
 def hooks(progress, cancel):
@@ -90,7 +88,6 @@ def hooks(progress, cancel):
             raise Cancelled()
 
     return report, check
-
 
 def files(cache) -> list[tuple[str, str, int]]:
     found = []
@@ -114,12 +111,10 @@ def files(cache) -> list[tuple[str, str, int]]:
     found.sort()
     return found
 
-
 # ----------------------------------------------------------------
 def stats(cache) -> tuple[int, int]:
     found = files(cache)
     return len(found), sum(size for _name, _path, size in found)
-
 
 # --------------------------------------------------
 # A file that cannot be deleted is listed, the others still go
@@ -140,7 +135,6 @@ def clear(cache, progress=None, cancel=None) -> Result:
         report(i * 100 // len(found), "Clearing the cache")
     return res
 
-
 def digest_of(path, check) -> str:
     h = hashlib.sha256()
     with open(path, "rb") as f:
@@ -148,7 +142,6 @@ def digest_of(path, check) -> str:
             check()
             h.update(block)
     return h.hexdigest()
-
 
 # ----------------------------------------------------------------
 # zip the cache files to dest, with a manifest and a dest.sha256 file next to it.
@@ -239,7 +232,6 @@ def create(cache, dest, progress=None, cancel=None) -> Result:
     finally:
         temp.unlink(missing_ok=True)
 
-
 # entry count and directory size sit at the end of the file, read them before
 # ZipFile builds one object per entry, an archive can claim millions
 def declared(path):
@@ -266,7 +258,6 @@ def declared(path):
             count, size = struct.unpack("<QQ", record[32:48])
     if count > MAX_FILES + 1 or size > MAX_DIRECTORY:
         raise ValueError("The ZIP holds too many entries to be a cache backup")
-
 
 # --------------------------------------------------------------
 def manifest(archive) -> dict:
@@ -298,7 +289,6 @@ def manifest(archive) -> dict:
                 f"This ZIP is not a cache backup: {key} is missing from {MANIFEST}"
             )
     return note
-
 
 # the manifest and every cache entry, after checking all of them. Nothing is written here
 def plan(archive) -> tuple[dict, list[tuple[zipfile.ZipInfo, str]]]:
@@ -351,7 +341,6 @@ def plan(archive) -> tuple[dict, list[tuple[zipfile.ZipInfo, str]]]:
         )
     return note, entries
 
-
 # ------------------------------------------------------
 # read every entry to its end, so zipfile checks the CRC, and compare the manifest with the entries
 def read_all(path, check, step=None) -> dict:
@@ -368,7 +357,6 @@ def read_all(path, check, step=None) -> dict:
                     if step:
                         step(done * 100 // total)
     return note
-
 
 # --------------------------------------------------------------
 # Raises ValueError when something is wrong
@@ -392,7 +380,6 @@ def verify(path, progress=None, cancel=None) -> Result:
         path=path, files=note["files"], size=os.path.getsize(path), sidecar=side
     )
 
-
 # false when dst exists. rename refuses to replace a file on Windows, link does it elsewhere
 def move_in(src, dst) -> bool:
     try:
@@ -404,7 +391,6 @@ def move_in(src, dst) -> bool:
     except FileExistsError:
         return False
     return True
-
 
 # put the files of a backup back in the cache. A file already there is kept, its name holds
 # what it was made from, so it is as good as the saved one. Every entry is checked before

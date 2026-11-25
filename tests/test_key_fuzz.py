@@ -1,3 +1,8 @@
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Damages and scrambles key files in seeded runs, checking the readers raise only their own errors and never hang.
+
 # damaged, cut and scrambled keys: the readers return or raise their own error, nothing else,
 # and never hang. Every loop is seeded and prints its seed when a case fails
 

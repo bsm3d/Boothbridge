@@ -1,3 +1,8 @@
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Read-only integrity check of audio files: header checks, full stream decode and an optional ClamAV scan.
+
 # read-only header and full-stream checks; decoder acceptance is not a checksum
 
 from __future__ import annotations

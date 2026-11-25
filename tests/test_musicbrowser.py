@@ -1,3 +1,8 @@
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Checks the music browser: its tree, copied data and actions, run offscreen with temporary folders.
+
 import copy
 import json
 import os

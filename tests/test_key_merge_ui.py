@@ -1,3 +1,8 @@
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Checks the key merge in the main window: the question before export, the Options setting and the help text.
+
 # main window side of the keys that already have playlists: the question before an export, the
 # Options setting, File > Open a CDJ USB key, the line next to Output, and the Help text
 

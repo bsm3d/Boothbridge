@@ -1,10 +1,11 @@
-# Benoit Saint-Moulin
-# Boothbridge : audio decoding and waveform bands
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Audio decoding and waveform band computation (low, mid, high) at several detail levels.
 
-# Traktor already did the musical analysis (bpm, grid, key, cues), only the waveforms need the audio.
-# Three bands per column: low < 200 Hz < mid < 2500 Hz < high, peaks normalised on the whole track.
-# The fine resolution (150 columns per second, what the players scroll) is computed once,
-# the overviews (1200, 400, 100) are taken from it
+# Traktor already did the musical analysis (bpm, grid, key, cues): only the waveforms need the audio.
+# Three bands per column: low below 200 Hz, mid below 2500 Hz, high above, peaks normalised on the whole track.
+# The fine resolution (150 columns per second) is computed once, and the overviews (1200, 400, 100) come from it.
 
 from __future__ import annotations
 
@@ -28,7 +29,6 @@ except ImportError:
 
 DETAIL = 150  # columns per second
 
-
 # ------------------------------------------------------------
 @dataclass
 class Bands:
@@ -40,7 +40,6 @@ class Bands:
     def __len__(self):
         return len(self.low)
 
-
 # --------------------------------------------------------------
 @lru_cache(maxsize=8)
 def filters(rate: int):
@@ -51,10 +50,8 @@ def filters(rate: int):
         butter(2, min(2500, top), "highpass", fs=rate, output="sos"),
     )
 
-
 # quarter rate (11 kHz for a CD rip) is plenty for a picture of the sound
 FOLD = 4
-
 
 # --------------------------------------------------------
 # average FOLD frames across channels into reduced-rate mono, slice accumulation is cheaper than a short-axis mean in workers
@@ -70,10 +67,8 @@ def fold(y, ch: int):
     out *= 1.0 / w
     return out
 
-
 BLOCK = 1 << 16  # frames, a multiple of FOLD
 QT_STALL_MS = 20000  # a decoder that gives nothing for this long is given up
-
 
 # block by block into one reused buffer: a whole track at once means ~150 MB of
 # fresh pages per file, and Windows serialises those page faults across processes
@@ -110,10 +105,8 @@ def read_sf(path: str):
                 break
     return out[:pos], 1, frames, sr
 
-
 # a process with no Qt application (a pool worker) gets a core one the first time it needs the decoder
 qt_core = None
-
 
 # the decoder Qt ships for the player, for what libsndfile cannot read: AAC (m4a, aac), ALAC. It runs as
 # fast as it can on the event loop of the calling thread, so any worker thread or process may use it
@@ -231,14 +224,12 @@ def read_qt(path: str):
         frames = max(frames, declared)
     return out, 1, frames, sr
 
-
 def read_librosa(path: str):
     # mp3 / m4a when libsndfile can't, much slower
     import librosa
 
     y, sr = librosa.load(path, sr=None, mono=True)
     return fold(y, 1), 1, len(y), sr
-
 
 # ------------------------------------------------------------
 # mono float32 samples at 1/FOLD of the file rate, that rate, and the frame count
@@ -256,17 +247,11 @@ def decode(path: str):
         return None, 0, 0
     return y, sr // FOLD, frames
 
-
 # --------------------------------------------------------
-# where each of n columns starts in a signal of `length` samples: column c is the samples
-# from c * length / n to (c + 1) * length / n, so the columns cover the whole signal at an even
-# pace
-# attention -> bug = every column took length // n samples and the tail was dropped: at
-# 44.1 kHz that is 73 samples for 73.5, a waveform 0.68 percent too slow. A sound at 5:50 was
-# drawn 2.4 s late, on the players and in the window
+# attention -> bug = length // n per column dropped the tail: at 44.1 kHz a waveform ran 0.68 percent slow, and a sound at 5:50 was drawn 2.4 s late.
+# Column c covers samples from c * length / n to (c + 1) * length / n, so the columns cover the whole signal at an even pace.
 def column_starts(length: int, n: int):
     return (np.arange(n, dtype=np.int64) * length) // n
-
 
 def peaks(sig, n: int):
     if n <= 0:
@@ -274,7 +259,6 @@ def peaks(sig, n: int):
     if len(sig) < n:
         return np.zeros(n, dtype="float32")
     return np.maximum.reduceat(np.abs(sig), column_starts(len(sig), n))
-
 
 # peak of a over n columns, a being a finer column array
 def shrink(a, n: int):
@@ -285,7 +269,6 @@ def shrink(a, n: int):
         if len(a)
         else np.zeros(n)
     )
-
 
 # ------------------------------------------------------------
 class Audio:

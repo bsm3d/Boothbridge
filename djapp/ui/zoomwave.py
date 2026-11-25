@@ -1,5 +1,7 @@
-# Benoit Saint-Moulin
-# Boothbridge : zoomable waveform (Ctrl+wheel), minute marks, cues and a scrub bar
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Zoomable waveform widget shared by the player and the cue editor, with cues, minute marks and a scrub bar.
 
 # shared by the player and the Cue Editor, detail loaded on demand. A click on the wave only
 # moves the needle; the overview scrubs the whole track and repositions the zoom window
@@ -35,9 +37,7 @@ GRID_HEAD = 12  # dedicated handle row, separate from cue letters
 HEAD = GRID_HEAD + 12
 OUT_X, OUT_Y = 60, 30  # px past the wave where releasing a dragged cue cancels the move
 
-
 TEXT_INPUTS = (QLineEdit, QAbstractSpinBox, QComboBox, QTextEdit, QPlainTextEdit)
-
 
 # ------------------------------------------------------------------
 # single-letter commands belong only to the active editor, never text entry
@@ -49,14 +49,12 @@ def letter_key(e, window: QWidget) -> bool:
         and not isinstance(QApplication.focusWidget(), TEXT_INPUTS)
     )
 
-
 def snap_key(e, window: QWidget) -> bool:
     return (
         letter_key(e, window)
         and e.key() == Qt.Key_S
         and e.modifiers() & ~Qt.KeypadModifier == Qt.NoModifier
     )
-
 
 # ------------------------------------------------------------------
 # for an event filter on the application: (slot 0-7, delete) when e is the key A-H
@@ -70,12 +68,10 @@ def hot_key(e, window: QWidget) -> tuple[int, bool] | None:
         return slot, mods == Qt.ShiftModifier
     return None
 
-
 def duration_text(seconds: float) -> str:
     hours, remainder = divmod(int(seconds), 3600)
     minutes, seconds = divmod(remainder, 60)
     return f"{hours}:{minutes:02d}:{seconds:02d}"
-
 
 # ----------------------------------------------------
 def clock(ms: float) -> str:
@@ -84,7 +80,6 @@ def clock(ms: float) -> str:
     s = ms / 1000
     return f"{int(s // 60):02d}:{s % 60:04.1f}"
 
-
 # ----------------------------------------------------
 def quantize_to_beat(t: Track | None, ms: float) -> float:
     if t is None or t.grid is None or t.bpm <= 0:
@@ -92,9 +87,7 @@ def quantize_to_beat(t: Track | None, ms: float) -> float:
     beat = MINUTE / t.bpm
     return max(0.0, t.grid + round((ms - t.grid) / beat) * beat)
 
-
 _pix: dict = {}
-
 
 # ----------------------------------------------------
 # cache the visible waveform; needle updates reuse the pixmap
@@ -125,7 +118,6 @@ def paint_wave(
         q.end()
         _pix[k] = (wave, pm)
     p.drawPixmap(int(rect.left()), int(rect.top()), pm)
-
 
 # a..b is the visible part of the wave, 0..1
 def draw_wave(
@@ -162,7 +154,6 @@ def draw_wave(
         p.setPen(QColor.fromRgbF(*cols[x]))
         p.drawLine(left + x, int(mid - h[x]), left + x, int(mid + h[x]))
 
-
 # ------------------------------------------------------
 def cue_color(c: Cue) -> str:
     if c.color:
@@ -170,7 +161,6 @@ def cue_color(c: Cue) -> str:
     if 0 <= c.hotcue < 8:
         return theme.CUE_COLORS[c.hotcue]
     return theme.LOOP_COLOR if c.is_loop else theme.MEMORY_COLOR
-
 
 def swatch(color: str) -> QIcon:
     pix = QPixmap(14, 14)
@@ -182,7 +172,6 @@ def swatch(color: str) -> QIcon:
     p.drawRoundedRect(1, 1, 12, 12, 3, 3)
     p.end()
     return QIcon(pix)
-
 
 # --------------------------------------------------------
 # visible beat times and bar starts, thinning the grid when beats are too close
@@ -198,7 +187,6 @@ def beat_grid_marks(
     last = int(np.floor((start + span - t.grid) / beat))
     first = ((first + stride - 1) // stride) * stride
     return [(t.grid + n * beat, n % 4 == 0) for n in range(first, last + 1, stride)]
-
 
 # ----------------------------------------------------
 # span is the visible length in ms (0 = the whole track), from start
@@ -242,7 +230,6 @@ def paint_cues(
                 QPolygonF([QPointF(x - 4, bt), QPointF(x + 4, bt), QPointF(x, bt - 7)])
             )
             p.setBrush(Qt.NoBrush)
-
 
 # ----------------------------------------------------
 class ZoomWave(QWidget):
@@ -707,7 +694,6 @@ class ZoomWave(QWidget):
             e.accept()
         else:
             e.ignore()
-
 
 # ----------------------------------------------------
 class ZoomControls(QWidget):

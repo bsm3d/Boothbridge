@@ -1,5 +1,7 @@
-# Benoit Saint-Moulin
-# Boothbridge : export.pdb against a real rekordbox export of the same tracks
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Compares Boothbridge's export.pdb with one rekordbox wrote for the same three tracks, layout and live rows.
 
 """The fixture is the export.pdb rekordbox 6 wrote for three tracks (no audio in the
 repo). Its content is read back, fed to our writer, and both files must agree on
@@ -22,16 +24,13 @@ FIX = Path(__file__).resolve().parent.parent / "fixtures" / "test_b_export.pdb"
 # the file is written by rekordbox, so it is not in the repository
 pytestmark = pytest.mark.skipif(not FIX.is_file(), reason="no rekordbox export.pdb fixture")
 
-
 def names(pdb, kind, name_at):
     return {struct.unpack_from("<I", r, id_at)[0]: rstr(r, off(r))
             for r in rows(pdb, kind) for id_at, off in [name_at]}
 
-
 @pytest.fixture(scope="module")
 def ref():
     return read(FIX.read_bytes())
-
 
 @pytest.fixture(scope="module")
 def ours(ref, tmp_path_factory):
@@ -70,7 +69,6 @@ def ours(ref, tmp_path_factory):
     P.write(items, [pl], out, today=track_strings(rows(ref, P.TRACKS)[0])[15], static=static)
     return read(out.read_bytes())
 
-
 # ============================================================
 # Layout
 # ============================================================
@@ -81,7 +79,6 @@ def test_header(ref, ours):
     for k, (ec, first, last) in ref.tables.items():
         assert ours.tables[k][1:] == (first, last), k
 
-
 def test_page_headers(ref, ours):
     for k, pages in ref.pages.items():
         assert len(ours.pages[k]) == len(pages), k
@@ -91,7 +88,6 @@ def test_page_headers(ref, ours):
             if k != P.HISTORY:
                 assert b.free + b.used + index_size(len(b.rows)) == HEAP
 
-
 # ============================================================
 # Rows
 # ============================================================
@@ -99,14 +95,12 @@ def test_page_headers(ref, ours):
 def content(r: bytes) -> bytes:
     return r.rstrip(b"\x00")
 
-
 @pytest.mark.parametrize("kind", [P.GENRES, P.ARTISTS, P.ALBUMS, P.KEYS, P.COLORS,
                                   P.PL_TREE, P.PL_ENTRIES, P.ARTWORK, P.COLUMNS, P.T17, P.T18])
 def test_rows(ref, ours, kind):
     a = sorted(content(r) for r in rows(ref, kind))
     b = sorted(content(r) for r in rows(ours, kind))
     assert a == b
-
 
 def test_tracks(ref, ours):
     a = {struct.unpack_from("<I", r, 0x48)[0]: bytearray(r) for r in rows(ref, P.TRACKS)}
@@ -122,13 +116,11 @@ def test_tracks(ref, ours):
         assert track_strings(ra) == track_strings(rb)
         assert content(ra) == content(rb), tid
 
-
 def test_long_strings_aligned(ours):
     for r in rows(ours, P.TRACKS):
         for o in struct.unpack_from("<21H", r, 0x5e):
             if r[o] in (0x40, 0x90):
                 assert o % 4 == 0
-
 
 def test_dstr():
     assert dstr("") == b"\x03"

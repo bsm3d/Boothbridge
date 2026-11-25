@@ -1,5 +1,7 @@
-# the FAT32 writer checked against the rules of the FAT specification, not against itself: the
-# geometry for drives of every size, and a parse of the structures it writes to an image
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Checks the FAT32 writer against the FAT specification geometry for every drive size, and parses its images.
 
 import random
 import struct

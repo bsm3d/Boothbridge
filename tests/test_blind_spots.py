@@ -1,5 +1,7 @@
-# what the first rounds of tests could not reach: collections written by other programs in odd ways,
-# and files that Windows refuses for a moment while an antivirus or the indexer looks at them
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Checks collections written oddly by other programs and files that Windows briefly refuses to open.
 
 import ctypes
 import os

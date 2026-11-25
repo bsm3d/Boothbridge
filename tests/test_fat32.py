@@ -1,3 +1,8 @@
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Checks FAT32 volume label cleaning: invalid characters are replaced and long labels are truncated.
+
 import struct
 import tempfile
 import unittest

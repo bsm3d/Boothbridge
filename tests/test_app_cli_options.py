@@ -1,5 +1,7 @@
-# the command line: --help prints the usage, an option nobody knows is refused, and none of the
-# two opens the window
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Checks the command line options: help text in every spelling, refused unknown options, and no window opened.
 
 import os
 import subprocess

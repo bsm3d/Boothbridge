@@ -1,20 +1,11 @@
-# Benoit Saint-Moulin
-# Boothbridge : Denon Engine DJ reader (the Engine Library folder of a drive or of a computer)
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Denon Engine DJ library reader, opened read-only, with the tracks, playlists, cues and loops from its SQLite file.
 
-# The library is a plain SQLite file, Engine Library/Database2/m.db, that Denon documents for third-party tools
-# (Engine DJ support article "Support for Third-Party Database Tools"). It is only ever opened read-only, and a
-# file that is not SQLite is refused by protected.py before this reader sees it. What is read:
-#   Track          the tags, the path (relative to the Engine Library folder), the key (0-23), the rating (0-100)
-#   Playlist       the tree, parentListId, the order of the siblings follows nextListId
-#   PlaylistEntity the tracks of a list, in the order of nextEntityId. An entry of another database is found
-#                  again by the pair (databaseUuid, trackId) against Track.originDatabaseUuid, originTrackId
-#   PerformanceData (a view in 2.x, a table in 3.x; in older files the same columns are on Track): zlib blobs
-#                  trackData, beatData, quickCues, loops. The layouts come from public documentation
-#                  (the Mixxx wiki, Denon article) and not from a file of my own, so every number read from a
-#                  blob is checked for sense. A blob that does not make sense leaves the track with its tags
-#                  and no cues, never with a wrong cue
-# The libraries of Engine Prime 1.x (m.db and p.db beside each other, titles in a MetaData table) are not read:
-# Engine DJ 4 and later do not read them either
+# Engine Library/Database2/m.db is a plain SQLite file that Denon documents for third-party tools, only ever opened read-only (protected.py refuses non-SQLite).
+# Read: Track (tags, relative path, key 0-23, rating 0-100), Playlist tree, PlaylistEntity in nextEntityId order, other-database entries by databaseUuid, trackId.
+# zlib blobs in PerformanceData are checked for sense: a bad one leaves the track with tags and no cues, never a wrong cue. Engine Prime 1.x is not read.
 
 from __future__ import annotations
 
@@ -67,7 +58,6 @@ KEY_NAMES = (
     "Dm",
 )
 
-
 # the m.db a path stands for: the file itself, the Database2 folder, the Engine Library folder or the drive
 def find_db(path: str) -> Path | None:
     p = Path(path)
@@ -89,14 +79,12 @@ def find_db(path: str) -> Path | None:
         return None
     return None
 
-
 def is_sqlite(p: Path) -> bool:
     try:
         with open(p, "rb") as f:
             return f.read(16) == b"SQLite format 3\0"
     except OSError:
         return False
-
 
 def detect(path: str) -> bool:
     db = find_db(path)
@@ -117,7 +105,6 @@ def detect(path: str) -> bool:
         return False
     return all(t in have for t in TABLES)
 
-
 def connect(db: Path) -> sqlite3.Connection:
     uri = sqlite_uri(db)
     for options in ("?mode=ro", "?mode=ro&immutable=1"):
@@ -131,7 +118,6 @@ def connect(db: Path) -> sqlite3.Connection:
             if con is not None:
                 con.close()
     raise ValueError(f"{db.name} cannot be opened for reading")
-
 
 # ------------------------------------------------------------
 # a zlib blob, with or without the 4-byte length that Qt puts in front of it. A blob that does not unpack, or that
@@ -148,7 +134,6 @@ def unpack(blob) -> bytes:
         except zlib.error:
             continue
     return b""
-
 
 class Reader:
     def __init__(self, data: bytes, little: bool = False):
@@ -179,10 +164,8 @@ class Reader:
         self.pos += n
         return out
 
-
 def finite(x: float) -> bool:
     return not (math.isnan(x) or math.isinf(x))
-
 
 # ------------------------------------------------------------
 # trackData: sample rate, number of samples, loudness, key
@@ -202,7 +185,6 @@ def read_track_data(blob) -> tuple[float, int] | None:
         ):
             return rate, samples
     return None
-
 
 # beatData: the beat markers of the grid. Returns (bpm, first beat in ms) or None
 def read_beat_data(blob) -> tuple[float, float] | None:
@@ -259,7 +241,6 @@ def read_beat_data(blob) -> tuple[float, float] | None:
         return bpm, origin / rate * 1000.0
     return None
 
-
 # markers: sample offset (double), beat index (int64), beats to the next marker and one unknown field (int32 each)
 def read_markers(
     r: Reader, count: int, rate: float, samples: float
@@ -290,7 +271,6 @@ def read_markers(
         r.pos = start
     raise ValueError("markers")
 
-
 # quickCues: eight hot cues, then the main cue
 def read_quick_cues(blob, rate: float, samples: float) -> list[Cue]:
     data = unpack(blob)
@@ -318,7 +298,6 @@ def read_quick_cues(blob, rate: float, samples: float) -> list[Cue]:
         except (ValueError, struct.error):
             continue
     return []
-
 
 # loops: eight slots, positions as doubles in samples
 def read_loops(blob, rate: float, samples: float) -> list[Cue]:
@@ -364,26 +343,21 @@ def read_loops(blob, rate: float, samples: float) -> list[Cue]:
             continue
     return []
 
-
 def whole(x) -> int:
     v = num(x)
     return int(v) if abs(v) < 1e12 else 0
 
-
 def text(x) -> str:
     return "" if x is None else str(x)
-
 
 # a column that older or newer schemas may not have
 def col(row: sqlite3.Row, name: str, default=None):
     names = row.keys()
     return row[name] if name in names else default
 
-
 # four bytes, alpha first, as the colour of a cue
 def rgb(argb: bytes) -> str:
     return f"#{argb[1]:02X}{argb[2]:02X}{argb[3]:02X}"
-
 
 def read_date(x) -> str:
     if isinstance(x, (int, float)):
@@ -391,13 +365,11 @@ def read_date(x) -> str:
     s = text(x)
     return unix_date(s) if s.isdigit() else s[:10]
 
-
 def track_path(base: Path, path: str) -> str:
     p = path.replace("\\", "/")
     if p.startswith("/") or (len(p) > 1 and p[1] == ":"):
         return os.path.normpath(p)
     return os.path.normpath(str(base / p))
-
 
 def chain(rows: list[sqlite3.Row], next_key: str) -> list[sqlite3.Row]:
     # a linked list kept in the table: every row names the next one, 0 ends it. What does not link in keeps its id order
@@ -415,10 +387,8 @@ def chain(rows: list[sqlite3.Row], next_key: str) -> list[sqlite3.Row]:
     out += [r for r in sorted(rows, key=lambda r: r["id"]) if r["id"] not in seen]
     return out
 
-
 def columns(con: sqlite3.Connection, table: str) -> set[str]:
     return {r[1] for r in con.execute(f"PRAGMA table_info({table})")}
-
 
 def load(
     path: str, music_root: str = "", progress: Progress | None = None
@@ -437,7 +407,6 @@ def load(
         raise ValueError(f"{db.name} cannot be read as an Engine library ({e})") from e
     finally:
         con.close()
-
 
 def read_library(
     con: sqlite3.Connection, db: Path, music_root: str, cb: Progress
@@ -600,7 +569,6 @@ def read_library(
         roots.append(Node("playlist", "All tracks", tracks=list(tracks.values())))
     cb(100, f"{len(tracks)} tracks")
     return roots
-
 
 def apply_performance(t: Track, blob: sqlite3.Row):
     data = read_track_data(blob["trackData"])

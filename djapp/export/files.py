@@ -1,5 +1,7 @@
-# Benoit Saint-Moulin
-# Boothbridge : audio copies shared by every export
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Audio copy engine shared by every export: safe file names, pipelined copies with verification and progress.
 
 from __future__ import annotations
 
@@ -32,7 +34,6 @@ _DEVICES = {
     *(f"LPT{i}" for i in range(1, 10)),
 }
 
-
 # ------------------------------------------------------------
 @dataclass
 class Report:
@@ -59,7 +60,6 @@ class Report:
     # CDJ key: player settings chosen in the program that were written to the file on the key
     settings_set: int = 0
 
-
 # ----------------------------------------------------------
 # FAT32 friendly name, keeps the accents like rekordbox does
 def safe_name(s: str, limit: int = 0) -> str:
@@ -70,7 +70,6 @@ def safe_name(s: str, limit: int = 0) -> str:
     if s.split(".")[0].rstrip().upper() in _DEVICES:
         s = "_" + s
     return s or "_"
-
 
 # ----------------------------------------------------------
 # hands out destination names, never twice the same (case insensitive, FAT)
@@ -89,7 +88,6 @@ class Planner:
         self.taken.add(cand.lower())
         return cand
 
-
 # ------------------------------------------------------
 # USB key or card: one copy at a time, parallel writes fragment the FAT
 # and the flash controller serialises them anyway
@@ -101,7 +99,6 @@ def removable(path: str) -> bool:
     root = os.path.splitdrive(os.path.abspath(path))[0] + "\\"
     return ctypes.windll.kernel32.GetDriveTypeW(root) == 2
 
-
 # --------------------------------
 def same_file(a: str, b: str) -> bool:
     try:
@@ -109,9 +106,7 @@ def same_file(a: str, b: str) -> bool:
     except OSError:
         return False
 
-
 SAMPLE = 64 << 10
-
 
 # ----------------------------------------------------------
 # same size, and the same bytes at the start, in the middle and at the end. 192 KB of
@@ -134,7 +129,6 @@ def same_content(a: str, b: str) -> bool:
         return False
     return True
 
-
 # ----------------------------------------------------------
 def _todo(jobs) -> int:
     n = 0
@@ -146,7 +140,6 @@ def _todo(jobs) -> int:
         except OSError:
             pass
     return n
-
 
 # ----------------------------------------------------------
 # (True, sha) when dst is already a good copy. The sha is None when it was trusted
@@ -164,7 +157,6 @@ def _already(src: str, dst: str, size: int, verify: bool) -> tuple[bool, str | N
         if sha256_file(src) == sha:
             return True, sha
     return False, None
-
 
 # ----------------------------------------------------------
 # bytes actually written, 0 when the file was already there. The copy is hashed
@@ -195,7 +187,6 @@ def copy_one(src: str, dst: str, verify: bool, man: Manifest | None = None) -> i
     if man:
         man.add(dst, h.hexdigest())
     return size
-
 
 # ------------------------------------------------------------------
 # reads the sources in order, ahead of the writer, into a bounded queue. The
@@ -232,7 +223,6 @@ def _read_ahead(jobs, verify: bool, q: queue.Queue, stop: threading.Event):
         except OSError as e:
             if not put((i, "err", e)):
                 return
-
 
 # ----------------------------------------------------------
 # one writer fed by a reader thread: for a removable drive, where parallel writes
@@ -334,7 +324,6 @@ def copy_pipelined(
         reader.join(timeout=5)
     return errors
 
-
 # ----------------------------------------------------------
 def eta(done: int, total: int, t0: float) -> str:
     dt = time.monotonic() - t0
@@ -343,7 +332,6 @@ def eta(done: int, total: int, t0: float) -> str:
     rate = done / dt
     left = (total - done) / rate
     return f"{rate / 1e6:.1f} MB/s, {int(left // 60)}:{int(left % 60):02d} left"
-
 
 # ----------------------------------------------------------
 # jobs: (src, dst). progress(i, n, info) with the speed and time left.
@@ -375,7 +363,6 @@ def copy_all(
             if progress:
                 progress(done, len(jobs), eta(written, todo, t0))
     return errors
-
 
 def present(t: Track) -> bool:
     return bool(t.path) and os.path.isfile(t.path)

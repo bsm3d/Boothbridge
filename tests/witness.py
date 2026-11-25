@@ -1,3 +1,8 @@
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Independent tag library used only by the tag tests to read back what the program's own tag code wrote.
+
 # The independent witness of the tag tests: a tag library that the program neither uses nor ships.
 # It only reads back what the program's own tag code wrote. Without it the tests that need it are skipped
 # (pip install -r tests/requirements.txt).

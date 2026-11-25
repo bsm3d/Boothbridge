@@ -1,3 +1,8 @@
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Checks backup and restore of the analysis cache, with the file dialogs and message boxes replaced.
+
 # back up and restore of the analysis cache: the module without Qt, then the buttons of the
 # Options window (CDJ tab) with the file dialogs and the message boxes replaced
 

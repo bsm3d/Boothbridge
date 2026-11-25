@@ -1,7 +1,10 @@
-# centre de test Boothbridge : python tests/test_center.py
-#
-# Sans argument, ouvre la fenêtre. Avec --monkey, --memory ou --random, lance la même séance sans
-# fenêtre (voir tests/center/cli.py) : python tests/test_center.py --monkey --seed 7 --steps 300
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Entry point of the test center, which opens its window or runs the same sessions headless.
+
+# Sans argument, ouvre la fenêtre. Avec --monkey, --memory ou --random, la même séance tourne sans fenêtre (voir tests/center/cli.py).
+# python tests/test_center.py
 
 from __future__ import annotations
 

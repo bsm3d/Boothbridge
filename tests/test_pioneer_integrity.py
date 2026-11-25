@@ -1,3 +1,8 @@
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Checks the integrity of Pioneer export files against the audio they point to, with a mocked audio source.
+
 import struct
 import tempfile
 import unittest

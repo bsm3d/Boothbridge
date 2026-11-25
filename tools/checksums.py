@@ -1,11 +1,10 @@
-# Benoit Saint-Moulin
-# Boothbridge : the SHA-256 sums of the files of a release
-#
-#   python tools/checksums.py FILE [FILE ...] [--out SHA256SUMS.txt]
-#
-# One line per file, "hash *name", the format that `sha256sum -c` and most checking tools read. To check a download:
-#   Windows (PowerShell):  Get-FileHash FILE -Algorithm SHA256
-#   Linux and macOS:       sha256sum -c SHA256SUMS.txt
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Command line tool that writes the SHA-256 sums of release files in the format that sha256sum -c reads.
+
+# One line per file, "hash *name", the format sha256sum -c reads. To check a download, use Get-FileHash (Windows) or sha256sum -c (Linux, macOS).
+# python tools/checksums.py FILE [FILE ...] [--out SHA256SUMS.txt]
 
 from __future__ import annotations
 
@@ -13,14 +12,12 @@ import hashlib
 import sys
 from pathlib import Path
 
-
 def sha256(path: Path) -> str:
     h = hashlib.sha256()
     with open(path, "rb") as fh:
         for block in iter(lambda: fh.read(1 << 20), b""):
             h.update(block)
     return h.hexdigest()
-
 
 def main(argv: list[str]) -> int:
     out = None
@@ -48,7 +45,6 @@ def main(argv: list[str]) -> int:
         out.write_text(text, encoding="ascii", newline="\n")
     print(text, end="")
     return 0
-
 
 if __name__ == "__main__":
     sys.exit(main(sys.argv[1:]))

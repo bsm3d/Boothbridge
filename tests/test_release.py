@@ -1,3 +1,8 @@
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Checks the release checksums file against hashlib and that a missing checksum file makes the check fail.
+
 import hashlib
 import importlib.util
 from pathlib import Path

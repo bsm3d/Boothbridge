@@ -1,3 +1,8 @@
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Checks the shipped source tree for denied file names and the rules for text files.
+
 import importlib.util
 import os
 import subprocess

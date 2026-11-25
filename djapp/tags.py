@@ -1,5 +1,7 @@
-# Benoit Saint-Moulin
-# Boothbridge : what the collection doesn't say, read from the audio file itself
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Reads artwork, comments and stream information from audio files that the collection does not provide.
 
 # artwork and DJ objects read from ID3v2, FLAC and MP4 containers.
 # soundfile supplies missing stream information when available
@@ -23,7 +25,6 @@ try:
 except ImportError:
     soundfile = None
 
-
 # duration and sample rate when the source had none (M3U, some XML)
 def fill(t: Track):
     if soundfile is None or (t.duration and t.samplerate):
@@ -38,15 +39,12 @@ def fill(t: Track):
     if not t.bitrate and i.duration:
         t.bitrate = round(os.path.getsize(t.path) * 8 / i.duration / 1000)
 
-
 # ----------------------------------------------------------------
 # ID3 (mp3, and the ID3 chunk of aiff / wav)
 # ----------------------------------------------------------------
 
-
 def syncsafe(b: bytes) -> int:
     return b[0] << 21 | b[1] << 14 | b[2] << 7 | b[3]
-
 
 # past a NUL terminated string, 2 byte NUL for the UTF-16 encodings
 def skip_text(buf: bytes, pos: int, enc: int) -> int:
@@ -56,7 +54,6 @@ def skip_text(buf: bytes, pos: int, enc: int) -> int:
         return pos + 2
     end = buf.find(b"\0", pos)
     return (end if end >= 0 else len(buf)) + 1
-
 
 # ID3v2 at the start of MP3, or inside an AIFF/WAV ID3 chunk
 def id3_block(f) -> bytes | None:
@@ -80,7 +77,6 @@ def id3_block(f) -> bytes | None:
         if ch[:4].lower() == b"id3 ":
             return f.read(size) if size <= MAX_TAG else None
         pos += 8 + size + (size & 1)
-
 
 # ----------------------------------------------------------------
 # (frame id, body) for every frame of an ID3v2 tag
@@ -116,7 +112,6 @@ def id3_frames(tag: bytes):
         pos += hl + size
         yield fid, body
 
-
 # ----------------------------------------------------------------
 def id3_picture(tag: bytes) -> bytes | None:
     pics = []
@@ -130,7 +125,6 @@ def id3_picture(tag: bytes) -> bytes | None:
         pics.append((kind, body[p:]))
     front = [d for k, d in pics if k == 3]
     return (front or [d for _, d in pics] or [None])[0]
-
 
 # ------------------------------------------------------
 # GEOB frame by its description (the cue and grid objects other DJ programs write), the object data only
@@ -151,11 +145,9 @@ def id3_geob(tag: bytes, desc: str) -> bytes | None:
             return body[end:]
     return None
 
-
 # --------------------------------------------------
 # FLAC
 # --------------------------------------------------
-
 
 def flac_blocks(f):
     if f.read(4) != b"fLaC":
@@ -168,7 +160,6 @@ def flac_blocks(f):
         yield kind, f.read(size)
         if last:
             return
-
 
 # ------------------------------------------------------
 def flac_picture(f) -> bytes | None:
@@ -183,7 +174,6 @@ def flac_picture(f) -> bytes | None:
             pics.append((ptype, data[p + 4 : p + 4 + n]))
     front = [d for k, d in pics if k == 3]
     return (front or [d for _, d in pics] or [None])[0]
-
 
 # Vorbis comments, keys upper case
 def flac_comments(f) -> dict[str, str]:
@@ -203,11 +193,9 @@ def flac_comments(f) -> dict[str, str]:
             p += 4 + ln
     return out
 
-
 # ------------------------------------------------------------------------
 # MP4
 # ----------------------------------------------------------------------
-
 
 # ----------------------------------------
 # the moov atom only, an m4a can weigh hundreds of MB
@@ -233,7 +221,6 @@ def mp4_moov(f) -> bytes | None:
         p += size
     return None
 
-
 # ----------------------------------------------------------------
 def mp4_atoms(data: bytes, start: int, end: int):
     p = start
@@ -249,7 +236,6 @@ def mp4_atoms(data: bytes, start: int, end: int):
         yield name, p + hl, min(p + size, end)
         p += size
 
-
 # --------------------------------------------------------------
 def mp4_find(data: bytes, path: list[bytes], start: int, end: int):
     for name, a, b in mp4_atoms(data, start, end):
@@ -260,7 +246,6 @@ def mp4_find(data: bytes, path: list[bytes], start: int, end: int):
             return mp4_find(data, path[1:], a + 4 if name == b"meta" else a, b)
     return None
 
-
 # ----------------------------------------
 def mp4_picture(f) -> bytes | None:
     data = mp4_moov(f)
@@ -268,7 +253,6 @@ def mp4_picture(f) -> bytes | None:
         return None
     hit = mp4_find(data, [b"udta", b"meta", b"ilst", b"covr", b"data"], 0, len(data))
     return data[hit[0] + 8 : hit[1]] if hit else None
-
 
 MP4_TEXT = {
     b"\xa9nam": "title",
@@ -280,7 +264,6 @@ MP4_TEXT = {
     b"aART": "album_artist",
     b"\xa9wrt": "composer",
 }
-
 
 def mp4_tags(f) -> dict[str, str]:
     data = mp4_moov(f)
@@ -318,13 +301,11 @@ def mp4_tags(f) -> dict[str, str]:
     out.update(custom)
     return out
 
-
 # ----------------------------------------------------------------
 # entry points
 # ----------------------------------------------------------------
 
 MP4 = (".m4a", ".mp4", ".aac", ".alac")
-
 
 # ----------------------------------------------------------------
 def artwork(path: str) -> bytes | None:
@@ -341,7 +322,6 @@ def artwork(path: str) -> bytes | None:
         log.debug("artwork %s: %s", path, e)
         return None
 
-
 # ----------------------------------------------------------------
 def geob(path: str, desc: str) -> bytes | None:
     if os.path.splitext(path)[1].lower() in MP4 + (".flac", ".ogg"):
@@ -354,7 +334,6 @@ def geob(path: str, desc: str) -> bytes | None:
         log.debug("geob %s: %s", path, e)
         return None
 
-
 # ----------------------------------------------------------------
 def comments(path: str) -> dict[str, str]:
     if os.path.splitext(path)[1].lower() != ".flac":
@@ -365,7 +344,6 @@ def comments(path: str) -> dict[str, str]:
     except (OSError, IndexError, struct.error) as e:
         log.debug("comments %s: %s", path, e)
         return {}
-
 
 # --------------------------------------------------------------
 # Basic tags, for a folder of music with no collection
@@ -415,14 +393,12 @@ VORBIS = {
     "DISCNUMBER": "disc_no",
 }
 
-
 # ----------------------------------------------------------------
 def id3_text(body: bytes, skip: int = 0) -> str:
     enc = body[0] if body else 0
     raw = body[1 + skip :]
     codec = {0: "latin-1", 1: "utf-16", 2: "utf-16-be", 3: "utf-8"}.get(enc, "latin-1")
     return raw.decode(codec, "replace").split("\0")[0].strip()
-
 
 def id3_tags(tag: bytes) -> dict[str, str]:
     out: dict[str, str] = {}
@@ -442,7 +418,6 @@ def id3_tags(tag: bytes) -> dict[str, str]:
             if "comment" not in out or body[1:4] == b"eng":
                 out["comment"] = value
     return out
-
 
 # ----------------------------------------------------------------
 # title, artist, album, album_artist, genre, year, comment, track_no, bpm and key as

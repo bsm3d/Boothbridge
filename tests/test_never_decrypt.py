@@ -1,3 +1,8 @@
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Checks the never-decrypt rule for files the program reads, using sqlite and regex checks on test inputs.
+
 import re
 import sqlite3
 import tempfile

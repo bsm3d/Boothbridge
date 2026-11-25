@@ -1,6 +1,10 @@
-# two different songs that get the same name on the key must both stay on it. The name comes
-# from artist, album and file name, so two untagged track01.flac from different folders ask for the
-# same place. Merging them used to take the second for the first and replace its audio
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Checks that two different songs with the same generated name both stay on the key without replacing each other.
+
+# Two different songs with the same generated name (artist, album, file name) must both stay on the key.
+# Two untagged track01.flac from different folders ask for the same name. Merging used to replace the first one's audio with the second's.
 
 import hashlib
 import os

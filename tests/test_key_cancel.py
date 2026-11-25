@@ -1,5 +1,7 @@
-# cancelling the read of the database on a key: key_summary and the page reader stop between
-# pages, the stamp tells whether a summary is still current
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Checks that cancelling a key read stops between pages and that the stamp tells whether a summary is current.
 
 import os
 import threading

@@ -1,3 +1,8 @@
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Checks that timing exports carry the right positions, with empty audio and mocked analysis.
+
 import struct
 import tempfile
 import unittest

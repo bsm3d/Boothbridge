@@ -1,3 +1,8 @@
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Checks the tag editor window: loading, editing and writing tags of the selected files.
+
 import os
 import tempfile
 import time

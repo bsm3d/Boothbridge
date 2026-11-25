@@ -1,10 +1,10 @@
-# Benoit Saint-Moulin
-# Boothbridge : reading the playlists already on a CDJ key and merging new ones into them
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Reads the playlists already on a CDJ key and merges new ones into them without losing existing ones.
 
-# A key that already holds playlists would lose them to a fresh export.pdb, so an
-# export reads the key first and merges into it. Layout from rekordbox keys and the
-# crate-digger research, nothing from Pioneer code. The merge is pure tree handling
-# with no I/O, so a window can show the outcome before anything is written.
+# An export reads the key first and merges into it: a fresh export.pdb would lose the playlists already there.
+# Layout from rekordbox keys and crate-digger research. The merge is pure tree handling with no I/O, so a window can show the outcome before anything is written.
 
 from __future__ import annotations
 
@@ -26,7 +26,6 @@ SEP = " / "
 # rekordbox files beside export.pdb, never written here
 FOREIGN = ("exportext.pdb", "exportlibrary.db")
 
-
 # ----------------------------------------------------------------
 # keep is the settings.DEFAULTS value, anything but "replace" counts as keep. A config
 # with no key_mode at all (built by hand) gets the old behaviour: replace.
@@ -35,7 +34,6 @@ def keeping(cfg: dict) -> bool:
         return False
     mode = str(cfg["key_mode"]).strip().lower()
     return mode != "replace"
-
 
 @dataclass
 class KeySummary:
@@ -47,7 +45,6 @@ class KeySummary:
     readable: bool = True
     error: str = ""
     others: list[str] = field(default_factory=list)
-
 
 # --------------------------------------------------
 # path, size, mtime: stat only, enough to know if an earlier summary is still valid
@@ -61,7 +58,6 @@ def key_stamp(out: str) -> tuple[str, int, int] | None:
     except OSError:
         return None
     return db_path, info.st_size, info.st_mtime_ns
-
 
 # ------------------------------------------------------------
 # with a cancel event the file is read by blocks, so a slow drive can be abandoned midway
@@ -78,7 +74,6 @@ def read_db(db: str, cancel: threading.Event | None) -> bytes:
                 return b"".join(blocks)
             blocks.append(block)
 
-
 # ------------------------------------------------------------
 # real names on the key (exportExt.pdb, exportLibrary.db), an export only changes export.pdb
 def foreign_files(db: str) -> list[str]:
@@ -87,7 +82,6 @@ def foreign_files(db: str) -> list[str]:
     except OSError:
         return []
     return sorted(name for name in entries if name.lower() in FOREIGN)
-
 
 # ------------------------------------------------------------
 # flat display names in player order, Folder / Sub / Name. depth says how many of the folders met still enclose the entry.
@@ -103,7 +97,6 @@ def _flatten_outline(placed) -> tuple[int, list[str]]:
         else:
             display_names.append(SEP.join([*enclosing, node.name]))
     return folder_count, display_names
-
 
 # ------------------------------------------------------------
 # None without a database. An unreadable one does not raise: readable=False and the
@@ -132,7 +125,6 @@ def key_summary(out: str, cancel: threading.Event | None = None) -> KeySummary |
         others=foreign_files(db_path),
     )
 
-
 # ------------------------------------------------------------
 # a read failure is re-raised with advice, nothing on the key has been modified at that point
 def read_existing(out: str, progress=None) -> key.KeyData | None:
@@ -146,7 +138,6 @@ def read_existing(out: str, progress=None) -> key.KeyData | None:
             f"its database, or restore {BACKUP} if there is one."
         ) from err
 
-
 # ------------------------------------------------------------
 # export.pdb.bak beside it, an older one is overwritten. Atomic writer: whole or absent. Returns "" when there was no database.
 def backup(db: str) -> str:
@@ -158,24 +149,16 @@ def backup(db: str) -> str:
     write_atomic(copy_path, content)
     return copy_path
 
-
 def count_playlists(nodes: list[Node]) -> int:
     return sum(1 for _ in playlists(nodes))
-
 
 def _same_entry(a: Node, b: Node) -> bool:
     return a.is_folder == b.is_folder and a.name.casefold() == b.name.casefold()
 
-
 # ------------------------------------------------------------
 # Returns (merged tree, names replaced as Folder / Name). Neither input is modified.
-# - existing entries keep their order
-# - same folder path and name (case ignored): the new playlist takes the old one's place,
-#   existing folders are merged into level by level
-# - anything else is added after the existing entries of its folder
-# - a track is identified by ident(track), lower case path by default, and ends up as one
-#   Track object everywhere. On a shared identity the new track wins, in the playlists
-#   that stay too.
+# Same folder path and name (case ignored): the new playlist takes the old place, folders merge level by level. Other new entries go after the existing ones.
+# A track is identified by ident(track) (lower case path by default); on a shared identity the new track wins, in the playlists that stay too.
 def merge(
     new_nodes: list[Node],
     existing_nodes: list[Node],
@@ -253,7 +236,6 @@ def merge(
         return result
 
     return merge_level(new_nodes, existing_nodes, []), replaced_names
-
 
 # ------------------------------------------------------------
 # which playlists on the key an export would replace, from the summary alone (no second read of the key). Same rule as merge.

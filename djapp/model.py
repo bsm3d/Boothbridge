@@ -1,5 +1,7 @@
-# Benoit Saint-Moulin
-# Boothbridge : collection model shared by every source and every export
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Collection model shared by every source and export: tracks, cues and playlist nodes, with fixed units.
 
 # units are fixed here once, so parsers convert on the way in and exporters on the way
 # out: durations in seconds, positions in ms, bitrate in kbps, size in bytes, rating 0-5,
@@ -14,7 +16,6 @@ from dataclasses import dataclass, field
 CUE, FADE_IN, FADE_OUT, LOAD, GRID, LOOP = range(6)
 LOOP_BEATS = (1, 2, 4, 8)
 
-
 # --------------------------------------------------
 @dataclass(slots=True)
 class Cue:
@@ -28,7 +29,6 @@ class Cue:
     @property
     def is_loop(self) -> bool:
         return self.length > 0
-
 
 # ----------------------------------------------------------------
 @dataclass(slots=True, eq=False)
@@ -82,7 +82,6 @@ class Track:
     def memory_cues(self) -> list[Cue]:
         return [c for c in self.cues if c.hotcue < 0 and c.kind in (CUE, LOOP, LOAD)]
 
-
 # ----------------------------------------------------------------
 @dataclass(slots=True, eq=False)
 class Node:
@@ -97,7 +96,6 @@ class Node:
     def is_folder(self) -> bool:
         return self.kind == "folder"
 
-
 # ------------------------------------------------------------
 def playlists(nodes: list[Node]) -> Iterator[Node]:
     for n in nodes:
@@ -105,7 +103,6 @@ def playlists(nodes: list[Node]) -> Iterator[Node]:
             yield from playlists(n.children)
         else:
             yield n
-
 
 def unique_tracks(nodes: list[Node]) -> list[Track]:
     seen, out = set(), []
@@ -115,7 +112,6 @@ def unique_tracks(nodes: list[Node]) -> list[Track]:
                 seen.add(t.uid)
                 out.append(t)
     return out
-
 
 # ----------------------------------------------------------------
 # takes node out of the tree, wherever it sits. False when it is not there. Its tracks are
@@ -128,7 +124,6 @@ def detach(nodes: list[Node], node: Node) -> bool:
         if n.is_folder and detach(n.children, node):
             return True
     return False
-
 
 # ----------------------------------------------------------------
 # copy of the tree reduced to the playlists whose id() is in keep, folders kept

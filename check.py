@@ -1,3 +1,8 @@
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Local regression gate that runs Ruff, compileall and the test suite on the djapp package.
+
 # fail-fast local regression gate: python check.py
 
 from __future__ import annotations

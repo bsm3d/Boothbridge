@@ -1,4 +1,7 @@
-# A PCM click track, buffered on its own output and following the preview clock
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : PCM click track generator and Qt metronome controls that follow the preview clock.
 
 from __future__ import annotations
 

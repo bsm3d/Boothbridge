@@ -1,5 +1,7 @@
-# Benoit Saint-Moulin
-# Boothbridge : iTunes XML export, the Library.xml that Apple Music and iTunes import
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : iTunes XML export writing a Library.xml property list that Apple Music and iTunes can import.
 
 # A property list written by plistlib: header, Tracks keyed by track id, Playlists as a
 # flat array where a folder is a playlist with Folder true and its children point at it
@@ -34,16 +36,13 @@ KINDS = {
     ".flac": "FLAC audio file",
 }
 
-
 def word(s) -> str:
     return clean(text(s, 255))
-
 
 # 16 hexadecimal digits, the same for the same thing every time so that a second export
 # of one library does not create new tracks in a program that matched the first
 def persistent(seed: str) -> str:
     return hashlib.sha1(seed.encode("utf-8", "replace")).hexdigest()[:16].upper()
-
 
 # file://localhost/C:/Music/a%20b.mp3, and file://localhost/Users/me/a.mp3 on a Mac
 def location(path: str) -> str:
@@ -55,13 +54,11 @@ def location(path: str) -> str:
     lead = "file://localhost" if p.startswith("/") else "file://localhost/"
     return lead + quote(p, safe="/:")
 
-
 def date_of(s: str) -> datetime | None:
     try:
         return datetime.fromisoformat(s[:10])
     except ValueError:
         return None
-
 
 # ----------------------------------------------------------------
 def entry(t: Track, ident: int, path: str) -> dict:
@@ -116,7 +113,6 @@ def entry(t: Track, ident: int, path: str) -> dict:
     d["Location"] = location(path)
     return d
 
-
 # ----------------------------------------------------------------
 class Builder:
     def __init__(self, ids: dict[str, int], cancel: threading.Event | None):
@@ -158,7 +154,6 @@ class Builder:
                 self.add(n.children, pid, here)
             else:
                 d["Playlist Items"] = self.listed(n)
-
 
 # ----------------------------
 def export(

@@ -1,3 +1,8 @@
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Regression tests for the 1.0.0 review: settings types, command line options, paths and iTunes locations.
+
 # defects found by the skeptical review before 1.0.0: a hand edited settings file, options of the command line,
 # paths that are not drive letters, a relative Mixxx path, an iTunes location that is not a URL
 

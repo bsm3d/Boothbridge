@@ -1,3 +1,8 @@
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Checks the zoomed beat grid waveform: beat and bar marks drawn on the track, run offscreen.
+
 import os
 import unittest
 

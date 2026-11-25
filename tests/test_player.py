@@ -1,3 +1,8 @@
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Checks the playlist player's cue handling, run offscreen with mocked audio output.
+
 import os
 import unittest
 from unittest.mock import patch

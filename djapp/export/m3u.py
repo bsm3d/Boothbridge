@@ -1,5 +1,7 @@
-# Benoit Saint-Moulin
-# Boothbridge : M3U8 export, one file per playlist, folders kept as folders
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : M3U8 playlist export, one file per playlist with folders kept as folders.
 
 from __future__ import annotations
 
@@ -12,10 +14,8 @@ from .files import Planner, Report, safe_name
 from .fit import fit, text
 from .manifest import Manifest, sha256_bytes, write_atomic
 
-
 def line(s: str) -> str:
     return text(s, 32767).replace("\r", " ").replace("\n", " ")
-
 
 # ----------------------------------------------------------------
 def write_list(
@@ -46,7 +46,6 @@ def write_list(
     if man:
         man.add(path, sha256_bytes(data))
 
-
 def walk(
     nodes: list[Node],
     folder: str,
@@ -74,7 +73,6 @@ def walk(
         write_list(n, path, moved, relative, man)
         count += 1
     return count
-
 
 # ----------------------------
 def export(

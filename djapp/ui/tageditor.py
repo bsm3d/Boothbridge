@@ -1,4 +1,7 @@
-# project metadata first; writing the source audio is a separate, confirmed operation
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Qt dialog that edits a track's metadata in the project first, and writes the source audio file only on confirmation.
 
 from __future__ import annotations
 

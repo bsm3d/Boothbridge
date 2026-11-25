@@ -1,5 +1,7 @@
-# Benoit Saint-Moulin
-# Boothbridge : format a USB key as FAT32 for the DJ players
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Qt dialog that formats a USB key as FAT32, with a confirmation for large drives and a progress bar.
 
 from __future__ import annotations
 
@@ -27,7 +29,6 @@ from .worker import Job
 log = logging.getLogger(__name__)
 
 LARGE = 256 * 10**9  # above this the confirmation says that it is a big drive
-
 
 # --------------------------------------------------
 # wipes a whole removable drive (Mac, Linux, NTFS, exFAT... whatever is on it) and

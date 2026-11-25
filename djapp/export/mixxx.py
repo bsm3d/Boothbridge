@@ -1,11 +1,10 @@
-# Benoit Saint-Moulin
-# Boothbridge : Mixxx export, a new standalone mixxxdb.sqlite (schema version 39)
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Mixxx export that writes a standalone mixxxdb.sqlite database at schema version 39, never touching a profile.
 
-# Never touches a Mixxx profile: it writes a database of its own, in the export folder, and
-# refuses a folder that already holds one. The user copies it into a backed up profile
-# with Mixxx closed. The DDL below is the state of Mixxx 2.5 (res/schema.xml, revision 39)
-# after all its migrations, and the settings rows say so, so that Mixxx opens it and
-# migrates it forward the way it does for any older library
+# Never touches a Mixxx profile: writes its own mixxxdb.sqlite in the export folder, and refuses a folder that already holds one.
+# The user copies it into a backed up profile with Mixxx closed. DDL is Mixxx 2.5 (res/schema.xml, revision 39) after all migrations, so Mixxx migrates it forward.
 
 from __future__ import annotations
 
@@ -253,22 +252,18 @@ _TRACK = (
     "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 2, ?, 0, 0, 1, ?, ?, ?, ?, ?, ?, ?)"
 )
 
-
 def flat(s: str) -> str:
     return text(s, NAME).replace("\r", " ").replace("\n", " ")
-
 
 # ----------------------------------------------------------------
 # forward slashes, as Mixxx writes the location of a file on Windows too
 def location(path: str) -> str:
     return os.path.abspath(text(path, 32767)).replace("\\", "/")
 
-
 def color_of(c, default: int) -> int:
     m = _HEX.match(c.color.strip()) if isinstance(c.color, str) else None
     # black is how Mixxx recognises an empty hot cue it throws away
     return int(m.group(1), 16) or default if m else default
-
 
 # ----------------------------------------------------------------
 # hot cues and loops. Cues without a slot, other than a loop or the one main cue, have no
@@ -301,7 +296,6 @@ def cue_rows(t: Track) -> list[tuple]:
             rows.append((MAINCUE, pos, 0.0, -1, label, MAIN_COLOR))
     return rows
 
-
 # ----------------------------------------------------------------
 def flatten(nodes: list[Node], prefix: str = "") -> list[tuple[str, Node]]:
     out = []
@@ -313,7 +307,6 @@ def flatten(nodes: list[Node], prefix: str = "") -> list[tuple[str, Node]]:
             out.append((prefix + name, n))
     return out
 
-
 def unique(name: str, taken: set[str]) -> str:
     base, k = name, 2
     while name.casefold() in taken:
@@ -321,7 +314,6 @@ def unique(name: str, taken: set[str]) -> str:
         k += 1
     taken.add(name.casefold())
     return name
-
 
 # ----------------------------------------------------------------
 def add_track(
@@ -382,7 +374,6 @@ def add_track(
     ids[loc] = tid
     return tid
 
-
 # ----------------------------------------------------------------
 def build(
     path: str,
@@ -433,7 +424,6 @@ def build(
     finally:
         con.close()
 
-
 # ----------------------------------------------------------------
 # integrity and foreign keys. library.location is declared as a reference to
 # track_locations(location) although it holds the id, Mixxx has always done that and runs
@@ -450,7 +440,6 @@ def check(con: sqlite3.Connection):
     if bad:
         raise ValueError(f"The Mixxx database has broken references: {bad[:3]}")
 
-
 # ----------------------------
 # a Mixxx library is the user's work: never replaced, never merged into. export.run calls
 # this before the checksum list of the folder is removed, so a refusal leaves it
@@ -461,7 +450,6 @@ def require_free(out: str):
             f"{final} already exists. This export never overwrites a Mixxx database, "
             "choose an empty folder."
         )
-
 
 def export(
     nodes: list[Node],

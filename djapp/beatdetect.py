@@ -1,5 +1,7 @@
-# Benoit Saint-Moulin
-# Boothbridge : tempo and first-beat detection for tracks without a beat grid
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Tempo and first-beat detection from the onset curve, for tracks that have no beat grid.
 
 #
 # Autocorrelation finds a period in the onset curve; nearby candidates refine the
@@ -36,19 +38,15 @@ REFINE_SPAN = 0.03  # candidate tempos around the autocorrelation peak, relative
 # BPM: an integer tempo wins when it explains the onsets almost as well
 INTEGER_TOLERANCE = 0.05
 
-# Reliability. The fold concentration alone never passed 0.3 on real music, so a correct tempo was
-# refused. What separates a real grid is that the pulse stands out from the neighbouring tempos
-# (prominence) and that every part of the track gives the same tempo (live bands drift, 1 to 5 %).
-# Thresholds come from 132 tracks with a known tempo (club AIFF, tags and rekordbox), 7 live
-# recordings and 5 long pieces with no known tempo
-# tempo spread between parts: full score up to OK, none from END
+# The fold concentration alone never passed 0.3 on real music, so a correct tempo was refused.
+# A real grid is a pulse that stands out from the neighbouring tempos (prominence) and gives the same tempo in every part of the track (live bands drift 1 to 5 %).
+# Thresholds from 132 tracks with a known tempo, 7 live recordings and 5 long pieces with none: tempo spread between parts, full score up to OK, none from END.
 STEADY_OK, STEADY_END = 0.004, 0.012
 RELIABLE_AT = 0.3
 # from here a fast result can also be read at half the tempo, and the user may prefer it
 HALF_OFFER_BPM = 135.0
 # seconds: cut in 3 parts, in 2, or measured whole
 LONG_TRACK, MEDIUM_TRACK = 45.0, 20.0
-
 
 @dataclass(frozen=True)
 class BeatResult:
@@ -60,7 +58,6 @@ class BeatResult:
     @property
     def reliable(self) -> bool:
         return self.confidence >= RELIABLE_AT
-
 
 # --------------------------------------------------------
 # onset strength per HOP samples and the time offset of its first value, in seconds
@@ -80,20 +77,12 @@ def onset_curve(y, rate: int):
     origin = (0.5 * HOP + win / 2) / rate
     return flux, origin
 
-
 def half_tempo(bpm: float) -> float | None:
     return round(bpm / 2, 4) if bpm >= HALF_OFFER_BPM else None
 
-
-# Which of the candidate tempos is the one. Each candidate gets a score, a weighted sum of what is known
-# about it: how well the onsets fold at that tempo (concentration and prominence, compared with the other
-# candidates), how far it is from 120 BPM, how regular its odd and even pulses are, how much the other
-# candidates support it (one that is its double or half, a 3:2 or a 4:3 away) and what the
-# autocorrelation says at it and at its multiples. The weights were fitted on 3102 tracks with a tag
-# tempo (club files, shop downloads, live rock) so that the best candidate is the one of the tag. Held
-# out source by source, 94 % of the tracks came out right against 92 % with the concentration times a
-# prior on 120 BPM that this replaces; the gain is on played music, where the autocorrelation peak of
-# the beat is often not the strongest
+# Score of each candidate tempo: a weighted sum of its onset fold, distance from 120 BPM, pulse regularity, support from other candidates, autocorrelation.
+# Weights fitted on 3102 tagged tracks. Held out by source: 94 % right, against 92 % for the old prior.
+# The gain is on played music, where the autocorrelation peak of the beat is often not the strongest.
 RANK_LAGS = (0.5, 2 / 3, 0.75, 1.5, 4 / 3, 2.0, 3.0, 4.0)
 RANK_WEIGHTS = {
     "octaves": -0.13228,
@@ -123,7 +112,6 @@ RANK_WEIGHTS = {
     "lag_x4": 2.06118,
 }
 
-
 # --------------------------------------------------------
 def autocorrelation(flux):
     n = len(flux)
@@ -136,7 +124,6 @@ def autocorrelation(flux):
     ac = np.fft.irfft(spectrum * np.conj(spectrum), size)[:n]
     ac /= np.maximum(1, n - np.arange(n))
     return ac
-
 
 def candidate_periods(flux, step: float, count: int = 5, ac=None) -> list[float]:
     n = len(flux)
@@ -171,7 +158,6 @@ def candidate_periods(flux, step: float, count: int = 5, ac=None) -> list[float]
         raise ValueError("No regular beat found")
     return chosen
 
-
 # the peak strength of the other candidates that sit at one of the ratios of candidate i
 def support(peaks, bpms, i: int, *ratios: float) -> float:
     return sum(
@@ -179,7 +165,6 @@ def support(peaks, bpms, i: int, *ratios: float) -> float:
         for j in range(len(bpms))
         if j != i and any(abs(bpms[j] / (bpms[i] * r) - 1) <= 0.03 for r in ratios)
     )
-
 
 # the score of each candidate (lags from candidate_periods), in the same order. Each one is measured
 # again around its lag, then compared with the others
@@ -227,15 +212,12 @@ def rank_candidates(flux, step: float, ac, lags: list[float]):
         scores.append(score)
     return periods, scores
 
-
 def lag_key(ratio: float) -> str:
     return "lag_x" + f"{ratio:.3f}".rstrip("0").rstrip(".")
-
 
 def fold(flux, period: float, bins: int, offset: int = 0):
     phase = ((np.arange(len(flux)) + offset) % period) / period
     return np.bincount((phase * bins).astype(int) % bins, weights=flux, minlength=bins)
-
 
 def concentration(hist) -> float:
     total = float(hist.sum())
@@ -248,13 +230,11 @@ def concentration(hist) -> float:
     smoothed[-1] += hist[0]
     return float(smoothed.max()) / total
 
-
 # --------------------------------------------------------
 # the tempo, around period, that folds the onsets the most. Returns (period, concentration)
 def refine_period(flux, period: float):
     best, peak, _ = refine_scan(flux, period)
     return best, peak
-
 
 # same search, plus how far the best tempo stands out: its fold concentration over the median
 # of the neighbouring tempos. Near 1 when no tempo is better than another
@@ -287,7 +267,6 @@ def refine_scan(flux, period: float):
         (max(scores) / median if median > 0 else 0.0),
     )
 
-
 # --------------------------------------------------------
 # how well the lattice holds on the whole track: the tempo is measured again in each part, and the
 # result is how far those tempos are apart (relative) and how clear the weakest part is
@@ -303,7 +282,6 @@ def consistency(flux, period: float, parts: int):
         clarity.append(prominence)
     return (max(periods) - min(periods)) / (sum(periods) / parts), min(clarity)
 
-
 # --------------------------------------------------------
 def confidence_of(spread: float, prominence: float) -> float:
     strength = max(0.0, min(1.0, prominence - 1.0))
@@ -313,7 +291,6 @@ def confidence_of(spread: float, prominence: float) -> float:
         else max(0.0, 1.0 - (spread - STEADY_OK) / (STEADY_END - STEADY_OK))
     )
     return strength * steadiness
-
 
 # where the beats fall in the onset curve, in frames, within [0, period). offset is the
 # index of flux[0] in the whole curve, so that parts of a track share one lattice
@@ -333,7 +310,6 @@ def beat_phase(flux, period: float, offset: int = 0) -> float:
     centre = peak + float((offsets * weights).sum() / weights.sum())
     return (centre + 0.5) / bins * period % period
 
-
 # --------------------------------------------------------
 # sharpens the tempo: a period that is slightly off moves the beats of the second half of
 # the track against those of the first half, and that shift tells how much to correct
@@ -346,7 +322,6 @@ def correct_drift(flux, period: float) -> float:
         shift = (shift + period / 2) % period - period / 2
         period *= 1 + shift / half
     return period
-
 
 # ----------------------------------------------------------
 # first beat of the lattice with a real onset under it, in frames
@@ -361,7 +336,6 @@ def first_audible_beat(flux, period: float, phase: float) -> float:
     reference = float(np.percentile(strength, 75))
     audible = np.nonzero(strength >= 0.3 * reference)[0] if reference > 0 else []
     return float(centres[audible[0]]) if len(audible) else phase
-
 
 # --------------------------------------------------------
 # weaker over stronger mean onset of the odd and even pulses of the lattice: close to 0 when
@@ -378,12 +352,10 @@ def alternation(flux, period: float) -> float:
     even, odd = float(strength[0::2].mean()), float(strength[1::2].mean())
     return min(even, odd) / max(even, odd, 1e-12)
 
-
 def snap_tempo(period: float, step: float) -> float:
     bpm = 60 / (period * step)
     nearest = round(bpm)
     return 60 / (nearest * step) if abs(bpm - nearest) <= INTEGER_TOLERANCE else period
-
 
 # --------------------------------------------------------
 def detect(y, rate: int) -> BeatResult:
@@ -420,7 +392,6 @@ def detect(y, rate: int) -> BeatResult:
         confidence=round(confidence_of(spread, prominence), 3),
     )
 
-
 # job entry point for a batch of (key, path). Returns (key, BeatResult or error text) for each
 def analyze_many(
     items: list[tuple[object, str]], progress=lambda *_: None, cancel=None
@@ -441,7 +412,6 @@ def analyze_many(
             done.append((key, str(e) or type(e).__name__))
     progress(100, "Done")
     return done
-
 
 # --------------------------------------------------------
 def analyze(path: str, progress=lambda *_: None, cancel=None) -> BeatResult:

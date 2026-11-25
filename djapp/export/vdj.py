@@ -1,11 +1,11 @@
-# Benoit Saint-Moulin
-# Boothbridge : VirtualDJ export, one .vdjfolder per playlist in a tree of folders
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : VirtualDJ export that writes one folder XML per playlist in a tree of folders, without a database.
 
-# VirtualDJ keeps its lists as small XML files: <VirtualFolder> holding one <song> per
-# track, only path is required, size helps it find the track in its own database.
-# No database.xml is written: merging one into the database of a user would be a
-# gamble, so cues, loops and beat grids stay behind. The bpm attribute is left out too,
-# the public page does not say in which unit it is read
+# VirtualDJ keeps its lists as small XML files: one <VirtualFolder> per playlist, one <song> per track. Only path is required, size helps it find the track.
+# No database.xml is written: merging into the user's database is a gamble, so cues, loops and beat grids stay behind.
+# The bpm attribute is left out too: the public page does not say in which unit it is read.
 
 from __future__ import annotations
 
@@ -22,10 +22,8 @@ from .manifest import Cancelled, Manifest
 # the folder of VirtualDJ 8 that the reader of this program walks as well
 ROOT = "Folders"
 
-
 def attr(s) -> str:
     return clean(text(s, 32767)).replace("\r", " ").replace("\n", " ")
-
 
 # ----------------------------------------------------------------
 def size_of(size: int, path: str) -> int:
@@ -35,7 +33,6 @@ def size_of(size: int, path: str) -> int:
         return os.path.getsize(path)
     except OSError:
         return 0
-
 
 def write_list(n: Node, path: str, moved: dict[str, str], man: Manifest | None):
     root = ET.Element(
@@ -63,10 +60,8 @@ def write_list(n: Node, path: str, moved: dict[str, str], man: Manifest | None):
     if man:
         man.add(path)
 
-
 def has_audio(n: Node) -> bool:
     return any(t.path for t in n.tracks)
-
 
 def walk(
     nodes: list[Node],
@@ -100,7 +95,6 @@ def walk(
         write_list(n, path, moved, man)
         count += 1
     return count
-
 
 # ----------------------------
 def export(

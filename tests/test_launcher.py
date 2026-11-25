@@ -1,3 +1,8 @@
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Checks that the launcher, run in a worker process, exits quietly when its parent is gone.
+
 # the launcher in a worker process: when the parent is gone Windows refuses the worker the handles it
 # needs ([WinError 5] in multiprocessing), and a windowed program turned that into a dialog box
 

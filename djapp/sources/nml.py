@@ -1,5 +1,7 @@
-# Benoit Saint-Moulin
-# Boothbridge : Traktor collection.nml reader (Traktor Pro 3 and 4)
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Reader for the Traktor collection.nml file, with defused XML parsing and cleaning of broken text.
 
 from __future__ import annotations
 
@@ -32,9 +34,7 @@ log = logging.getLogger(__name__)
 # Traktor COLOR 1-7 -> rekordbox color id (1 pink ... 8 purple)
 COLOR_TO_RB = {1: 2, 2: 3, 3: 4, 4: 5, 5: 7, 6: 8, 7: 1}
 
-
 _CHAR_REF = re.compile(r"&#(x[0-9a-fA-F]+|[0-9]+);")
-
 
 # ------------------------------------------------------------
 # A numeric reference to a character XML does not allow (&#0;, half a surrogate pair) is dropped
@@ -52,15 +52,12 @@ def _legal_reference(m: re.Match) -> str:
     )
     return m.group(0) if legal else ""
 
-
 _CONTROL = re.compile(r"[\x00-\x08\x0b\x0c\x0e-\x1f]")
-
 
 # ------------------------------------------------------------
 # old collections sometimes carry control chars in tags, Traktor itself doesn't care
 def clean_text(txt: str) -> str:
     return _CHAR_REF.sub(_legal_reference, _CONTROL.sub("", txt))
-
 
 # ------------------------------------------------------------
 # The file as text with clean_text applied, a chunk at a time. A character reference cut in two by the
@@ -91,7 +88,6 @@ class Cleaned:
                 return text
         return ""
 
-
 # ------------------------------------------------------------
 def read_tree(path: str) -> ET.Element:
     check_size(path)
@@ -102,7 +98,6 @@ def read_tree(path: str) -> ET.Element:
     except (ET.ParseError, LookupError):
         # An encoding label that is not one makes the parser fail too, the text is read as UTF-8
         return ET.fromstring(clean_text(raw.decode("utf-8", errors="replace")))
-
 
 # '2026/9/28' -> '2026-09-28'
 def nml_date(s: str) -> str:
@@ -115,11 +110,9 @@ def nml_date(s: str) -> str:
         return ""
     return f"{y:04d}-{m:02d}-{d:02d}"
 
-
 # the PRIMARYKEY form Traktor uses to reference a track from a playlist
 def location_key(loc: ET.Element) -> str:
     return loc.get("VOLUME", "") + loc.get("DIR", "") + loc.get("FILE", "")
-
 
 # ------------------------------------------------------------
 def location_path(loc: ET.Element) -> str:
@@ -130,9 +123,6 @@ def location_path(loc: ET.Element) -> str:
     # macOS: VOLUME is the disk name, the boot disk is mounted on /
     ext = f"/Volumes/{vol}{rel}"
     return ext if os.path.exists(ext) else rel
-
-
-# entries
 
 # ------------------------------------------------------------
 def read_entry(e: ET.Element) -> Track:
@@ -203,8 +193,6 @@ def read_entry(e: ET.Element) -> Track:
         t.cues.append(cue)
     return t
 
-
-
 # ------------------------------------------------------------
 def read_nodes(parent: ET.Element, by_key: dict[str, Track], keyed: dict) -> list[Node]:
     out = []
@@ -241,12 +229,9 @@ def read_nodes(parent: ET.Element, by_key: dict[str, Track], keyed: dict) -> lis
             )
     return out
 
-
 # ------------------------------------------------------------
-# One pass over the file. A collection entry becomes a Track as soon as it is read and a playlist
-# entry becomes a reference to its Track, nothing of the XML is kept but the folders and playlists
-# (keyed holds what each playlist lists). Traktor writes the collection before the playlists, a
-# playlist read first keeps the keys instead and they are resolved at the end
+# One pass over the file. A collection entry becomes a Track as soon as it is read; a playlist entry becomes a reference to its Track.
+# Only folders and playlists are kept (keyed: what each playlist lists). Traktor writes the collection first; a playlist read before it keeps keys, resolved at the end.
 def read_stream(path: str, found: dict, cb, music_root: str, clean) -> list[Node]:
     by_key: dict[str, Track] = {}
     keyed: dict = {}
@@ -311,7 +296,6 @@ def read_stream(path: str, found: dict, cb, music_root: str, clean) -> list[Node
     nodes = read_nodes(rootnode if rootnode is not None else top, by_key, keyed)
     cb(100, f"{len(by_key)} tracks")
     return nodes
-
 
 # ------------------------------------------------------------
 def load(

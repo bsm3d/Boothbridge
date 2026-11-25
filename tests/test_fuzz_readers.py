@@ -1,3 +1,8 @@
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Mutates tag and database bytes at random in seeded runs, checking the readers fail only with their own errors.
+
 import os
 import random
 import shutil

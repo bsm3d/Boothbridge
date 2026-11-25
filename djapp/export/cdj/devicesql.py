@@ -1,14 +1,11 @@
-# Benoit Saint-Moulin
-# Boothbridge : writer for the page container of export.pdb (DeviceSQL)
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Page container writer for export.pdb (DeviceSQL), laying rows out in 4096 byte pages with index pages.
 
-# Container format of export.pdb: 4096 byte pages, rows, string encoding. The layout
-# comes from a byte level study of rekordbox 6 USB exports and from the public notes
-# of Deep Symmetry crate-digger.
-#
-# The players depend on three rules: each table owns an index page (flags 0x64) then
-# its data pages, the header sequence is higher than any page sequence, and the free
-# size of a data page is exact. A CDJ-2000NXS2 shows the first screens of a file
-# that breaks them, then freezes on the next one.
+# Container format of export.pdb: 4096 byte pages, rows, string encoding, from a byte level study of rekordbox 6 USB exports and crate-digger.
+# Players need three rules: each table owns an index page (flags 0x64) then its data pages, header sequence above every page sequence, exact free size per data page.
+# A CDJ-2000NXS2 shows the first screens of a file that breaks them, then freezes on the next one.
 
 from __future__ import annotations
 
@@ -22,7 +19,6 @@ N_TABLES = 20
 
 HEAP = PAGE - HEAD
 
-# page header offsets
 OFF_PAGE_NUMBER = 0x04
 OFF_TABLE_KIND = 0x08
 OFF_NEXT_PAGE = 0x0C
@@ -34,7 +30,6 @@ OFF_USED_SIZE = 0x1E
 OFF_ROW_COUNT_A = 0x20
 OFF_ROW_COUNT_B = 0x22
 
-# page flag bytes
 FLAG_INDEX_PAGE = 0x64
 FLAG_DATA_PAGE = 0x24
 FLAG_DATA_PAGE_LISTED = 0x34
@@ -65,7 +60,6 @@ LONG_UTF16 = 0x90
 EMPTY_STRING = b"\x03"
 SHORT_ASCII_LIMIT = 126
 
-
 # --------------------------------------------------------
 # the C++ core builds it when loaded, build_py is the reference and the fallback
 def build(
@@ -75,17 +69,14 @@ def build(
         tables, static, shifted
     )
 
-
 # ---------------------------------------------------------------
 # page 0 = file header, then 2 pages per table (index, first data). Extra data pages
 # of a big table go after those 2 * N_TABLES pages.
 def _index_page_of(table: int) -> int:
     return 1 + 2 * table
 
-
 def _first_data_page_of(table: int) -> int:
     return 2 + 2 * table
-
 
 def _page_groups(
     tables: dict[int, list[bytes]], static: dict[int, bytes]
@@ -99,7 +90,6 @@ def _page_groups(
             groups[table] = split_into_pages(tables[table])
     return groups
 
-
 def _number_pages(groups: dict[int, list]) -> tuple[dict[int, list[int]], int]:
     numbers: dict[int, list[int]] = {}
     highest = 2 * N_TABLES
@@ -110,7 +100,6 @@ def _number_pages(groups: dict[int, list]) -> tuple[dict[int, list[int]], int]:
             table_numbers.append(highest)
         numbers[table] = table_numbers
     return numbers, highest
-
 
 def build_py(
     tables: dict[int, list[bytes]], static: dict[int, bytes], shifted: set[int]
@@ -167,7 +156,6 @@ def build_py(
     pages[0] = _file_header(groups, numbers, spare_page, unused, sequence)
     return b"".join(pages)
 
-
 def _file_header(
     groups: dict[int, list],
     numbers: dict[int, list[int]],
@@ -192,7 +180,6 @@ def _file_header(
         )
     return bytes(header)
 
-
 # ------------------------------------------------------
 # bytes taken by the row index of `count` rows: full groups, the last one only as big as needed
 def index_size(count: int) -> int:
@@ -201,7 +188,6 @@ def index_size(count: int) -> int:
     if leftover:
         size += GROUP_TRAILER + 2 * leftover
     return size
-
 
 # ------------------------------------------------------------
 # greedy fill, a page closes when the next row plus its index space does not fit
@@ -221,7 +207,6 @@ def split_into_pages(rows: list[bytes]) -> list[list[bytes]]:
         pages.append(current)
     return pages
 
-
 # ------------------------------------------------------------
 def _write_row_index(page: bytearray, offsets: list[int]) -> None:
     for first in range(0, len(offsets), ROWS_PER_GROUP):
@@ -232,7 +217,6 @@ def _write_row_index(page: bytearray, offsets: list[int]) -> None:
         struct.pack_into("<HH", page, group_end - GROUP_TRAILER, present, present)
         for slot, offset in enumerate(group):
             struct.pack_into("<H", page, group_end - 6 - 2 * slot, offset)
-
 
 def build_data_page(
     page_number: int,
@@ -270,7 +254,6 @@ def build_data_page(
         "<HHHHHH", page, OFF_FREE_SIZE, free_size, heap_used, count, 0, 0, 0
     )
     return bytes(page)
-
 
 # ------------------------------------------------------------
 # index page entry = page number << 3, unused slots get the fixed empty word
@@ -314,7 +297,6 @@ def build_index_page(
         cursor += 4
     return bytes(page)
 
-
 # --------------------------------------------------------------------
 # moves a finished page: only its number, next link and sequence change
 def renumber_page(
@@ -324,7 +306,6 @@ def renumber_page(
     struct.pack_into("<I", patched, OFF_PAGE_NUMBER, page_number)
     struct.pack_into("<II", patched, OFF_NEXT_PAGE, next_page, sequence)
     return bytes(patched)
-
 
 # --------------------------------------------------------
 # Fixed part, then strings pointed to by offset. Rows end on a 4 byte boundary and
@@ -355,13 +336,9 @@ class RowBuffer:
         self._pad_to_word()
         return bytes(self.buf)
 
-
 # ------------------------------------------------------------
-# DeviceSQL strings:
-# - empty: the single byte 0x03
-# - short ASCII (up to 126 bytes): one byte ((length + 1) << 1) | 1, then the text
-# - long ASCII: 0x40, u16 total length (text + 4), a zero byte, then the text
-# - anything else: 0x90, the same header, then the text as UTF-16 little endian
+# DeviceSQL strings: empty is the single byte 0x03, short ASCII (up to 126 bytes) is one byte ((length + 1) << 1) | 1, then the text.
+# Long ASCII: 0x40, u16 total length (text + 4), a zero byte, then the text. Other text: 0x90, the same header, then UTF-16 little endian.
 def dstr(text: str) -> bytes:
     if not text:
         return EMPTY_STRING

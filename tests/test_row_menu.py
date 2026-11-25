@@ -1,4 +1,7 @@
-# right click on a track of a playlist: Explorer, BPM detection, Cue Editor, insert into another playlist
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Checks the track row right-click menu: Explorer, BPM detection, Cue Editor and inserting into a playlist.
 
 import os
 import tempfile

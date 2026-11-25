@@ -1,12 +1,10 @@
-# Benoit Saint-Moulin
-# Boothbridge : reader for the ANLZ0000.DAT and ANLZ0000.EXT analysis files
-#
-# Counterpart of anlz.py: path, frame count, beat grid (tempo and anchor) and cues
-# from the analysis files of a track. Same sources as the writer (rekordbox exports,
-# crate-digger), nothing from Pioneer software. Big endian.
-#
-# Only PPTH, PVBR, PQTZ, PCOB and PCO2 are read, waveforms are skipped by length. The
-# key can come from anywhere, so every length is checked against the file size first.
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Reader for ANLZ analysis files that returns path, frame count, beat grid and cues, with size checks.
+
+# Counterpart of anlz.py: path, frame count, beat grid (tempo and anchor) and cues from the analysis files. Big endian, nothing from Pioneer software.
+# Only PPTH, PVBR, PQTZ, PCOB and PCO2 are read, other sections skipped by length. Every length is checked against the file size first: the key can come from anywhere.
 # Only AnlzError escapes.
 
 from __future__ import annotations
@@ -52,11 +50,9 @@ KIND_PLAIN, KIND_LOOP = 1, 2
 NO_LOOP_END = 0xFFFFFFFF
 LAST_HOT_SLOT = 8
 
-
 # --------------------------------------------------------
 class AnlzError(ValueError):
     pass
-
 
 # --------------------------------------------------------
 @dataclass(slots=True)
@@ -69,7 +65,6 @@ class AnlzCue:
     color: str = ""  # "#RRGGBB" of a hot cue, "" when the file has none
     palette: int = 0  # hot cue palette code, 0 when unknown
 
-
 @dataclass(slots=True)
 class Anlz:
     path: str = ""
@@ -80,7 +75,6 @@ class Anlz:
     cues: list[AnlzCue] = field(default_factory=list)
     detailed: bool = False  # the cues come from PCO2: names and colours are there
     whole: bool = False  # combine: both files of the track were read
-
 
 # --------------------------------------------------------
 class _Window:
@@ -99,7 +93,6 @@ class _Window:
 
     def number(self, pos: int, code: str) -> int:
         return struct.unpack(code, self.take(pos, struct.calcsize(code)))[0]
-
 
 # --------------------------------------------------------
 # None for what a player does not show (slot above H, type other than cue and loop). A
@@ -120,14 +113,12 @@ def _cue_from_fields(
     palette = color_bytes[0] if color else 0
     return AnlzCue(slot, is_loop, start, end if is_loop else None, name, color, palette)
 
-
 def _plain_entry(entry: bytes) -> AnlzCue | None:
     if len(entry) < PLAIN_ENTRY_MIN:
         raise AnlzError("a cue is too short")
     (slot,) = struct.unpack_from(">I", entry, PLAIN_SLOT_AT)
     start, end = struct.unpack_from(">II", entry, PLAIN_TIMES_AT)
     return _cue_from_fields(slot, entry[PLAIN_KIND_AT], start, end, "", b"")
-
 
 def _extended_entry(entry: bytes) -> AnlzCue | None:
     if len(entry) < EXT_ENTRY_MIN:
@@ -141,7 +132,6 @@ def _extended_entry(entry: bytes) -> AnlzCue | None:
     label = entry[EXT_LABEL_AT:label_end].decode("utf-16-be", "replace").rstrip("\0")
     color_bytes = entry[label_end : label_end + EXT_COLOR_BYTES]
     return _cue_from_fields(slot, entry[EXT_KIND_AT], start, end, label, color_bytes)
-
 
 # entry = name (PCPT or PCP2), header length, entry length, which gives the next one
 def _read_cue_entries(
@@ -170,13 +160,10 @@ def _read_cue_entries(
         raise AnlzError("the cue count does not match the section")
     return cues
 
-
 # --------------------------------------------------------
-# (anchor in ms, bpm) from the PQTZ entries.
-# The writer rounds every beat to a millisecond, so many anchors give back these exact
-# beats: the middle of that range is taken, so writing the grid again gives the same
-# bytes. The anchor is always a beat 1 (the first beat if it opens a bar, else the beat 1
-# before it). An uneven grid, as a hand edited one, keeps the time of its first beat 1.
+# Returns (anchor in ms, bpm) from the PQTZ entries.
+# The writer rounds every beat to a millisecond, so the middle of that range is taken: writing the grid again gives the same bytes.
+# The anchor is always a beat 1 (the first beat if it opens a bar, else the beat 1 before it). An uneven grid keeps the time of its first beat 1.
 def _fit_grid(entries: list[tuple[int, int, int]]) -> tuple[float | None, float]:
     tempo = next((t for _, t, _ in entries if t), 0)
     if not entries or not tempo:
@@ -199,7 +186,6 @@ def _fit_grid(entries: list[tuple[int, int, int]]) -> tuple[float | None, float]
     first_one = next((when for pos, _, when in entries if pos == 1), entries[0][2])
     return float(first_one), bpm
 
-
 # --------------------------------------------------------
 class _Collected:
     def __init__(self):
@@ -209,7 +195,6 @@ class _Collected:
         self.grid_entries: list[tuple[int, int, int]] = []
         self.saw_extended = False
 
-
 def _read_path(win: _Window, got: _Collected, pos: int, head_len: int, size: int):
     if head_len < PATH_HEADER_MIN or not 2 <= size - head_len <= MAX_PATH:
         raise AnlzError("the path section is not usable")
@@ -217,12 +202,10 @@ def _read_path(win: _Window, got: _Collected, pos: int, head_len: int, size: int
     even = raw[: len(raw) // 2 * 2]
     got.out.path = even.decode("utf-16-be", "replace").rstrip("\0")
 
-
 def _read_vbr(win: _Window, got: _Collected, pos: int, head_len: int, size: int):
     # frame count = last 4 bytes, after the seek table
     if size >= head_len + VBR_COUNT_BYTES:
         got.out.frames = win.number(pos + size - VBR_COUNT_BYTES, ">I")
-
 
 def _read_beat_grid(win: _Window, got: _Collected, pos: int, head_len: int, size: int):
     if head_len < BEAT_HEADER_MIN:
@@ -233,7 +216,6 @@ def _read_beat_grid(win: _Window, got: _Collected, pos: int, head_len: int, size
     got.out.beats = count
     raw = win.take(pos + head_len, BEAT_ENTRY_BYTES * min(count, MAX_BEATS))
     got.grid_entries = list(struct.iter_unpack(">HHI", raw))
-
 
 def _read_cue_list(
     win: _Window, got: _Collected, pos: int, head_len: int, size: int, extended: bool
@@ -254,7 +236,6 @@ def _read_cue_list(
         got.extended_cues += cues
     else:
         got.plain_cues += cues
-
 
 def _parse_stream(stream, size: int) -> Anlz:
     if size > MAX_FILE:
@@ -294,17 +275,14 @@ def _parse_stream(stream, size: int) -> Anlz:
     out.cues = got.extended_cues if got.saw_extended else got.plain_cues
     return out
 
-
 # --------------------------------------------------------
 def parse(data: bytes) -> Anlz:
     return _parse_stream(io.BytesIO(data), len(data))
-
 
 # OSError if it cannot be opened, AnlzError if it is not ANLZ
 def read(path: str) -> Anlz:
     with open(path, "rb") as f:
         return _parse_stream(f, os.fstat(f.fileno()).st_size)
-
 
 # DAT first for path, frames and grid. Cues from the EXT when it has named and coloured
 # ones, else from whichever file has any (an empty PCO2 next to a filled PCOB).

@@ -1,10 +1,11 @@
-# keeps a test process inside its temporary folder.
-#
-# An audit hook sees every Python level file write, directory listing, process start and
-# network call, whatever code makes it. Writes outside the work folder, listings of folders
-# that are not part of the install, other programs than this Python and any network use raise
-# PermissionError and are noted. Qt's own C++ file access is not seen by the hook, so the
-# monkey also stubs the dialogs and the drive code (see monkey.py)
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Audit hook that keeps a test process inside its temporary folder and blocks outside writes, listings and network use.
+
+# An audit hook sees every Python level file write, directory listing, process start and network call, whatever code makes it.
+# Writes outside the work folder, listings of folders outside the install, other programs than this Python and network use raise PermissionError.
+# Qt's C++ file access is not seen by the hook, so monkey.py also stubs the dialogs and the drive code.
 
 from __future__ import annotations
 

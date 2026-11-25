@@ -1,3 +1,8 @@
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Checks that the optimised beat analysis and band filters give the same results as their reference versions.
+
 import unittest
 from unittest.mock import patch
 

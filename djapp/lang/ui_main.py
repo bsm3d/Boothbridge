@@ -1,5 +1,7 @@
-# Benoit Saint-Moulin
-# Boothbridge : translations, ui_main
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Translations for the main window menus, file actions and status messages.
 
 CATALOG = {
     "fr": {

@@ -1,3 +1,8 @@
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Checks the metronome audio output format and its click timing, with Qt audio mocked.
+
 import os
 import unittest
 from types import SimpleNamespace

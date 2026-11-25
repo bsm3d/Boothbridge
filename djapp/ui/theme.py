@@ -1,5 +1,7 @@
-# Benoit Saint-Moulin
-# Boothbridge : colours and the one stylesheet
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Colour constants and the single Qt stylesheet of the interface, including the accent, cue pad and state colours.
 
 from pathlib import Path
 

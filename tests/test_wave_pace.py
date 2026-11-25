@@ -1,3 +1,8 @@
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Checks that the waveform keeps the audio pace, so sounds late in a track are drawn where they play.
+
 # the waveform keeps the pace of the audio: a sound late in a track is drawn where it plays.
 # Every column took len // n samples and the tail was dropped: 73 samples for 73.5 at 44.1 kHz,
 # so a sound at 5:50 was drawn 2.4 s late on the players and in the window

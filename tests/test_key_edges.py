@@ -1,5 +1,7 @@
-# two odd keys the reader meets: a PCO2 section with no cue next to a PCOB that has some, and a
-# track id that appears twice in the database
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Checks two odd key cases: an empty PCO2 section beside cues, and a track id that appears twice.
 
 import unittest
 from unittest.mock import patch

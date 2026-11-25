@@ -1,5 +1,7 @@
-# Benoit Saint-Moulin
-# Boothbridge : checksums of every file an export writes, and their verification
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Checksum manifest of every file an export writes, plus atomic writes and retrying file replacement.
 
 # paths, sizes, modification times and SHA-256 of every file an export writes.
 # Hashes are collected during writes, and reused only for audio left in place. Verification
@@ -23,16 +25,13 @@ FORMAT = 1
 BLOCK = 1 << 20
 MAX_MANIFEST = 256 << 20  # 1 million files is about 150 MB of JSON
 
-
 class Cancelled(Exception):
     pass
-
 
 # Fix erreur = Windows refuses a file for a moment while an antivirus or the indexer
 # looks at it, and one scan used to stop a whole export
 LOCK_TRIES = 10
 LOCK_PAUSE = 0.2
-
 
 # ----------------------------------------------------------------
 # true when Windows refused the file the way it does while another program holds it:
@@ -40,7 +39,6 @@ LOCK_PAUSE = 0.2
 # with an errno and no Windows code. Elsewhere a refusal is final
 def busy(error: OSError) -> bool:
     return os.name == "nt" and getattr(error, "winerror", None) in (None, 5, 32, 33)
-
 
 # ------------------------------------------------------------------
 # runs a file operation again when it is refused for a moment, up to about two seconds.
@@ -60,7 +58,6 @@ def settle(action, cancel: threading.Event | None = None, hopeless=None):
                 raise Cancelled() from None
             time.sleep(LOCK_PAUSE)
 
-
 # ----------------------------------------------------------------
 # os.replace that waits out a short lock on either file. A read-only destination or a folder in
 # the way will not let go, so those fail at once
@@ -71,7 +68,6 @@ def replace(src: str, dst: str, cancel: threading.Event | None = None):
         )
 
     settle(lambda: os.replace(src, dst), cancel, hopeless)
-
 
 # --------------------------------
 def sha256_file(path: str, cancel: threading.Event | None = None) -> str:
@@ -85,7 +81,6 @@ def sha256_file(path: str, cancel: threading.Event | None = None) -> str:
                 break
             h.update(b)
     return h.hexdigest()
-
 
 # ----------------------------------------------------------------
 # Windows: the file read around the system cache, so the bytes come from the drive
@@ -132,7 +127,6 @@ def _direct_blocks(path: str):
     finally:
         k.CloseHandle(h)
 
-
 # ----------------------------------------------------------------
 # SHA-256 of what the drive holds, not of the system cache. Falls back to a normal
 # read where that is not possible; a read error that happens halfway is raised
@@ -150,10 +144,8 @@ def sha256_drive(path: str, cancel: threading.Event | None = None) -> str:
                 raise
     return sha256_file(path, cancel)
 
-
 def sha256_bytes(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()
-
 
 # ----------------------------------------------------------------
 # whole file or nothing, a power cut or a pulled key leaves the old one
@@ -170,7 +162,6 @@ def write_atomic(path: str, data: bytes):
         except OSError:
             pass
         raise
-
 
 # ----------------------------------------------------------------
 # straight into the final name, parents created on demand. A rename costs a directory
@@ -194,7 +185,6 @@ def write_direct(path: str, data: bytes):
             pass
         raise
 
-
 # ----------------------------------------------------------------
 # A path inside the drive: no drive letter, no absolute path, no '..'
 def safe_rel(rel) -> bool:
@@ -206,7 +196,6 @@ def safe_rel(rel) -> bool:
         and not any(part in ("", ".", "..") for part in rel.split("/"))
     )
 
-
 # ----------------------------------------------------------------
 # checksum of the list itself, a manifest edited or cut short is refused
 def seal(files: dict) -> str:
@@ -214,17 +203,12 @@ def seal(files: dict) -> str:
         json.dumps(files, sort_keys=True, separators=(",", ":")).encode("utf-8")
     )
 
-
 def same_stat(entry: dict, st: os.stat_result) -> bool:
     # FAT keeps times to 2 seconds
     return (
         entry.get("size") == st.st_size
         and abs(entry.get("mtime", 0) - int(st.st_mtime)) <= 2
     )
-
-
-# reading
-
 
 # ----------------------------------------------------------------
 # whole manifest, {} when absent, ValueError when damaged
@@ -253,7 +237,6 @@ def read(base: str) -> dict:
         ):
             raise ValueError(f"{NAME} is damaged (entry {rel!r})")
     return data
-
 
 # ------------------------------------------------------------------
 # filled by an export, saved at its end. The previous one is read and then
@@ -325,7 +308,6 @@ class Manifest:
         )
         return path
 
-
 # ----------------------------------------------------------------
 @dataclass
 class Check:
@@ -391,7 +373,6 @@ class Check:
             )
         return "\n\n".join(lines) if lines else self.summary()
 
-
 # ----------------------------------------------------------------
 def file_category(rel: str) -> str:
     from ..sources import COLLECTION_AUDIO_EXT
@@ -405,7 +386,6 @@ def file_category(rel: str) -> str:
         return "Pioneer database / analysis"
     return "Other files"
 
-
 # ----------------------------------------
 # only known player-written database and analysis locations
 def player_mutable(rel: str) -> bool:
@@ -416,15 +396,10 @@ def player_mutable(rel: str) -> bool:
         and parts[-1] in ("anlz0000.dat", "anlz0000.ext", "anlz0000.2ex")
     )
 
-
-
-
 # ----------------------------------------------------------------
-# read every listed file; standalone checks can distinguish possible player changes.
-#
-# A changed file that a player may rewrite is not certified healthy: its checksum cannot establish who
-# changed it. Immediate export verification remains strict, except for the files in
-# lenient: the export left those as they were, and their hash is the one of the export before
+# Standalone checks read every listed file, so they can tell possible player changes apart.
+# A changed file that a player may rewrite is not certified healthy: its checksum cannot say who changed it.
+# Immediate export verification stays strict, except for the lenient files (the export left them as they were, their hash is that of the export before).
 def verify(
     base: str,
     progress=None,

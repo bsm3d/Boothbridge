@@ -1,5 +1,7 @@
-# Benoit Saint-Moulin
-# Boothbridge : main window
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Main window of the program with its menus, playlist tree, export and CDJ key actions, and drag and drop of sources.
 
 from __future__ import annotations
 
@@ -68,14 +70,11 @@ log = logging.getLogger(__name__)
 
 PROBE_WAIT = 2000  # ms a read of the key gets to stop when the window closes
 
-
 def playlist_duration(node: Node) -> str:
     return duration_text(sum(track.duration for track in node.tracks))
 
-
 def tree_name(node: Node) -> str:
     return node.name + ("  " + tr("(smart)") if node.kind == "smartlist" else "")
-
 
 # ------------------------------------------------
 # File system of the drive holding path, Windows only, '' elsewhere
@@ -91,14 +90,12 @@ def fs_type(path: str) -> str:
     )
     return buf.value if ok else ""
 
-
 # ------------------------------------------------
 # contents and PIONEER must sit side by side at the key root
 def cdj_root(out: str) -> str:
     if os.path.basename(os.path.normpath(out)).lower() in ("contents", "pioneer"):
         return os.path.dirname(os.path.normpath(out))
     return out
-
 
 # ------------------------------------------------
 # the root of the key for a folder picked inside it: PIONEER or anything below it
@@ -114,7 +111,6 @@ def key_root(path: str) -> str:
         return path
     return str(Path(*parts[:cut])) if cut else path
 
-
 # what the info line adds when a key was read with trouble: the playlists are all there, but
 # some analysis files were missing or damaged (those tracks have no cues), or the database holds
 # tracks that no playlist lists (they are not loaded)
@@ -127,14 +123,10 @@ def key_notes(saved: dict) -> str:
         out += tr(", {n} tracks in no playlist not loaded", n=saved["key_unlisted"])
     return out
 
-
 # what the export job hands back when keep mode met a database it cannot read
 class Unreadable:
     def __init__(self, message: str):
         self.message = message
-
-
-
 
 # ----------------------------------------
 def export_job(
@@ -150,16 +142,12 @@ def export_job(
                 return Unreadable(str(e))
         raise
 
-
 # ----------------------------------------
 # the summary of the database on a key, away from the GUI: a USB drive can be slow. The
 # stamp is taken first, so a file that changes during the read does not pass as fresh
 def key_probe(path: str, progress=None, cancel=None) -> tuple[str, object, object]:
     stamp = export.key_stamp(path)
     return path, export.key_summary(path, cancel), stamp
-
-
-
 
 # ------------------------------------------------
 # load nodes, missing-file count and project settings off the GUI thread
@@ -203,7 +191,6 @@ def load_job(
             cb(100, tr("Checking files..."))
         missing += not os.path.isfile(t.path)
     return nodes, missing, extra
-
 
 # ------------------------------------------------------------------
 class MainWindow(QMainWindow):
@@ -719,7 +706,6 @@ class MainWindow(QMainWindow):
     def key_reading(self) -> bool:
         return self.key_read is not None
 
-
     # ------------------------------------------------
     # the jobs that are running and are not a read of the key
     def other_jobs(self) -> list[Job]:
@@ -1065,7 +1051,6 @@ class MainWindow(QMainWindow):
         if cdj:
             self.copy.setChecked(True)
         self.out_changed()
-
 
     # ---- loading
 
@@ -1497,7 +1482,6 @@ class MainWindow(QMainWindow):
         self.music_browser.set_root(self.cfg.get("library_root", ""))
         self.music_browser.open()
 
-
     # ------------------------------------------------
     def options(self, library=False):
         d = Options(self.sync(), self)
@@ -1629,7 +1613,6 @@ class MainWindow(QMainWindow):
             self.cfg["key_ask"] = False
             self.cfg["key_mode"] = choice
         return choice
-
 
     def start_export(self, fmt: str, nodes: list[Node], out: str, run_cfg: dict):
         log.info("Export %s to %s", fmt, out)
@@ -1807,7 +1790,6 @@ class MainWindow(QMainWindow):
                 settings.save(self.sync())
             self.offer_eject(rep.path)
 
-
     # ------------------------------------------------
     # Keep mode met a database it cannot read: replace it for this run, or give up
     def key_unreadable(self, message: str, run):
@@ -1826,7 +1808,6 @@ class MainWindow(QMainWindow):
             QTimer.singleShot(0, self.start_rerun)
             return
         self.status.setText(tr("Cancelled"))
-
 
     # ---- eject
 

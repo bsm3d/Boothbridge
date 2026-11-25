@@ -1,6 +1,7 @@
-// Benoit Saint-Moulin
-// Boothbridge : native core, export.pdb rows (what pdbwrite.py builds)
-// Included by fastcore.cpp, after build_file.
+// Boothbridge
+// © Benoit Saint-Moulin - 2026
+// Version du fichier : 1.0.0
+// Fonction du fichier : C++ builder for export.pdb table rows, including UTF-8 to UTF-16 conversion, included by fastcore.cpp.
 
 namespace {
 
@@ -152,10 +153,8 @@ struct TbEntry {
 
 }
 
-// The whole export.pdb from flat track and playlist arrays. Strings are UTF-8 slices of
-// blob. today: the date string. stat: the 20 static pages or null. Returns the size, 0
-// when a row does not fit in a page, -1 when a value is out of range or a string cannot
-// be written.
+// The whole export.pdb from flat track and playlist arrays. Strings are UTF-8 slices of blob. today is the date string, stat the 20 static pages or null.
+// Returns the size, 0 when a row does not fit in a page, -1 when a value is out of range or a string cannot be written.
 BB_API int64_t bb_pdb_write(const TbTrack* tr, uint32_t ntr, const char* blob, const char* today,
                             uint32_t today_len, const TbNode* nodes, uint32_t nnodes,
                             const TbEntry* entries, uint32_t nentries,

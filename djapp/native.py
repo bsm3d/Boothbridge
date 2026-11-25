@@ -1,10 +1,10 @@
-# Benoit Saint-Moulin
-# Boothbridge : loader of the native core (fastcore), None of it is needed to run
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Loader of the optional native core (fastcore), returning None so callers fall back to the Python versions.
 
-# the page layout of export.pdb and the waveform bands exist twice: in Python
-# (devicesql.py, analysis.py), the reference, and in C++ (core/fastcore.cpp), what a
-# release uses. Every function here returns None when the library is absent or
-# BB_PURE_PYTHON is set, and the caller falls back to the Python version
+# The page layout of export.pdb and the waveform bands exist twice: Python (devicesql.py, analysis.py) is the reference, C++ (core/fastcore.cpp) is what a release uses.
+# Every function returns None when the library is absent or BB_PURE_PYTHON is set, and the caller falls back to the Python version.
 
 from __future__ import annotations
 
@@ -29,7 +29,6 @@ MAX_OUTPUT = 1 << 30
 N_TABLES = 20
 PAGE = 4096
 
-
 u32 = ctypes.c_uint32
 
 # the library exports neutral names, the code keeps the readable ones
@@ -42,7 +41,6 @@ NAMES = {
     "bb_bands": "q5",
 }
 
-
 # ------------------------------------------------------------
 class Named:
     def __init__(self, dll):
@@ -50,7 +48,6 @@ class Named:
 
     def __getattr__(self, name: str):
         return getattr(self.dll, NAMES[name])
-
 
 class TbTrack(ctypes.Structure):
     _fields_ = [
@@ -76,14 +73,11 @@ class TbTrack(ctypes.Structure):
         ("len", u32 * 14),
     ]
 
-
 class TbNode(ctypes.Structure):
     _fields_ = [(n, u32) for n in ("parent", "sort", "id", "folder", "off", "len")]
 
-
 class TbEntry(ctypes.Structure):
     _fields_ = [(n, u32) for n in ("pos", "tid", "me")]
-
 
 class TbWave(ctypes.Structure):
     _fields_ = [
@@ -92,7 +86,6 @@ class TbWave(ctypes.Structure):
         ("high", ctypes.c_void_p),
         ("n", ctypes.c_int64),
     ]
-
 
 class TbCue(ctypes.Structure):
     _fields_ = [
@@ -104,7 +97,6 @@ class TbCue(ctypes.Structure):
         ("color_id", u32),
         ("rgb", u32),
     ]
-
 
 def load():
     if os.environ.get("BB_PURE_PYTHON"):
@@ -198,19 +190,15 @@ def load():
         log.warning("native core not loaded, Python used: %s", e)
         return None
 
-
 LIB = load()
-
 
 def available() -> bool:
     return LIB is not None
-
 
 def _output_size(size: int) -> int:
     if not 0 < size <= MAX_OUTPUT:
         raise ValueError(f"Native output size is invalid or exceeds 1 GiB: {size}")
     return size
-
 
 def _samples(y):
     import numpy as np
@@ -219,7 +207,6 @@ def _samples(y):
     if array.ndim != 1 or not np.isfinite(array).all():
         raise ValueError("Native audio input must be a finite one-dimensional array")
     return array
-
 
 # ------------------------------------------------------------
 # the export.pdb file, same as devicesql.build
@@ -261,7 +248,6 @@ def pdb_build(
         raise RuntimeError("native pdb build changed its size")
     return out.raw
 
-
 # ------------------------------------------------------------
 # mean of w consecutive samples, float32 in, float32 out. None without the library
 def fold(y, w: int):
@@ -277,7 +263,6 @@ def fold(y, w: int):
     if n != len(out):
         raise RuntimeError("Native fold returned an unexpected sample count")
     return out[:n]
-
 
 # ------------------------------------------------------------
 # three float32 arrays of cols peaks, normalised, or None without the library.
@@ -321,14 +306,12 @@ def bands(y, lo_sos, hi_sos, cols: int):
             raise RuntimeError(f"Native waveform calculation failed: {status}")
     return out
 
-
 # ------------------------------------------------------------
 def _u32(v) -> int:
     v = int(v)
     if not 0 <= v <= 0xFFFFFFFF:
         raise ValueError(f"{v} does not fit in an export.pdb field")
     return v
-
 
 # ------------------------------------------------------------
 def _blob(strings: list[str]):
@@ -340,12 +323,10 @@ def _blob(strings: list[str]):
         _u32(pos)
     return ctypes.create_string_buffer(b"".join(raw), pos + 1), spans
 
-
 # ------------------------------------------------------------
-# the whole export.pdb, same as pdbwrite.build_py_file builds it.
-# tracks: (id, art, size, samplerate, bitrate, track_no, disc_no, plays, year, color, rating,
-# filetype, bpm, duration, [14 strings]); nodes: (parent, sort, id, folder, name);
-# entries: (pos, track id, playlist id). None when the library is absent or cannot write it
+# Builds the whole export.pdb, same as pdbwrite.build_py_file builds it.
+# tracks: (id, art, size, samplerate, bitrate, track_no, disc_no, plays, year, color, rating, filetype, bpm, duration, [14 strings]).
+# nodes: (parent, sort, id, folder, name); entries: (pos, track id, playlist id). None when the library is absent or cannot write it.
 def pdb_write(
     tracks: list, nodes: list, entries: list, today: str, static: dict[int, bytes]
 ) -> bytes | None:
@@ -420,7 +401,6 @@ def pdb_write(
     if LIB.bb_pdb_write(*args, out, size) != size:
         raise RuntimeError("native pdb write changed its size")
     return out.raw
-
 
 # --------------------------------------------------
 # ANLZ0000.DAT and .EXT of one track. hot / mem: (hotcue, start, length, stripped name, colour id, rgb);

@@ -1,4 +1,7 @@
-# the program is free: no licence key, no lock, every export format and the music browser open for everyone
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Checks that the program has no licence lock: every export format and the music browser are open to all.
 
 import importlib
 import os

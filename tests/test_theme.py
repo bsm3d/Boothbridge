@@ -1,3 +1,8 @@
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Checks the scrollbar theme: the chevron icons are valid package files, run offscreen.
+
 import os
 import unittest
 from pathlib import Path

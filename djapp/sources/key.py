@@ -1,5 +1,7 @@
-# Benoit Saint-Moulin
-# Boothbridge : CDJ USB key reader (export.pdb and ANLZ files back to playlists)
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Reader for a CDJ USB key that turns export.pdb and ANLZ files back into playlists, writing nothing to the key.
 
 # the inverse of the CDJ export: the playlist tree of PIONEER/rekordbox/export.pdb, every track
 # row, and the beat grid and cues of its ANLZ files. A track's path is the audio file on the key.
@@ -27,12 +29,10 @@ ANLZ_PATH = re.compile(
     r"^/PIONEER/USBANLZ/P[0-9A-F]{3}/[0-9A-F]{8}/ANLZ0000\.DAT$", re.IGNORECASE
 )
 
-
 # ------------------------------------------------------------
 # the key has a database, but it cannot be read
 class KeyReadError(ValueError):
     pass
-
 
 @dataclass
 class KeyData:
@@ -48,7 +48,6 @@ class KeyData:
     intact: set[str] = field(default_factory=set)
     # the tracks that are in no playlist, read like the others so a new database can keep them
     extra: list[Track] = field(default_factory=list)
-
 
 # finding the database
 
@@ -71,10 +70,8 @@ def locate(path: str) -> tuple[str, str] | None:
     db = os.path.join(p, *DB)
     return (p, db) if os.path.isfile(db) else None
 
-
 def detect(path: str) -> bool:
     return locate(path) is not None
-
 
 # ------------------------------------------------------------
 # the path of a file as the database writes it ("/Contents/..."), "" for a file that is
@@ -90,7 +87,6 @@ def key_path(root: str, path: str) -> str:
         return ""
     return "/" + rel.replace("\\", "/")
 
-
 # the file a database path stands for, "" when the path is not a plain path inside the key
 def on_disk(root: str, usb: str) -> str:
     parts = usb.split("/")
@@ -100,7 +96,6 @@ def on_disk(root: str, usb: str) -> str:
     ):
         return ""
     return os.path.join(root, *parts[1:])
-
 
 # reading
 
@@ -131,7 +126,6 @@ def outline(tree) -> tuple[list[tuple[object, int]], int]:
             todo.append((iter(kids.get(n.id, ())), depth + 1))
     return out, len(tree) - len(out)
 
-
 def cue_of(c) -> Cue:
     loop = c.loop and c.end is not None and c.end > c.start
     return Cue(
@@ -142,7 +136,6 @@ def cue_of(c) -> Cue:
         hotcue=c.slot - 1,
         color=c.color,
     )
-
 
 # ------------------------------------------------------------
 # the beat grid and cues of one track, None (and a warning) when its files are missing
@@ -171,7 +164,6 @@ def analysis(root: str, usb: str, anlz_path: str, warn):
         warn(f"{usb}: its analysis files belong to {a.path}, loaded without them")
         return None
     return a
-
 
 # ------------------------------------------------------
 # everything a key holds that the model can keep. ValueError (KeyReadError) when
@@ -257,7 +249,6 @@ def read(path: str, music_root: str = "", progress: Progress | None = None) -> K
             f"track ids that appear twice in the database, the first row is used: {twice}"
         )
 
-    # the playlists, from the tree rows
     members: dict[int, list[tuple[int, int, int]]] = {}
     for i, (pos, tid, pid) in enumerate(entries):
         members.setdefault(pid, []).append((pos, i, tid))
@@ -287,7 +278,6 @@ def read(path: str, music_root: str = "", progress: Progress | None = None) -> K
     if left:
         warn(f"playlists that could not be placed in the tree, left out: {left}")
 
-    # beat grids and cues
     todo = list(by_id)
     intact: set[str] = set()
     for n, i in enumerate(todo):
@@ -316,7 +306,6 @@ def read(path: str, music_root: str = "", progress: Progress | None = None) -> K
     return KeyData(
         root, nodes, warnings, anlz, len(by_id) - len(used), art, intact, extra
     )
-
 
 # ------------------------------------------------------------
 # the playlists of a key. What could not be read is logged as a warning. notes, when given,

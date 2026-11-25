@@ -1,3 +1,8 @@
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : End to end regression run: real temporary audio through tags, sources, project, exports and backup and restore.
+
 # real temporary audio -> tags -> sources -> project -> exports -> backup/restore
 
 import hashlib

@@ -1,12 +1,11 @@
-# Benoit Saint-Moulin
-# Boothbridge : MBR + FAT32 writer for a whole drive (what the DJ players read)
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Writes an MBR and FAT32 layout onto a whole drive, raw or as an image, for the DJ players to read.
 
-# writes a blank MBR disk with one FAT32 partition on anything that takes sector writes:
-# a raw drive (\\.\PhysicalDriveN, /dev/sdX) or an image file. No size limit of the
-# Windows formatter (32 GB), the 32 KB clusters Windows uses above that are the default.
-#
-# Whatever was on the drive (GPT, APFS, HFS+, ext4, NTFS...) is wiped: the first and last
-# 8 MiB are zeroed, and every sector of the FAT area is written, so no old signature survives
+# Writes a blank MBR disk with one FAT32 partition on a raw drive (PhysicalDriveN on Windows, /dev/sdX on Linux) or an image file. No 32 GB limit of the Windows formatter.
+# Whatever was on the drive is wiped: the first and last 8 MiB are zeroed and every sector of the FAT area is written, so no old signature survives.
+# 32 KB clusters are the default above that size.
 
 from __future__ import annotations
 
@@ -72,7 +71,6 @@ _CODE = (
 
 Progress = Callable[[int, str], None]
 
-
 # --------------------------------------------------
 def clean_label(label: str) -> str:
     out = "".join(
@@ -81,7 +79,6 @@ def clean_label(label: str) -> str:
     )
     return out.strip()[:11]
 
-
 # the default of Windows for FAT32: 4 KB up to 8 GB, then 8, 16 and 32 KB
 def cluster_bytes(size: int) -> int:
     gib = size / (1 << 30)
@@ -89,7 +86,6 @@ def cluster_bytes(size: int) -> int:
         if gib <= limit:
             return c
     return 32768
-
 
 @dataclass
 class Layout:
@@ -110,7 +106,6 @@ class Layout:
     @property
     def cluster_size(self) -> int:
         return self.spc * self.bps
-
 
 # ------------------------------------------------------------
 # the geometry for a drive of size bytes. The data area starts on a cluster boundary
@@ -156,14 +151,12 @@ def layout(
         spc //= 2
     raise ValueError("The drive is too small for FAT32 (about 34 MB at least)")
 
-
 def dos_stamp(t: float | None = None) -> tuple[int, int]:
     n = time.localtime(t)
     return (
         ((max(n.tm_year, 1980) - 1980) << 9) | (n.tm_mon << 5) | n.tm_mday,
         (n.tm_hour << 11) | (n.tm_min << 5) | (n.tm_sec // 2),
     )
-
 
 # --------------------------------------------------------
 def boot_sector(L: Layout) -> bytes:
@@ -212,7 +205,6 @@ def boot_sector(L: Layout) -> bytes:
     b[510:512] = b"\x55\xaa"
     return bytes(b)
 
-
 def fsinfo(L: Layout) -> bytes:
     b = bytearray(L.bps)
     struct.pack_into("<L", b, 0, 0x41615252)
@@ -221,12 +213,10 @@ def fsinfo(L: Layout) -> bytes:
     b[508:512] = b"\x00\x00\x55\xaa"
     return bytes(b)
 
-
 def tail_sector(L: Layout) -> bytes:
     b = bytearray(L.bps)
     b[508:512] = b"\x00\x00\x55\xaa"
     return bytes(b)
-
 
 def mbr(L: Layout) -> bytes:
     b = bytearray(L.bps)
@@ -250,7 +240,6 @@ def mbr(L: Layout) -> bytes:
     b[510:512] = b"\x55\xaa"
     return bytes(b)
 
-
 # ------------------------------------------------------------
 # the volume label entry of the root directory, the way Windows writes it
 def root_entry(L: Layout) -> bytes:
@@ -272,7 +261,6 @@ def root_entry(L: Layout) -> bytes:
         0,
         0,
     )
-
 
 # ------------------------------------------------------------
 # sector writes on a raw drive or an image. Offsets and lengths are sector multiples,
@@ -300,7 +288,6 @@ class RawDevice:
 
     def close(self):
         self.f.close()
-
 
 # ------------------------------------------------------------
 # wipes the drive of size bytes and writes the partition table and the FAT32 file system.

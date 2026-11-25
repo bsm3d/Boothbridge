@@ -1,5 +1,7 @@
-# Benoit Saint-Moulin
-# Boothbridge : application start
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Application start that handles the command line options and launches the graphical main window.
 
 from __future__ import annotations
 
@@ -28,10 +30,8 @@ USAGE = (
     "--verify reads an export back and compares it to the checksums written with it."
 )
 
-
 def plural(n: int, word: str) -> str:
     return f"{n} {word}{'' if n == 1 else 's'}"
-
 
 # --------------------------------------------------------------
 def headless(argv: list[str]) -> int:
@@ -116,7 +116,6 @@ def headless(argv: list[str]) -> int:
     )
     return 1 if rep.errors else 0
 
-
 def verify(argv: list[str]) -> int:
     from .export import manifest
 
@@ -135,7 +134,6 @@ def verify(argv: list[str]) -> int:
         )
     log_line(chk.summary())
     return 0 if chk.good else 1
-
 
 MODES = (
     "--export",
@@ -157,7 +155,6 @@ INTERNAL = (
     "--owner",
 )
 
-
 # ----------------------------------------------------------
 # exit code when the command line asks for help or is wrong, None to go on. Without it
 # an unknown option (or --help) would open the window
@@ -178,7 +175,6 @@ def check_options(argv: list[str]) -> int | None:
         return 2
     return None
 
-
 def log_line(msg: str):
     logging.getLogger("headless").info(msg)
     if sys.stdout is not None:
@@ -186,7 +182,6 @@ def log_line(msg: str):
             print(msg)
         except UnicodeEncodeError:
             print(msg.encode("ascii", "replace").decode("ascii"))
-
 
 # ----------------------------------------------------------
 # the buttons of the standard Qt dialogs (Yes, No, Cancel...) come with Qt in each language
@@ -209,7 +204,6 @@ def qt_translator(app, code: str):
             logging.getLogger(__name__).info("Qt translations from %s", folder)
             return
     logging.getLogger(__name__).info("no Qt translation found for %s", name)
-
 
 def main() -> int:
     # the analysis workers are processes, a frozen build re-enters here without this
@@ -263,6 +257,14 @@ def main() -> int:
 
     app = QApplication(sys.argv)
     app.setApplicationName(APP_NAME)
+    # the analyses are on D:\Datas: a missing disk or a copy that failed is said plainly, nothing is analysed again on C:
+    try:
+        settings.cache_dir()
+    except settings.DatasUnavailable as e:
+        from PySide6.QtWidgets import QMessageBox
+
+        QMessageBox.critical(None, APP_NAME, str(e))
+        return 1
     app.setWindowIcon(QIcon(str(Path(__file__).parent / "ui" / "res" / "icon.png")))
     app.setStyleSheet(theme.STYLE)
 

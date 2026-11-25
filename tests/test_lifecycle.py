@@ -1,3 +1,8 @@
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Checks the lifecycle of background jobs: start, finish and cleanup without leaking objects.
+
 import gc
 import os
 import tempfile

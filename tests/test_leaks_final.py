@@ -1,6 +1,10 @@
-# leaks found by measuring (tests/center/memory.py and the scratch runs of the final pass): what is
-# kept after a window, a load, an export, an analysis or a write is gone, caches have a ceiling,
-# threads and files do not pile up. Few cycles and wide margins, a leak here is a steady growth
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Checks that windows, loads, exports and analyses free what they keep, with capped caches and no piling threads.
+
+# Leaks found by measuring (tests/center/memory.py): what a window, a load, an export, an analysis or a write keeps must be gone afterwards.
+# Caches have a ceiling, threads and files must not pile up. Few cycles and wide margins: a leak here is a steady growth.
 
 import gc
 import os

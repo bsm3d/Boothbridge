@@ -1,4 +1,7 @@
-# automated tests for Boothbridge
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Package marker and shared test setup: the program root and the environment helper for child processes.
 
 import os
 from pathlib import Path

@@ -1,5 +1,7 @@
-# Benoit Saint-Moulin
-# Boothbridge : options, collection check, log, usage and about
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Qt dialogs for options, collection check, log, usage and about, plus the key and player settings choices.
 
 from __future__ import annotations
 
@@ -57,14 +59,12 @@ from .worker import Job
 
 SHOWN = 8
 
-
 # ----------------------------------------------------------------
 def name_lines(names: list[str]) -> str:
     lines = [f"    {name}" for name in names[:SHOWN]]
     if len(names) > SHOWN:
         lines.append("    " + tr("... and {n} more", n=len(names) - SHOWN))
     return "\n".join(lines)
-
 
 # ----------------------------------------------------------------
 # "a and b and c": the word between two names comes from the catalog
@@ -73,7 +73,6 @@ def join_and(items: list[str]) -> str:
     for item in items[1:]:
         text = tr("{a} and {b}", a=text, b=item)
     return text
-
 
 # ----------------------------------------------------------------
 # what to do with the playlists already on the key. choice is "keep", "replace" or "" (cancel).
@@ -165,7 +164,6 @@ class KeyChoice(QDialog):
     def confirm_replace(self) -> bool:
         return ask_replace_always(self)
 
-
 # ----------------------------------------------------------------
 def ask_replace_always(parent) -> bool:
     r = QMessageBox.question(
@@ -180,7 +178,6 @@ def ask_replace_always(parent) -> bool:
         QMessageBox.No,
     )
     return r == QMessageBox.Yes
-
 
 # ----------------------------------------------------------------
 # A message in plain text, because the names in it come from files. Gives back the label of
@@ -214,9 +211,6 @@ def box(
     if hit is opener:
         QDesktopServices.openUrl(QUrl.fromLocalFile(folder))
     return hit.text()
-
-
-
 
 # ----------------------------------------------------------------
 class PlayerSettings(QDialog):
@@ -265,7 +259,6 @@ class PlayerSettings(QDialog):
         return reference.format_choices(
             {p: box.currentData() for p, box in self.boxes.items() if box.currentData() is not None}
         )
-
 
 class Options(QDialog):
     def __init__(self, cfg: dict, parent=None):
@@ -723,7 +716,6 @@ class Options(QDialog):
         text += "\n\n" + tr("A file that was already in the cache is never replaced.")
         box(self, QMessageBox.Information, tr("Restore analyses"), text)
 
-
     # --------------------------------------------
     def accept(self):
         root = self.library_root.text().strip()
@@ -797,8 +789,6 @@ class Options(QDialog):
         if root:
             self.library_root.setText(root)
 
-
-
 # ----------------------------------------------------------------
 class _Scan(QThread):
     found = Signal(object)
@@ -809,7 +799,6 @@ class _Scan(QThread):
 
     def run(self):
         self.found.emit(index_folder(self.root))
-
 
 # missing files and their relocation. Tracks are shared between playlists,
 # so relocating one entry fixes it everywhere
@@ -1026,7 +1015,6 @@ class CheckCollection(QDialog):
             self.check()
             self.relocated.emit()
 
-
 # ---- log
 LEVEL_COLORS = {
     "DEBUG": theme.FG_MUTED,
@@ -1035,7 +1023,6 @@ LEVEL_COLORS = {
     "ERROR": theme.RED,
     "CRITICAL": theme.RED,
 }
-
 
 # ----------------------------------------------------------------
 # logging.Handler usable from any thread: records cross into the GUI by signal
@@ -1052,7 +1039,6 @@ class LogBridge(QObject, logging.Handler):
             self.line.emit(self.format(rec), rec.levelname)
         except RuntimeError:
             pass  # window already gone at shutdown
-
 
 # ----------------------------------------------------------------
 class LogWindow(QDialog):
@@ -1105,7 +1091,6 @@ class LogWindow(QDialog):
                     f"{APP_NAME} {VERSION} log, {datetime.now().astimezone():%Y-%m-%d %H:%M}\n\n"
                 )
                 fh.write(self.text.toPlainText())
-
 
 # ---- usage, about
 USAGE = (
@@ -1219,10 +1204,8 @@ Boothbridge.exe --verify OUTPUT
 """
 )
 
-
 def slug(title: str) -> str:
     return re.sub(r"[^a-z0-9]+", "-", title.lower()).strip("-")
-
 
 # ----------------------------------------------------------------
 # the help with a list of its sections before the first one, and an anchor on each of them
@@ -1233,7 +1216,6 @@ def with_contents(page: str) -> str:
     for t in titles:
         page = page.replace(f"<h3>{t}</h3>", f'<h3><a name="{slug(t)}"></a>{t}</h3>', 1)
     return page
-
 
 # ----------------------------------------------------------------
 class Usage(QDialog):
@@ -1279,7 +1261,6 @@ class Usage(QDialog):
         if not self.text.find(needle):
             self.text.moveCursor(QTextCursor.Start)
             self.text.find(needle)
-
 
 # ----------------------------------------------------------------
 class About(QDialog):

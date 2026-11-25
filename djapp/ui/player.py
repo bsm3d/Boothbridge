@@ -1,5 +1,7 @@
-# Benoit Saint-Moulin
-# Boothbridge : preview player (two decks for the crossfade, waveform, cue pads)
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Qt preview player with two decks for the crossfade, waveform display and cue pads.
 
 from __future__ import annotations
 
@@ -197,8 +199,6 @@ class Engine(QObject):
             pl.stop()
             pl.setSource(QUrl())
 
-
-
 # ------------------------------------------------------------
 class WaveView(ZoomWave):
     dropped = Signal(str)
@@ -216,7 +216,6 @@ class WaveView(ZoomWave):
             if u.isLocalFile():
                 self.dropped.emit(u.toLocalFile())
                 return
-
 
 # ------------------------------------------------------------
 # needs a playlist context to continue; resolve(track) gives the file to play

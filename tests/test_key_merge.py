@@ -1,4 +1,7 @@
-# exporting to a key that already holds playlists: the old ones stay, the new ones join them
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Checks merging playlists into a key that already holds some: old playlists stay and new ones join them.
 
 import hashlib
 import json

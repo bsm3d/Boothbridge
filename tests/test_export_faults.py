@@ -1,6 +1,10 @@
-# what a key looks like after an export that failed or was cancelled at any step: the database is
-# the old one or the new one, never half of each, it can always be read, every track it lists has its
-# audio, and no temporary file is left behind. Found by failing every write in turn
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Checks that an export cut off at any write leaves a readable key with no half-written or stray files.
+
+# After a failed or cancelled export the database is the old one or the new one, never half of each, and it can always be read.
+# Every track it lists has its audio, and no temporary file is left. Found by failing every write in turn.
 
 import builtins
 import errno

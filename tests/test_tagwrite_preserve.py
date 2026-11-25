@@ -1,3 +1,8 @@
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Checks that tag writing only changes the values the user edited and leaves the other tags as they are.
+
 # writing tags only changes what the user changed: a full date, a track total or a key written
 # another way stay as they are, a file that already holds the values is not rewritten, and the temporary
 # copy of a killed write is not taken for music

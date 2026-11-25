@@ -1,5 +1,8 @@
-// Benoit Saint-Moulin
-// Boothbridge : native core, keeps the format constants and the exported names out of plain sight
+// Boothbridge
+// © Benoit Saint-Moulin - 2026
+// Version du fichier : 1.0.0
+// Fonction du fichier : Header that renames the exported symbols and obscures format constants in the native core binary.
+
 //
 // Not encryption: it makes a static read of the binary slower, nothing more. The results are
 // the same, the tests compare every byte with the Python reference.

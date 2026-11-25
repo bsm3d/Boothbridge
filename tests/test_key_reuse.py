@@ -1,7 +1,10 @@
-# A merge keeps the analysis files of the tracks that stay on the key, and Cancel works while
-# the key is read. The analysis of a track nobody touched is not made again: it costs a decode of
-# the whole audio from the drive, and a key made by rekordbox holds sections this program does not
-# write (phrases, a second beat grid) that a new file would lose
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Checks that a merge keeps the analysis files of unchanged tracks, so untouched tracks are not decoded again.
+
+# A merge keeps the analysis files of the tracks that stay on the key, so untouched tracks are not decoded again (a whole-audio read from the drive).
+# A key made by rekordbox holds sections this program does not write (phrases, a second beat grid) that a new file would lose.
 
 import os
 import struct

@@ -1,5 +1,7 @@
-# Benoit Saint-Moulin
-# Boothbridge : playlist details (player, sortable list, reorder, properties)
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Qt playlist details window with the player, a sortable track list, drag reorder and track properties.
 
 from __future__ import annotations
 
@@ -58,7 +60,6 @@ COLS = [
     "ID Tag",
 ]
 
-
 # the titles of COLS in the language of the interface, same order
 def columns() -> list[str]:
     return [
@@ -78,12 +79,10 @@ def columns() -> list[str]:
         tr("ID Tag"),
     ]
 
-
 WIDTHS = [28, 36, 190, 260, 60, 60, 55, 40, 60, 90, 200, 62, 70, 76]
 C_PLAY, C_NUM, C_CUES, C_ALSO, C_ENERGY, C_TAG = 0, 1, 9, 11, 12, 13
 HISTORY = 200  # undo steps kept per playlist window
 SEEK_MS = 5000  # Ctrl+Left / Ctrl+Right
-
 
 # ----------------------------------------------------
 def track_identity(t: Track) -> tuple[str, str] | None:
@@ -92,7 +91,6 @@ def track_identity(t: Track) -> tuple[str, str] | None:
     if t.path:
         return "path", os.path.normcase(os.path.abspath(t.path))
     return None
-
 
 # --------------------------------------------
 # match tracks by ID or path; collections do not always use the same identity
@@ -103,7 +101,6 @@ def track_identities(t: Track) -> list[tuple[str, str]]:
     if t.path:
         found.append(("path", os.path.normcase(os.path.abspath(t.path))))
     return found
-
 
 # Camelot wheel colours, the usual ones in DJ software
 KEY_COLORS = [
@@ -121,7 +118,6 @@ KEY_COLORS = [
     "#55f1f0",
 ]
 
-
 # ----------------------------------------------------
 def key_color(k: int | None) -> str:
     if k is None:
@@ -130,7 +126,6 @@ def key_color(k: int | None) -> str:
         return theme.FG
     cam = keys.name(k, "Camelot")
     return KEY_COLORS[(int(cam[:-1]) - 1) % 12]
-
 
 # ------------------------------------------------------------
 # the file selected in an Explorer window; when only its folder is left, the folder
@@ -147,7 +142,6 @@ def show_in_explorer(path: str) -> bool:
         QUrl.fromLocalFile(folder)
     )
 
-
 # --------------------------------------------------
 def cue_summary(t: Track) -> str:
     hot = sum(c.hotcue >= 0 for c in t.cues)
@@ -155,7 +149,6 @@ def cue_summary(t: Track) -> str:
     loops = sum(c.is_loop for c in t.cues)
     s = " ".join(f"{k}{n}" for k, n in (("H", hot), ("M", mem), ("L", loops)) if n)
     return s or "-"
-
 
 # ----------------------------------------------------
 class Table(QTreeWidget):
@@ -206,7 +199,6 @@ class Table(QTreeWidget):
             return
         super().dropEvent(e)
         self.moved.emit()
-
 
 # ----------------------------------------------------
 # edits the playlist in place: order, removed tracks and cues go to the next export

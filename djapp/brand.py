@@ -1,4 +1,8 @@
-# Benoit Saint-Moulin
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Single source for the program name, version, author, website and the names of its files.
+
 # The name of the program lives here and nowhere else in the code. A new name is a new value of APP_NAME,
 # then tools/rename.py renames the files and the texts that cannot read it at run time
 

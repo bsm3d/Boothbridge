@@ -1,3 +1,8 @@
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Checks the timeline cue pad: cue editing and playback positions, run offscreen.
+
 import os
 import unittest
 from pathlib import Path

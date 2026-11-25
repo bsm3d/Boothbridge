@@ -1,3 +1,8 @@
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Checks the library scan, including recursive reading of music folders with real temporary audio files.
+
 import os
 import shutil
 import subprocess

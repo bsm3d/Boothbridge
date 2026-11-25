@@ -1,5 +1,7 @@
-# Benoit Saint-Moulin
-# Boothbridge : iTunes and Music reader (the Library.xml that the application writes on request)
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Reader for the iTunes and Music Library.xml property list, with tracks and playlists but no cues or grids.
 
 # File > Library > Export Library writes a property list in XML: Tracks, a dictionary of tracks by id, and
 # Playlists, an array of dictionaries whose Playlist Items are track ids. There is no cue point, no grid and no key
@@ -27,7 +29,6 @@ from .rbxml import host_path
 MAX_DEPTH = 12
 TREE_DEPTH = 32  # folders in folders, as deep as the other readers keep them
 SKIPPED_KINDS = ("podcast", "movie", "tv show", "audiobook", "ringtone")
-
 
 # ------------------------------------------------------------
 # one plist element as a Python value. Data is not decoded and a nesting that is too deep is a bad file
@@ -60,7 +61,6 @@ def value(el, depth: int = 0):
         return el.text or ""
     return None
 
-
 # file://localhost/C:/Music/a.mp3 or file:///Users/me/a.mp3 as a path of this system
 def location_path(location: str) -> str:
     try:
@@ -74,12 +74,10 @@ def location_path(location: str) -> str:
         path = path[1:]
     return os.path.normpath(path) if path else ""
 
-
 # ------------------------------------------------------------
 def whole(x) -> int:
     v = num(x)
     return int(v) if sane(v) else 0
-
 
 def read_track(d: dict) -> Track | None:
     if (
@@ -123,13 +121,10 @@ def read_track(d: dict) -> Track | None:
     t.last_played = str(d.get("Play Date UTC", ""))[:10]
     return t
 
-
 # ------------------------------------------------------------
-# The library as a dictionary in one pass over the file. Tracks is read one track at a time and
-# Playlist Items one item at a time, so the XML of a big library is never held, only the Tracks
-# and, for a playlist, the Tracks it lists. A playlist that comes before Tracks keeps ids instead,
-# they are resolved at the end. Every dictionary pairs its keys and values by position, a key that
-# is not one drops its value
+# The library is read as a dictionary in one pass: Tracks one track at a time, Playlist Items one item at a time, so a big XML is never held whole.
+# A playlist that comes before Tracks keeps ids instead, resolved at the end.
+# Every dictionary pairs keys and values by position; a key that is not one drops its value.
 def read_library(path: str, name: str, cb, found) -> tuple[dict, dict[str, Track]]:
     lib: dict = {}
     raw: dict = {}
@@ -253,7 +248,6 @@ def read_library(path: str, name: str, cb, found) -> tuple[dict, dict[str, Track
         raise ValueError(f"{name} is not an iTunes library")
     return lib, tracks or {}
 
-
 # ------------------------------------------------------------
 # Parents that lead round in a circle reach no root, and a chain of folders can be deeper than any walk of
 # the tree goes. A list no root reaches starts a tree at the top, and what lies below TREE_DEPTH moves up there
@@ -281,7 +275,6 @@ def place_all(roots: list[Node], listed: list[tuple[Node, Node | None]]):
             parent.children.remove(n)
             roots.append(n)
             place()
-
 
 # ------------------------------------------------------------
 def load(

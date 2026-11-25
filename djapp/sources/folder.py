@@ -1,5 +1,7 @@
-# Benoit Saint-Moulin
-# Boothbridge : a folder of music read as it is, no collection needed
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Reads a folder of music as it is, turning audio folders into playlists with tags as the metadata.
 
 # audio folders become playlists; parent folders keep their hierarchy.
 # Tags supply metadata. There is no beat grid until one is detected or set in the
@@ -18,10 +20,8 @@ from . import Progress, is_audio, is_link, num, walk
 BPM_RANGE = (40.0, 300.0)
 log = logging.getLogger(__name__)
 
-
 def natural(name: str):
     return [int(p) if p.isdecimal() else p.lower() for p in re.split(r"(\d+)", name)]
-
 
 # ----------------------------------------------------------
 def make_track(path: str) -> Track:
@@ -50,7 +50,6 @@ def make_track(path: str) -> Track:
     tags.fill(t)
     return t
 
-
 # ----------------------------------------------------------
 # tracks of dropped or picked paths: audio files as they are, folders walked in natural order
 def tracks_from(paths: list[str]) -> list[Track]:
@@ -67,10 +66,8 @@ def tracks_from(paths: list[str]) -> list[Track]:
             out.append(make_track(p))
     return out
 
-
 def count_audio(root: str) -> int:
     return sum(1 for _, _, files in walk(root) for f in files if is_audio(f))
-
 
 def load(
     path: str, music_root: str = "", progress: Progress | None = None

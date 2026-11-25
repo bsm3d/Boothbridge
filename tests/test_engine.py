@@ -1,3 +1,8 @@
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Checks the Engine library reader and writer against synthetic databases, track data and compressed blobs.
+
 import hashlib
 import os
 import sqlite3

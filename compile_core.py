@@ -1,14 +1,11 @@
-# Benoit Saint-Moulin
-# Boothbridge : compiles the core to native extension modules (Cython, then MinGW gcc)
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Build script that compiles the Python core to native modules with Cython and builds the optional C++ library.
 
+# Copies the package to build/stage and turns each module into a .pyd (Cython, then gcc). The two __init__ files with logic go through PyArmor instead.
+# Needs cython, pyarmor and MinGW gcc (CC or BB_CXX when it is not on the PATH). --native only builds core/fastcore.cpp beside the sources.
 # python compile_core.py
-# Copies the package and main.py to build/stage and replaces every module by a .pyd (Cython translates it to C, gcc builds it), only the __init__ files stay Python.
-# PyArmor protects the two __init__ files that carry logic (sources, export). build.py feeds build/stage to PyInstaller, the sources in the repository are never touched.
-# 
-# python compile_core.py --native    only builds core/fastcore.cpp next to the sources, to run or test the C++ core without a full build
-# 
-# The C++ core (export.pdb page layout and waveform bands) becomes fastcore.dll beside native.py, the Python versions stay as the reference and the fallback.
-# Needs: pip install cython pyarmor, and MinGW gcc (MSYS2 ucrt64: C:\msys64\ucrt64\bin, or on the PATH, or CC and BB_CXX)
 
 from __future__ import annotations
 
@@ -56,13 +53,11 @@ HARDENING = ["-fstack-protector-strong", "-D_FORTIFY_SOURCE=2", "-fvisibility=hi
 HARDENING_LINK = ["-s", "-Wl,--dynamicbase", "-Wl,--nxcompat", "-Wl,--high-entropy-va", "-Wl,--no-insert-timestamp"]
 MINGW = Path(r"C:\msys64\ucrt64\bin")
 
-
 def core_files() -> list[Path]:
     files = []
     for pat in CORE:
         files += [p for p in sorted(PKG.glob(pat)) if p.name not in KEEP]
     return files
-
 
 def write_seal():
     # SHA-256 of every native module of the staged package, packed in the executable as _seal.py.
@@ -79,7 +74,6 @@ def write_seal():
         encoding="utf-8",
     )
     print(f"seal: {len(hashes)} native modules")
-
 
 def protect():
     # PyArmor on the files that stay Python. Its runtime goes inside djapp/, so write_seal() hashes it with the other native modules,
@@ -133,14 +127,12 @@ def protect():
         shutil.rmtree(folder, ignore_errors=True)
     print(f"PyArmor: {len(PROTECT)} files protected, runtime in djapp/{RUNTIME}")
 
-
 def stage():
     shutil.rmtree(STAGE, ignore_errors=True)
     shutil.copytree(
         ROOT / "djapp", PKG, ignore=shutil.ignore_patterns("__pycache__", "*.pyc")
     )
     shutil.copyfile(ROOT / "main.py", STAGE / "main.py")
-
 
 def find_tool(env: str, names: tuple[str, ...]) -> str | None:
     # the variable, the PATH, then the MSYS2 ucrt64 folder
@@ -153,20 +145,17 @@ def find_tool(env: str, names: tuple[str, ...]) -> str | None:
             return str(MINGW / (name + ".exe"))
     return None
 
-
 def find_cxx() -> list[str]:
     found = find_tool("BB_CXX", ("g++", "clang++"))
     if not found:
         sys.exit("no C++ compiler: install MSYS2 ucrt64 (g++), or set BB_CXX")
     return [found]
 
-
 def find_cc() -> str:
     found = find_tool("CC", ("gcc", "clang"))
     if not found:
         sys.exit("no C compiler: install MSYS2 ucrt64 (gcc), or set CC")
     return found
-
 
 def build_native(dest: Path):
     name = (
@@ -228,7 +217,6 @@ def build_native(dest: Path):
     )
     return out
 
-
 def compile_one(src: Path, cc: str):
     from Cython.Compiler import Options
     from Cython.Compiler.Main import CompilationOptions
@@ -260,7 +248,6 @@ def compile_one(src: Path, cc: str):
         sys.exit(f"gcc failed on {rel}:\n{r.stderr[-2500:]}")
     src.unlink()
 
-
 def main() -> int:
     if "--native" in sys.argv:
         if not CPP.is_file():
@@ -290,7 +277,6 @@ def main() -> int:
     ]
     print(f"{len(files)} core modules compiled in {STAGE}, {len(left)} core .py left")
     return 0 if not left else 1
-
 
 if __name__ == "__main__":
     sys.exit(main())

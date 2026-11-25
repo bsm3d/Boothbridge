@@ -1,3 +1,8 @@
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Checks the translation mechanics: five languages with English as the source, and how the language is chosen.
+
 import os
 import sys
 import unittest

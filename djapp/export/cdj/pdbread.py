@@ -1,10 +1,10 @@
-# Benoit Saint-Moulin
-# Boothbridge: read an export.pdb back into tables and rows.
-#
+# Boothbridge
+# © Benoit Saint-Moulin - 2026
+# Version du fichier : 1.0.0
+# Fonction du fichier : Reads an export.pdb file back into tables and rows, checking every offset against the buffer.
+
 # Layout worked out from rekordbox USB exports, matches the crate-digger write-up.
-#
-# The input is a drive anybody may have written to: every offset and length is checked
-# against its buffer, and only PdbError escapes.
+# The input is a drive anybody may have written to: every offset and length is checked against its buffer, and only PdbError escapes.
 
 from __future__ import annotations
 
@@ -50,11 +50,9 @@ TRACK_ROW_MIN = 0x88
 TRACK_STRING_TABLE_AT = 0x5E
 TRACK_STRING_COUNT = 21
 
-
 # --------------------------------------------------
 class PdbError(ValueError):
     pass
-
 
 # ----------------------------------------------------------
 @dataclass
@@ -69,7 +67,6 @@ class Page:
     # present rows only, deleted ones are skipped
     rows: list[bytes] = field(default_factory=list)
 
-
 # ----------------------------------------------------------
 @dataclass
 class Pdb:
@@ -79,7 +76,6 @@ class Pdb:
     tables: dict[int, tuple[int, int, int]]
     # table number -> its data pages, in chain order
     pages: dict[int, list[Page]]
-
 
 # ----------------------------------------------------------
 def dstr(buf: bytes, off: int) -> str:
@@ -102,7 +98,6 @@ def dstr(buf: bytes, off: int) -> str:
     codec = "utf-16-le" if marker == LONG_UTF16_MARKER else "ascii"
     return body.decode(codec, "replace")
 
-
 # ----------------------------------------------------------
 def _row_slots(page: bytes, count: int) -> list[tuple[int, bool]]:
     slots = []
@@ -115,7 +110,6 @@ def _row_slots(page: bytes, count: int) -> list[tuple[int, bool]]:
             offset = struct.unpack_from("<H", page, at)[0]
             slots.append((offset, bool(mask >> bit & 1)))
     return slots
-
 
 def read_page(data: bytes, idx: int) -> Page:
     page = data[idx * PAGE : (idx + 1) * PAGE]
@@ -145,7 +139,6 @@ def read_page(data: bytes, idx: int) -> Page:
         stop = boundaries[bisect_right(boundaries, offset)]
         result.rows.append(page[HEAD + offset : HEAD + stop])
     return result
-
 
 # ----------------------------------------------------------
 def _read_chain(
@@ -178,7 +171,6 @@ def _read_chain(
             return chain
         number = page.nxt
 
-
 # `only` limits the walk to those tables, the others stay empty. cancel is checked before each page.
 def read(
     data: bytes, only: set[int] | None = None, cancel: threading.Event | None = None
@@ -202,10 +194,8 @@ def read(
         pages[kind] = _read_chain(data, kind, first, last, cancel)
     return Pdb(next_unused, seq, tables, pages)
 
-
 def rows(pdb: Pdb, kind: int) -> list[bytes]:
     return [row for page in pdb.pages.get(kind, []) for row in page.rows]
-
 
 # ----------------------------------------------------------
 def track_strings(row: bytes) -> list[str]:
@@ -213,7 +203,6 @@ def track_strings(row: bytes) -> list[str]:
         raise PdbError("track row too short")
     offsets = struct.unpack_from(f"<{TRACK_STRING_COUNT}H", row, TRACK_STRING_TABLE_AT)
     return [dstr(row, offset) for offset in offsets]
-
 
 @dataclass(slots=True)
 class TrackRow:
@@ -239,7 +228,6 @@ class TrackRow:
     rating: int
     kind: int  # file type
     strings: list[str]  # the 21 strings of the row, see track_strings
-
 
 def track_row(row: bytes) -> TrackRow:
     strings = track_strings(row)
@@ -278,7 +266,6 @@ def track_row(row: bytes) -> TrackRow:
         strings=strings,
     )
 
-
 # ----------------------------------------------------------
 # id to name. Genre and label rows: name at byte 4, key rows: byte 8
 def names(pdb: Pdb, kind: int) -> dict[int, str]:
@@ -290,7 +277,6 @@ def names(pdb: Pdb, kind: int) -> dict[int, str]:
         found.setdefault(struct.unpack_from("<I", row, 0)[0], dstr(row, name_at))
     return found
 
-
 # name offset is one byte, or a u16 when bit 2 of the subtype is set (name too far for one byte)
 def near_far(r: bytes, near: int, far: int) -> str:
     if len(r) < far + 2:
@@ -300,7 +286,6 @@ def near_far(r: bytes, near: int, far: int) -> str:
         return dstr(r, struct.unpack_from("<H", r, far)[0])
     return dstr(r, r[near])
 
-
 def artists(pdb: Pdb) -> dict[int, str]:
     found = {}
     for row in rows(pdb, ARTISTS):
@@ -308,7 +293,6 @@ def artists(pdb: Pdb) -> dict[int, str]:
             raise PdbError("artist row too short")
         found.setdefault(struct.unpack_from("<I", row, 4)[0], near_far(row, 9, 10))
     return found
-
 
 # album id -> (name, album artist id)
 def albums(pdb: Pdb) -> dict[int, tuple[str, int]]:
@@ -320,7 +304,6 @@ def albums(pdb: Pdb) -> dict[int, tuple[str, int]]:
         found.setdefault(ident, (near_far(row, 0x15, 0x16), artist))
     return found
 
-
 # ----------------------------------------------------------
 @dataclass(slots=True)
 class TreeRow:
@@ -330,7 +313,6 @@ class TreeRow:
     folder: bool
     name: str
 
-
 def tree(pdb: Pdb) -> list[TreeRow]:
     found = []
     for row in rows(pdb, PL_TREE):
@@ -339,7 +321,6 @@ def tree(pdb: Pdb) -> list[TreeRow]:
         parent, _, sort, ident, folder = struct.unpack_from("<5I", row, 0)
         found.append(TreeRow(parent, sort, ident, bool(folder), dstr(row, 0x14)))
     return found
-
 
 # (position, track id, playlist id)
 def entries(pdb: Pdb) -> list[tuple[int, int, int]]:
