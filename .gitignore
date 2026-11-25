@@ -20,6 +20,8 @@ dist/
 *.wav
 *.flac
 *.m4a
+# the synthetic tone the decoder tests read
+!tests/media/tone.m4a
 
 
 # local files kept on disk, not published
