@@ -130,17 +130,59 @@ class MigrationTests(unittest.TestCase):
 class DatasTests(unittest.TestCase):
     """The analyses are on D:\\Datas\\Boothbridge\\cache, the settings and the log stay in the home folder."""
 
-    def test_the_root_is_the_variable_then_the_pointer_then_d_datas(self):
+    def test_the_root_is_the_variable_then_the_pointer_then_the_default_folder_if_it_is_there(self):
         with tempfile.TemporaryDirectory() as tmp:
-            roaming = Path(tmp) / "roaming"
+            roaming, default = Path(tmp) / "roaming", Path(tmp) / "Datas"
             (roaming / "BSM").mkdir(parents=True)
-            with without_home(APPDATA=str(roaming)):
+            with without_home(APPDATA=str(roaming)), patch.object(settings, "DEFAULT_DATAS", default):
                 os.environ.pop("BSM_DATAS")
-                self.assertEqual(settings.datas_root(), Path("D:/Datas"))
+                self.assertIsNone(settings.datas_root())
+                default.mkdir()
+                self.assertEqual(settings.datas_root(), default)
                 (roaming / "BSM" / "datas.json").write_text('{"root": "%s"}' % str(Path(tmp) / "pointed").replace("\\", "\\\\"), encoding="utf-8")
                 self.assertEqual(settings.datas_root(), Path(tmp) / "pointed")
                 os.environ["BSM_DATAS"] = str(Path(tmp) / "variable")
                 self.assertEqual(settings.datas_root(), Path(tmp) / "variable")
+
+    def test_without_a_data_folder_the_cache_stays_in_the_home_folder(self):
+        # a PC with no D: disk: the program starts and nothing is made outside the home folder
+        with tempfile.TemporaryDirectory() as tmp, without_home(APPDATA=tmp), patch.object(settings, "DEFAULT_DATAS", Path(tmp) / "none" / "Datas"):
+            os.environ.pop("BSM_DATAS")
+            d = settings.cache_dir()
+            self.assertEqual(d, Path(tmp) / "BSM" / APP_NAME / "cache")
+            self.assertTrue(d.is_dir())
+            self.assertFalse((Path(tmp) / "none").exists())
+            self.assertFalse((Path(tmp) / "BSM" / APP_NAME / settings.DATAS_MARK).exists())
+
+    def test_a_relative_default_is_never_used(self):
+        # D:/Datas is a relative path on macOS and Linux
+        with tempfile.TemporaryDirectory() as tmp, without_home(APPDATA=tmp), patch.object(settings, "DEFAULT_DATAS", Path(".")):
+            os.environ.pop("BSM_DATAS")
+            self.assertIsNone(settings.datas_root())
+
+    def test_a_default_folder_used_once_and_then_gone_is_said_not_replaced(self):
+        missing = Path("Q:/Datas") if not os.path.exists("Q:\\") else Path("Z:/Datas")
+        if os.path.exists(missing.anchor):
+            self.skipTest("the test disk exists on this machine")
+        with tempfile.TemporaryDirectory() as tmp, without_home(APPDATA=tmp):
+            os.environ.pop("BSM_DATAS")
+            default = Path(tmp) / "Datas"
+            default.mkdir()
+            with patch.object(settings, "DEFAULT_DATAS", default), patch.object(settings, "_ADOPTED", []):
+                self.assertEqual(settings.cache_dir(), default / APP_NAME / "cache")
+            mark = Path(tmp) / "BSM" / APP_NAME / settings.DATAS_MARK
+            self.assertEqual(mark.read_text(encoding="utf-8").strip(), str(default))
+            # the disk is taken out
+            mark.write_text(f"{missing}\n", encoding="utf-8")
+            with patch.object(settings, "DEFAULT_DATAS", missing), self.assertRaises(settings.DatasUnavailable):
+                settings.cache_dir()
+            self.assertFalse((Path(tmp) / "BSM" / APP_NAME / "cache").exists())
+
+    def test_the_variable_leaves_no_mark(self):
+        with tempfile.TemporaryDirectory() as tmp, without_home(APPDATA=tmp, BSM_DATAS=str(Path(tmp) / "given")):
+            with patch.object(settings, "_ADOPTED", []):
+                settings.cache_dir()
+            self.assertFalse((Path(tmp) / "BSM" / APP_NAME / settings.DATAS_MARK).exists())
 
     def test_the_cache_is_copied_once_never_over_what_is_there_and_the_old_one_stays(self):
         with tempfile.TemporaryDirectory() as tmp:

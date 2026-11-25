@@ -257,7 +257,7 @@ def main() -> int:
 
     app = QApplication(sys.argv)
     app.setApplicationName(APP_NAME)
-    # the analyses are on D:\Datas: a missing disk or a copy that failed is said plainly, nothing is analysed again on C:
+    # the analyses can be in a data folder: a missing disk or a copy that failed is said plainly, nothing is analysed again elsewhere
     try:
         settings.cache_dir()
     except settings.DatasUnavailable as e:

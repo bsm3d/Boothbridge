@@ -23,7 +23,7 @@ AppVerName={#AppName} {#AppVersion}
 AppPublisher=Benoit Saint-Moulin
 AppPublisherURL=https://www.benoitsaintmoulin.com
 VersionInfoVersion={#AppVersion}.0
-; Program Files needs administrator rights. The settings, the log and the cache are in %APPDATA%\BSM\Boothbridge,
+; Program Files needs administrator rights. The settings, the log and the cache (unless a data folder is used) are in %APPDATA%\BSM\Boothbridge,
 ; nothing is written beside the exe, so a folder the user cannot write to is fine
 PrivilegesRequired=admin
 DefaultDirName={autopf}\{#AppName}
@@ -50,7 +50,7 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
 
 ; a file left by an older version would be reported as unexpected by the startup check,
-; so the program folder is emptied first. Settings, log and cache are in %APPDATA%\BSM\Boothbridge, never in runtime
+; so the program folder is emptied first. Settings, log and cache are never in runtime
 [InstallDelete]
 Type: filesandordirs; Name: "{app}\runtime"
 
@@ -71,7 +71,7 @@ Filename: "{app}\{#AppExe}"; Description: "{cm:LaunchProgram,{#AppName}}"; Flags
 ; ---- user data question (added by the audit, group 2) ----
 [CustomMessages]
 english.DataAsk=Remove all the user data of %1?%n%nFolder(s):%n%2%nContent: %3 (%4 MB).%n%nYes: the folder(s) are deleted, for good.%nNo: they are kept, you get them back if you reinstall %1.%n%nYour data in D:\Datas is never touched: delete it yourself if you do not want it.
-english.DataWhat=the settings and the log (the analyses are in D:\Datas\Boothbridge)
+english.DataWhat=the settings, the log and the analysis cache kept there
 
 [Code]
 // Size of a folder in bytes: the dialog tells the user what "Yes" removes.

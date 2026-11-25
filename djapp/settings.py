@@ -109,13 +109,24 @@ def data_dir() -> Path:
         log.warning("cannot create %s: %s", d, e)
     return d
 
-# The analyses (beat grids, BPM, waveforms) are hours of work, not a preference: they live on D:\Datas\Boothbridge\cache so that a format of C: does not take them.
-# Settings and log stay in %APPDATA%\BSM\Boothbridge. D:\Datas is found through BSM_DATAS, else the root of %APPDATA%\BSM\datas.json, else D:\Datas.
-# BOOTHBRIDGE_HOME (the tests) keeps everything in one folder. A portable copy leaves no cache on its key: the cache is the machine's, on D:.
+# The analyses (beat grids, BPM, waveforms) are hours of work, not a preference: they can live in a data folder so that a format of the system disk does not take them.
+# That folder is named by BSM_DATAS, else by the root of %APPDATA%\BSM\datas.json, else it is D:\Datas when it is there. Without any of them the cache is the
+# cache folder of the home folder. Settings and log stay in the home folder. BOOTHBRIDGE_HOME (the tests) keeps everything in one folder.
 class DatasUnavailable(OSError):
     pass
 
-def datas_root() -> Path:
+DEFAULT_DATAS = Path("D:/Datas")
+DATAS_MARK = "datas.path"  # in the home folder: the default data folder was used once
+
+def _first_line(path: Path) -> str:
+    try:
+        return path.read_text(encoding="utf-8-sig").strip().split("\n")[0].strip()
+    except (OSError, ValueError):
+        return ""
+
+# the data folder to use, None when there is none and the home folder keeps the cache
+# attention -> bug = D:/Datas was taken by default: no start at all on a PC without a D: disk, and a folder named "D:" made on macOS and Linux
+def datas_root() -> Path | None:
     given = os.environ.get("BSM_DATAS", "").strip().strip('"')
     if not given:
         base = os.environ.get("APPDATA") or os.path.expanduser("~/.config")
@@ -124,7 +135,29 @@ def datas_root() -> Path:
                 given = str(json.load(f).get("root") or "").strip()
         except (OSError, ValueError, AttributeError):
             given = ""
-    return Path(given) if given else Path("D:/Datas")
+    if given:
+        return Path(given)
+    # used before: a disk that is gone is said, the library is not analysed again somewhere else
+    used = _first_line(home_dir() / DATAS_MARK)
+    if used:
+        return Path(used)
+    # not absolute outside Windows
+    if DEFAULT_DATAS.is_absolute() and DEFAULT_DATAS.is_dir():
+        return DEFAULT_DATAS
+    return None
+
+# only the default needs a mark, the variable and the pointer file say it again at each start
+def _remember(root: Path) -> None:
+    if root != DEFAULT_DATAS or os.environ.get("BSM_DATAS", "").strip():
+        return
+    mark = home_dir() / DATAS_MARK
+    if mark.is_file():
+        return
+    try:
+        mark.parent.mkdir(parents=True, exist_ok=True)
+        mark.write_text(f"{root}\n", encoding="utf-8")
+    except OSError as e:
+        log.warning("cannot write %s: %s", mark, e)
 
 def _tree(root: Path) -> dict:
     out = {}
@@ -170,21 +203,22 @@ def adopt_cache(src: Path, dst: Path) -> list:
 _ADOPTED: list = []
 
 def cache_dir() -> Path:
-    if os.environ.get(HOME_ENV):
+    root = None if os.environ.get(HOME_ENV) else datas_root()
+    if root is None:
         d = home_dir() / "cache"
         d.mkdir(parents=True, exist_ok=True)
         return d
-    root = datas_root()
     if root.anchor and not Path(root.anchor).exists():
         raise DatasUnavailable(
             f"The data folder {root} is on a disk that is not there ({root.anchor}). "
-            f"{APP_NAME} does not analyse your library again on C:. Connect the disk, or set BSM_DATAS to another folder."
+            f"{APP_NAME} does not analyse your library again somewhere else. Connect the disk, or set BSM_DATAS to another folder."
         )
     d = root / APP_NAME / "cache"
     try:
         d.mkdir(parents=True, exist_ok=True)
     except OSError as e:
         raise DatasUnavailable(f"The data folder {d} cannot be made: {e}") from e
+    _remember(root)
     if not _ADOPTED:
         adopt_cache(home_dir() / "cache", d)
         _ADOPTED.append(True)
